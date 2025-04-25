@@ -48,7 +48,7 @@ const features = [
     icon: <DescriptionIcon fontSize="medium" />,
     title: "Professional Templates",
     description:
-      "Build standout resumes with beautiful templates designed by career experts for every industry",
+      "Build standout resumes with beautiful templates designed by career Experts for Every Industry",
   },
   {
     icon: <EditIcon fontSize="medium" />,
