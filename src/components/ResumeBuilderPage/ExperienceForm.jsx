@@ -7,11 +7,9 @@ import {
   Box,
   Tooltip,
   IconButton,
-  Divider,
   Paper,
   Checkbox,
   FormControlLabel,
-  Stack,
   Avatar,
   InputAdornment,
 } from "@mui/material";
@@ -60,7 +58,7 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
 
       return () => clearTimeout(debounce);
     }
-  }, [experiences, lastSavedexperiences]);
+  }, [experiences, lastSavedexperiences, updateData]);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -220,7 +218,7 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
                   borderColor: "divider",
                 }}
               >
-                
+
 
                 <Box
                   sx={{

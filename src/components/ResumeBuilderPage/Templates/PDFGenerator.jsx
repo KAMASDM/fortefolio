@@ -1,5 +1,4 @@
-// Templates/PDFGenerator.js
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import html2pdf from 'html2pdf.js';
 
 export const PDFGenerator = ({

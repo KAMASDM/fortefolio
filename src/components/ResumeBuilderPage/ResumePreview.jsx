@@ -1,14 +1,13 @@
-// ResumePreview.js
 import React, { useRef, useState, useEffect } from "react";
-import { 
-  Box, 
-  Paper, 
-  useTheme, 
-  useMediaQuery, 
-  SpeedDial, 
-  SpeedDialAction, 
-  SpeedDialIcon, 
-  Snackbar, 
+import {
+  Box,
+  Paper,
+  useTheme,
+  useMediaQuery,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
+  Snackbar,
   Alert,
   Container,
   Zoom,
@@ -20,7 +19,6 @@ import {
 } from "@mui/material";
 import { Download, FormatColorFill, TextFormat, Print } from "@mui/icons-material";
 
-// Import smaller components
 import { TemplateSelector } from "./Templates/TemplateSelector";
 import { ResumeToolbar } from "./Templates/ResumeToolbar";
 import { ExportMenu } from "./Templates/ExportMenu";
@@ -34,7 +32,6 @@ import { PDFGenerator } from "./Templates/PDFGenerator";
 import { constants } from "./Templates/constants";
 import { injectPrintStyles } from "./utils/pdfUtils";
 
-// Extract the constant values
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
 const ResumePreview = ({ resumeData, onBack }) => {
@@ -68,37 +65,32 @@ const ResumePreview = ({ resumeData, onBack }) => {
     projects = [],
   } = resumeData;
 
-  // Add print styles to the document when component mounts
   useEffect(() => {
     const cleanup = injectPrintStyles();
     return cleanup;
   }, []);
 
-  // Handle responsive scaling
   useEffect(() => {
     const handleResize = () => {
       const viewportWidth = window.innerWidth;
-      
+
       if (viewportWidth < 360) {
-        setScale(0.5); // Extra small devices
+        setScale(0.5);
       } else if (viewportWidth < 600) {
-        setScale(1.0); // Small mobile
+        setScale(1.0);
       } else if (viewportWidth < 900) {
-        setScale(0.8); // Larger mobile/small tablet
+        setScale(0.8);
       } else if (viewportWidth < 1200) {
-        setScale(0.9); // Tablet/small desktop
+        setScale(0.9);
       } else {
-        setScale(1); // Desktop
+        setScale(1);
       }
     };
 
-    // Initial calculation
     handleResize();
-    
-    // Add event listener for window resize
+
     window.addEventListener('resize', handleResize);
-    
-    // Cleanup
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -117,52 +109,47 @@ const ResumePreview = ({ resumeData, onBack }) => {
     }
   };
 
-  // Enhanced handleTemplateChange to work with both tabs and dropdown
-  const handleTemplateChange = (event, newValue) => {
-    // For dropdown menu on mobile, the value comes directly from event.target.value
-    if (event && event.target && event.target.value !== undefined) {
-      const selectedTemplate = event.target.value;
-      // Find the corresponding tab index based on template value
-      let tabIndex = 0;
-      switch (selectedTemplate) {
-        case TEMPLATES.MODERN:
-          tabIndex = 0;
-          break;
-        case TEMPLATES.MINIMAL:
-          tabIndex = 1;
-          break;
-        case TEMPLATES.CREATIVE:
-          tabIndex = 2;
-          break;
-        case TEMPLATES.PROFESSIONAL:
-          tabIndex = 3;
-          break;
-        default:
-          tabIndex = 0;
-      }
-      setActiveTab(tabIndex);
-      setActiveTemplate(selectedTemplate);
-    } 
-    // For tab-based selection on desktop
-    else if (newValue !== undefined) {
-      setActiveTab(newValue);
-      switch (newValue) {
-        case 0:
-          setActiveTemplate(TEMPLATES.MODERN);
-          break;
-        case 1:
-          setActiveTemplate(TEMPLATES.MINIMAL);
-          break;
-        case 2:
-          setActiveTemplate(TEMPLATES.CREATIVE);
-          break;
-        case 3:
-          setActiveTemplate(TEMPLATES.PROFESSIONAL);
-          break;
-        default:
-          setActiveTemplate(TEMPLATES.MODERN);
-      }
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    switch (newValue) {
+      case 0:
+        setActiveTemplate(TEMPLATES.MODERN);
+        break;
+      case 1:
+        setActiveTemplate(TEMPLATES.MINIMAL);
+        break;
+      case 2:
+        setActiveTemplate(TEMPLATES.CREATIVE);
+        break;
+      case 3:
+        setActiveTemplate(TEMPLATES.PROFESSIONAL);
+        break;
+      default:
+        setActiveTemplate(TEMPLATES.MODERN);
     }
+  };
+
+  const handleDropdownChange = (event) => {
+    const selectedTemplate = event.target.value;
+    let tabIndex = 0;
+    switch (selectedTemplate) {
+      case TEMPLATES.MODERN:
+        tabIndex = 0;
+        break;
+      case TEMPLATES.MINIMAL:
+        tabIndex = 1;
+        break;
+      case TEMPLATES.CREATIVE:
+        tabIndex = 2;
+        break;
+      case TEMPLATES.PROFESSIONAL:
+        tabIndex = 3;
+        break;
+      default:
+        tabIndex = 0;
+    }
+    setActiveTab(tabIndex);
+    setActiveTemplate(selectedTemplate);
   };
 
   const toggleStarSection = (section) => {
@@ -228,7 +215,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
     }
   };
 
-  // Setup PDF generator component with enhanced PDF generation
   const pdfGenerator = PDFGenerator({
     resumeRef,
     loading,
@@ -251,7 +237,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
     }
   });
 
-  // Improved PDF download function that uses our enhanced PDF generator
   const downloadPDF = () => {
     pdfGenerator.downloadPDF();
   };
@@ -307,10 +292,10 @@ const ResumePreview = ({ resumeData, onBack }) => {
   ];
 
   return (
-    <Stack 
-      spacing={0} 
-      sx={{ 
-        width: '100%', 
+    <Stack
+      spacing={0}
+      sx={{
+        width: '100%',
         height: '100%',
         overflowX: 'hidden',
         bgcolor: 'background.default'
@@ -323,16 +308,16 @@ const ResumePreview = ({ resumeData, onBack }) => {
         handleColorMenuOpen={handleColorMenuOpen}
         handleFontMenuOpen={handleFontMenuOpen}
         handleExportMenuOpen={handleExportMenuOpen}
-        sx={{ 
-          width: "100%", 
-          mb: { xs: 1, sm: 2 }, 
+        sx={{
+          width: "100%",
+          mb: { xs: 1, sm: 2 },
           flexShrink: 0,
           py: { xs: 1, sm: 1.5 },
           px: { xs: 1, sm: 2 }
         }}
       />
 
-      <Container 
+      <Container
         disableGutters={isExtraSmallMobile}
         maxWidth="lg"
         sx={{
@@ -355,14 +340,13 @@ const ResumePreview = ({ resumeData, onBack }) => {
             height: { xs: 'calc(100vh - 136px)', sm: 'calc(100vh - 120px)', md: 'calc(100vh - 120px)' }
           }}
         >
-          {/* Template Selection - Conditional Rendering */}
           {isMobile ? (
-            <Box sx={{ 
-              px: 2, 
-              py: 1.5, 
-              borderBottom: 1, 
+            <Box sx={{
+              px: 2,
+              py: 1.5,
+              borderBottom: 1,
               borderColor: 'divider',
-              flexShrink: 0 
+              flexShrink: 0
             }}>
               <FormControl fullWidth size="small">
                 <InputLabel id="template-select-label">Template</InputLabel>
@@ -370,7 +354,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   labelId="template-select-label"
                   id="template-select"
                   value={activeTemplate}
-                  onChange={handleTemplateChange}
+                  onChange={handleDropdownChange}
                   label="Template"
                 >
                   <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem>
@@ -383,13 +367,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
           ) : (
             <TemplateSelector
               activeTab={activeTab}
-              handleTemplateChange={handleTemplateChange}
+              handleTemplateChange={handleTabChange}
               isMobile={isMobile}
               sx={{ flexShrink: 0 }}
             />
           )}
 
-          {/* Resume Content Scroll Area */}
           <Box
             sx={{
               flexGrow: 1,
@@ -427,7 +410,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   colorAdjust: 'exact',
                   transform: `scale(${scale})`,
                   transformOrigin: 'top center',
-                  width: scale < 1 ? `${100/scale}%` : '100%',
+                  width: scale < 1 ? `${100 / scale}%` : '100%',
                   maxWidth: scale < 1 ? undefined : '830px',
                   transition: 'transform 0.2s ease',
                   height: 'auto',
@@ -442,13 +425,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
         </Paper>
       </Container>
 
-      {/* Fixed Mobile Actions */}
       <Zoom in={isMobile}>
         <SpeedDial
           ariaLabel="Resume actions"
           sx={{
             position: "fixed",
-            bottom: { xs: 70, sm: 16 }, // Give space for bottom navigation on mobile
+            bottom: { xs: 70, sm: 16 },
             right: 16,
             zIndex: 1000,
           }}
@@ -478,7 +460,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
         </SpeedDial>
       </Zoom>
 
-      {/* Supporting Menu Components */}
       <ColorMenu
         colorMenu={colorMenu}
         handleColorMenuClose={handleColorMenuClose}
@@ -504,7 +485,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
         isMobile={isMobile}
       />
 
-      {/* Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -514,13 +494,13 @@ const ResumePreview = ({ resumeData, onBack }) => {
           horizontal: isSmallMobile ? 'center' : 'left'
         }}
         sx={{
-          bottom: { xs: 76, sm: 24 } // Adjust for bottom navigation
+          bottom: { xs: 76, sm: 24 }
         }}
       >
         <Alert
           onClose={handleSnackbarClose}
           severity={snackbar.severity}
-          sx={{ 
+          sx={{
             width: "100%",
             boxShadow: 2
           }}

@@ -34,11 +34,9 @@ import {
 } from "@mui/icons-material";
 
 const titleSuggestions = [
-  /* ... */
 ];
 
 const summaryExamples = [
-  /* ... */
 ];
 
 const defaultPersonalInfo = {

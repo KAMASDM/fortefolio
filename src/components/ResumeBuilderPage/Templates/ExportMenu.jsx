@@ -1,14 +1,13 @@
-// components/ExportMenu.js
 import React from "react";
 import { Menu, MenuItem, ListItemIcon, ListItemText, CircularProgress } from "@mui/material";
 import { PictureAsPdf, Print } from "@mui/icons-material";
 
-export const ExportMenu = ({ 
-  exportMenu, 
-  handleExportMenuClose, 
-  downloadPDF, 
-  printResume, 
-  loading 
+export const ExportMenu = ({
+  exportMenu,
+  handleExportMenuClose,
+  downloadPDF,
+  printResume,
+  loading
 }) => {
   return (
     <Menu

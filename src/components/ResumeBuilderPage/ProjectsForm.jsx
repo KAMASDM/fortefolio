@@ -59,7 +59,7 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
 
       return () => clearTimeout(debounce);
     }
-  }, [projects, lastSavedProjects]);
+  }, [projects, lastSavedProjects, updateData]);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -82,10 +82,10 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
       prevProjects.map((project) =>
         project.id === id
           ? {
-              ...project,
-              current: checked,
-              endDate: checked ? "" : project.endDate,
-            }
+            ...project,
+            current: checked,
+            endDate: checked ? "" : project.endDate,
+          }
           : project
       )
     );
@@ -166,7 +166,7 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
                   borderColor: "divider",
                 }}
               >
-                
+
 
                 <Box
                   sx={{

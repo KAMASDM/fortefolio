@@ -5,7 +5,6 @@ import {
   Button,
   Box,
   IconButton,
-  Divider,
   Paper,
   Avatar,
   InputAdornment,
@@ -60,7 +59,7 @@ const SkillsForm = ({ data, updateData, nextStep }) => {
 
       return () => clearTimeout(debounce);
     }
-  }, [skillCategories, lastSavedskillCategories]);
+  }, [skillCategories, lastSavedskillCategories, updateData]);
 
   useEffect(() => {
     if (data && data.length > 0) {

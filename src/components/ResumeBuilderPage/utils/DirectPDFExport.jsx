@@ -1,4 +1,3 @@
-// utils/DirectPDFExport.js
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
@@ -16,7 +15,7 @@ export const generateResumePDF = async (resumeElement, filename) => {
     position: "absolute",
     top: "0",
     left: "-9999px",
-    width: "210mm", // A4 width
+    width: "210mm",
     height: "auto",
     backgroundColor: "#ffffff",
     margin: "0",

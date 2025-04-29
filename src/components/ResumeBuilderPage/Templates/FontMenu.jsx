@@ -1,9 +1,7 @@
-// components/FontMenu.js
 import React from "react";
 import { Menu, MenuItem, Typography, Box, ListItemIcon, Radio } from "@mui/material";
 
 export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONTS, fontFamily }) => {
-  // Function to handle font selection and close menu
   const handleFontSelection = (font) => {
     changeFontFamily(font);
     handleFontMenuClose();
@@ -27,7 +25,7 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         dense: true
       }}
     >
-      <MenuItem 
+      <MenuItem
         onClick={() => handleFontSelection(FONTS.POPPINS)}
         selected={fontFamily === FONTS.POPPINS}
       >
@@ -36,8 +34,8 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.POPPINS }}>Poppins</Typography>
       </MenuItem>
-      
-      <MenuItem 
+
+      <MenuItem
         onClick={() => handleFontSelection(FONTS.ROBOTO)}
         selected={fontFamily === FONTS.ROBOTO}
       >
@@ -46,8 +44,8 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.ROBOTO }}>Roboto</Typography>
       </MenuItem>
-      
-      <MenuItem 
+
+      <MenuItem
         onClick={() => handleFontSelection(FONTS.OPEN_SANS)}
         selected={fontFamily === FONTS.OPEN_SANS}
       >
@@ -56,8 +54,8 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.OPEN_SANS }}>Open Sans</Typography>
       </MenuItem>
-      
-      <MenuItem 
+
+      <MenuItem
         onClick={() => handleFontSelection(FONTS.MONTSERRAT)}
         selected={fontFamily === FONTS.MONTSERRAT}
       >
@@ -66,8 +64,8 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.MONTSERRAT }}>Montserrat</Typography>
       </MenuItem>
-      
-      <MenuItem 
+
+      <MenuItem
         onClick={() => handleFontSelection(FONTS.RALEWAY)}
         selected={fontFamily === FONTS.RALEWAY}
       >

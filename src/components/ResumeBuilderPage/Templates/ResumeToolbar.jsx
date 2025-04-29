@@ -1,14 +1,13 @@
-// components/ResumeToolbar.js
 import React from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { ArrowBack, FormatColorFill, TextFormat, Download, KeyboardArrowDown } from "@mui/icons-material";
 
-export const ResumeToolbar = ({ 
-  onBack, 
-  isMobile, 
-  handleColorMenuOpen, 
-  handleFontMenuOpen, 
-  handleExportMenuOpen 
+export const ResumeToolbar = ({
+  onBack,
+  isMobile,
+  handleColorMenuOpen,
+  handleFontMenuOpen,
+  handleExportMenuOpen
 }) => {
   return (
     <Box
