@@ -1,4 +1,3 @@
-// constants.js - All constants used in the application
 export const constants = {
   TEMPLATES: {
     MODERN: "modern",

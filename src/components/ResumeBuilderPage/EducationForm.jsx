@@ -32,7 +32,6 @@ import {
 } from "@mui/icons-material";
 
 const degreeSuggestions = [
-  /* ... */
 ];
 
 const fieldSuggestions = [
@@ -221,9 +220,9 @@ const EducationForm = ({ data, updateData, nextStep }) => {
                   transition: "box-shadow 0.3s ease",
                 }}
               >
-                
-                  
-                
+
+
+
 
                 <Box
                   sx={{

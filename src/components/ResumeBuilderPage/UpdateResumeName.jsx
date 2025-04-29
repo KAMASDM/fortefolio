@@ -27,9 +27,8 @@ const UpdateResumeName = ({
     isMobile,
     showLeaveConfirmation,
     setShowLeaveConfirmation,
-    handleConfirmedNavigation
+    handleConfirmedNavigation,
 }) => {
-
     const handleSaveTitle = () => {
         const newTitle = currentTitle.trim();
         if (!newTitle || newTitle === resumeTitle) {
@@ -42,7 +41,7 @@ const UpdateResumeName = ({
         setNotification({
             open: true,
             message: "Title updated. Save changes to finalize.",
-            severity: "info"
+            severity: "info",
         });
     };
 
@@ -73,7 +72,7 @@ const UpdateResumeName = ({
                                 >
                                     <CloseIcon fontSize="small" />
                                 </IconButton>
-                            ) : null
+                            ) : null,
                         }}
                     />
                 </DialogContent>
@@ -91,7 +90,6 @@ const UpdateResumeName = ({
                 </DialogActions>
             </Dialog>
 
-            {/* Snackbar Notification */}
             <Snackbar
                 open={notification.open}
                 autoHideDuration={4000}
@@ -110,7 +108,6 @@ const UpdateResumeName = ({
                 </Alert>
             </Snackbar>
 
-            {/* Leave Confirmation Dialog */}
             <Dialog
                 open={showLeaveConfirmation}
                 onClose={() => setShowLeaveConfirmation(false)}
