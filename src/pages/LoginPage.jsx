@@ -174,7 +174,7 @@ function LoginPage() {
               position: "relative",
             }}
           >
-            ForteFolio
+            MakeMyForte
             <Box
               component={motion.div}
               initial={{ opacity: 0, scale: 0 }}
@@ -403,7 +403,7 @@ function LoginPage() {
                         position: "relative",
                       }}
                     >
-                      Welcome to ForteFolio
+                      Welcome to MakeMyForte
                       <Box
                         component={motion.div}
                         animate={{

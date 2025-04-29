@@ -57,7 +57,7 @@ const TestimonialBadge = () => {
             fontWeight: 500,
           }}
         >
-          "ForteFolio helped me land my dream job!" - Sarah K.
+          "MakeMyForte helped me land my dream job!" - Sarah K.
         </Typography>
       </Paper>
     </Box>
