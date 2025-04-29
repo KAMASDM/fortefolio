@@ -672,7 +672,7 @@ function DashboardPage() {
                                 }}
                             >
                                 {" "}
-                                ForteFolio{" "}
+                                MakeMyForte{" "}
                             </Typography>
                         </Box>
                         <Box
