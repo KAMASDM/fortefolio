@@ -77,7 +77,7 @@ const EducationForm = ({ data, updateData, nextStep }) => {
 
       return () => clearTimeout(debounce);
     }
-  }, [educations, lastSavedEducations]);
+  }, [educations, lastSavedEducations, updateData]);
 
   useEffect(() => {
     const requiredFields = ["institution", "degree", "startDate"];

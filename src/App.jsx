@@ -21,7 +21,7 @@ function ProtectedRoute({ children }) {
     return null;
   }
 
-  return currentUser ? children : <Navigate to="/login" replace />;
+  return currentUser ? children : <Navigate to="/" replace />;
 }
 function AuthRedirector() {
   const { currentUser, loading } = useAuth();
@@ -29,7 +29,7 @@ function AuthRedirector() {
   return currentUser ? (
     <Navigate to="/dashboard" replace />
   ) : (
-    <Navigate to="/login" replace />
+    <Navigate to="/" replace />
   );
 }
 
@@ -40,7 +40,7 @@ function App() {
         <CssBaseline />
         <Router>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<LoginPage />} />
             <Route
               path="/dashboard"
               element={
