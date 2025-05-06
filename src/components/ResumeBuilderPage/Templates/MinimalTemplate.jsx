@@ -38,9 +38,9 @@ export const MinimalTemplate = ({
   } = resumeData;
 
   const pdfColorStyles = {
-    WebkitPrintColorAdjust: 'exact',
-    printColorAdjust: 'exact',
-    colorAdjust: 'exact'
+    WebkitPrintColorAdjust: "exact",
+    printColorAdjust: "exact",
+    colorAdjust: "exact",
   };
 
   return (
@@ -52,7 +52,7 @@ export const MinimalTemplate = ({
         p: 4,
         maxWidth: "1000px",
         mx: "auto",
-        ...pdfColorStyles
+        ...pdfColorStyles,
       }}
     >
       <Box sx={{ mb: 4 }}>
@@ -64,12 +64,11 @@ export const MinimalTemplate = ({
             color: colorScheme.primary,
             mb: 1,
             fontSize: { xs: "2rem", md: "2.5rem" },
-            ...pdfColorStyles
+            ...pdfColorStyles,
           }}
         >
           {personalInfo.fullName || "Your Name"}
         </Typography>
-
         {personalInfo.jobTitle && (
           <Typography
             variant="h5"
@@ -84,7 +83,6 @@ export const MinimalTemplate = ({
             {personalInfo.jobTitle}
           </Typography>
         )}
-
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12} sm={6} md={8}>
             {personalInfo.summary && (
@@ -93,46 +91,58 @@ export const MinimalTemplate = ({
               </Typography>
             )}
           </Grid>
-
           <Grid item xs={12} sm={6} md={4}>
             <Stack spacing={1}>
               {personalInfo.email && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <EmailIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Typography variant="body2">{personalInfo.email}</Typography>
                 </Box>
               )}
-
               {personalInfo.phone && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <PhoneIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Typography variant="body2">{personalInfo.phone}</Typography>
                 </Box>
               )}
-
               {personalInfo.location && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <LocationIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Typography variant="body2">
                     {personalInfo.location}
                   </Typography>
                 </Box>
               )}
-
               {personalInfo.linkedin && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <LinkedInIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Link
                     href={personalInfo.linkedin}
@@ -145,12 +155,15 @@ export const MinimalTemplate = ({
                   </Link>
                 </Box>
               )}
-
               {personalInfo.github && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <GitHubIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Link
                     href={personalInfo.github}
@@ -163,12 +176,15 @@ export const MinimalTemplate = ({
                   </Link>
                 </Box>
               )}
-
               {personalInfo.website && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <LanguageIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Link
                     href={personalInfo.website}
@@ -181,12 +197,15 @@ export const MinimalTemplate = ({
                   </Link>
                 </Box>
               )}
-
               {personalInfo.portfolio && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <LanguageIcon
                     fontSize="small"
-                    sx={{ mr: 1, color: colorScheme.primary, ...pdfColorStyles }}
+                    sx={{
+                      mr: 1,
+                      color: colorScheme.primary,
+                      ...pdfColorStyles,
+                    }}
                   />
                   <Link
                     href={personalInfo.portfolio}
@@ -202,10 +221,10 @@ export const MinimalTemplate = ({
             </Stack>
           </Grid>
         </Grid>
-
-        <Divider sx={{ mt: 3, borderColor: colorScheme.primary, ...pdfColorStyles }} />
+        <Divider
+          sx={{ mt: 3, borderColor: colorScheme.primary, ...pdfColorStyles }}
+        />
       </Box>
-
       {!isSectionEmpty("experience") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -215,7 +234,7 @@ export const MinimalTemplate = ({
               sx={{
                 fontWeight: 600,
                 color: colorScheme.primary,
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               Experience
@@ -235,7 +254,6 @@ export const MinimalTemplate = ({
               )}
             </IconButton>
           </Box>
-
           {experience.map((exp, index) => (
             <Box key={exp.id || index} sx={{ mb: 3 }}>
               <Grid container spacing={2}>
@@ -267,7 +285,7 @@ export const MinimalTemplate = ({
                       fontWeight: 600,
                       color: colorScheme.secondary,
                       fontSize: "1.1rem",
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     {exp.position || "Position Title"}
@@ -284,7 +302,6 @@ export const MinimalTemplate = ({
                       {exp.description}
                     </Typography>
                   )}
-
                   {exp.responsibilities &&
                     typeof exp.responsibilities === "string" && (
                       <Box component="ul" sx={{ pl: 2, m: 0 }}>
@@ -303,7 +320,6 @@ export const MinimalTemplate = ({
                         )}
                       </Box>
                     )}
-
                   {Array.isArray(exp.responsibilities) &&
                     exp.responsibilities.length > 0 && (
                       <Box component="ul" sx={{ pl: 2, m: 0 }}>
@@ -324,12 +340,13 @@ export const MinimalTemplate = ({
                     )}
                 </Grid>
               </Grid>
-              {index < experience.length - 1 && <Divider sx={{ my: 2, ...pdfColorStyles }} />}
+              {index < experience.length - 1 && (
+                <Divider sx={{ my: 2, ...pdfColorStyles }} />
+              )}
             </Box>
           ))}
         </Box>
       )}
-
       {!isSectionEmpty("education") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -339,7 +356,7 @@ export const MinimalTemplate = ({
               sx={{
                 fontWeight: 600,
                 color: colorScheme.primary,
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               Education
@@ -359,7 +376,6 @@ export const MinimalTemplate = ({
               )}
             </IconButton>
           </Box>
-
           <Grid container spacing={3}>
             {education.map((edu, index) => (
               <Grid item xs={12} sm={6} md={4} key={edu.id || index}>
@@ -370,7 +386,7 @@ export const MinimalTemplate = ({
                     border: "1px solid",
                     borderColor: "divider",
                     borderRadius: 1,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   <Typography
@@ -379,7 +395,7 @@ export const MinimalTemplate = ({
                       fontWeight: 600,
                       color: colorScheme.secondary,
                       fontSize: "1rem",
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     {edu.degree || "Degree"} {edu.field && `in ${edu.field}`}
@@ -413,7 +429,6 @@ export const MinimalTemplate = ({
           </Grid>
         </Box>
       )}
-
       {!isSectionEmpty("skills") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -423,7 +438,7 @@ export const MinimalTemplate = ({
               sx={{
                 fontWeight: 600,
                 color: colorScheme.primary,
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               Skills
@@ -443,7 +458,6 @@ export const MinimalTemplate = ({
               )}
             </IconButton>
           </Box>
-
           <Grid container spacing={2}>
             {skills.map((category, index) => (
               <Grid item xs={12} sm={6} md={4} key={category.id || index}>
@@ -454,12 +468,11 @@ export const MinimalTemplate = ({
                       fontWeight: 600,
                       color: colorScheme.secondary,
                       mb: 1,
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     {category.name || "Skill Category"}
                   </Typography>
-
                   {Array.isArray(category.skills) && (
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {category.skills.map(
@@ -473,7 +486,7 @@ export const MinimalTemplate = ({
                               sx={{
                                 borderColor: colorScheme.primary,
                                 color: colorScheme.text,
-                                ...pdfColorStyles
+                                ...pdfColorStyles,
                               }}
                             />
                           )
@@ -486,7 +499,6 @@ export const MinimalTemplate = ({
           </Grid>
         </Box>
       )}
-
       {!isSectionEmpty("projects") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -496,7 +508,7 @@ export const MinimalTemplate = ({
               sx={{
                 fontWeight: 600,
                 color: colorScheme.primary,
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               Projects
@@ -516,7 +528,6 @@ export const MinimalTemplate = ({
               )}
             </IconButton>
           </Box>
-
           <Grid container spacing={3}>
             {projects.map((project, index) => (
               <Grid item xs={12} sm={6} key={project.id || index}>
@@ -527,7 +538,7 @@ export const MinimalTemplate = ({
                     border: "1px solid",
                     borderColor: "divider",
                     borderRadius: 1,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   <Typography
@@ -536,7 +547,7 @@ export const MinimalTemplate = ({
                       fontWeight: 600,
                       color: colorScheme.secondary,
                       fontSize: "1.1rem",
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     {project.title || "Project Title"}
@@ -549,21 +560,19 @@ export const MinimalTemplate = ({
                           ml: 1,
                           fontSize: "0.8rem",
                           color: colorScheme.primary,
-                          ...pdfColorStyles
+                          ...pdfColorStyles,
                         }}
                       >
                         View
                       </Link>
                     )}
                   </Typography>
-
                   <Typography variant="body2" color="text.secondary">
                     {formatDate(project.startDate) || "Start Date"} -{" "}
                     {project.current
                       ? "Present"
                       : formatDate(project.endDate) || "End Date"}
                   </Typography>
-
                   {project.technologies && (
                     <Chip
                       label={project.technologies}
@@ -573,11 +582,10 @@ export const MinimalTemplate = ({
                         bgcolor: colorScheme.accent,
                         color: colorScheme.secondary,
                         fontSize: "0.75rem",
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     />
                   )}
-
                   {project.description && (
                     <Typography variant="body2" sx={{ mt: 1 }}>
                       {project.description}

@@ -2,7 +2,11 @@ import React from "react";
 import { Tabs, Tab } from "@mui/material";
 import { Description, Article, Brush, Work } from "@mui/icons-material";
 
-export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) => {
+export const TemplateSelector = ({
+  activeTab,
+  handleTemplateChange,
+  isMobile,
+}) => {
   return (
     <Tabs
       value={activeTab}
