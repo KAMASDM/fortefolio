@@ -31,8 +31,7 @@ import {
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
 
-const degreeSuggestions = [
-];
+const degreeSuggestions = [];
 
 const fieldSuggestions = [
   /* ... */
@@ -77,7 +76,7 @@ const EducationForm = ({ data, updateData, nextStep }) => {
 
       return () => clearTimeout(debounce);
     }
-  }, [educations, lastSavedEducations]);
+  }, [educations, lastSavedEducations, updateData]);
 
   useEffect(() => {
     const requiredFields = ["institution", "degree", "startDate"];
@@ -220,10 +219,6 @@ const EducationForm = ({ data, updateData, nextStep }) => {
                   transition: "box-shadow 0.3s ease",
                 }}
               >
-
-
-
-
                 <Box
                   sx={{
                     display: "flex",

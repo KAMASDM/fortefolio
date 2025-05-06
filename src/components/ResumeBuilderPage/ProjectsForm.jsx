@@ -6,7 +6,6 @@ import {
   Button,
   Box,
   IconButton,
-  Divider,
   Paper,
   Checkbox,
   FormControlLabel,
@@ -82,10 +81,10 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
       prevProjects.map((project) =>
         project.id === id
           ? {
-            ...project,
-            current: checked,
-            endDate: checked ? "" : project.endDate,
-          }
+              ...project,
+              current: checked,
+              endDate: checked ? "" : project.endDate,
+            }
           : project
       )
     );
@@ -166,8 +165,6 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
                   borderColor: "divider",
                 }}
               >
-
-
                 <Box
                   sx={{
                     display: "flex",

@@ -1,6 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { auth } from '../firebaseConfig';
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { auth } from "../firebaseConfig";
+import {
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 
 const AuthContext = createContext();
@@ -23,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       await set(userProfileRef, {
         displayName: result.user.displayName,
         email: result.user.email,
-        photoURL: result.user.photoURL
+        photoURL: result.user.photoURL,
       });
       return true;
     } catch (error) {
@@ -53,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     loading,
     handleGoogleLogin,
-    logout
+    logout,
   };
 
   return (

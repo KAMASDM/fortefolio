@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import html2pdf from 'html2pdf.js';
+import { useEffect } from "react";
+import html2pdf from "html2pdf.js";
 
 export const PDFGenerator = ({
   resumeRef,
@@ -7,10 +7,10 @@ export const PDFGenerator = ({
   setLoading,
   personalInfo,
   onSuccess,
-  onError
+  onError,
 }) => {
   useEffect(() => {
-    const styleElement = document.createElement('style');
+    const styleElement = document.createElement("style");
     styleElement.innerHTML = `
       @media print {
         * {
@@ -43,11 +43,11 @@ export const PDFGenerator = ({
         }
       }
     `;
-    styleElement.id = 'pdf-print-styles';
+    styleElement.id = "pdf-print-styles";
     document.head.appendChild(styleElement);
 
     return () => {
-      const element = document.getElementById('pdf-print-styles');
+      const element = document.getElementById("pdf-print-styles");
       if (element) {
         document.head.removeChild(element);
       }
@@ -67,20 +67,23 @@ export const PDFGenerator = ({
     const filename = `${personalInfo.fullName || "Resume"}.pdf`;
 
     try {
-      await html2pdf().set({
-        margin: [0.5, 0.5],
-        filename: filename,
-        html2canvas: {
-          scale: 2,
-          useCORS: true
-        },
-        jsPDF: {
-          unit: 'in',
-          format: 'letter',
-          orientation: 'portrait'
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      }).from(element).save();
+      await html2pdf()
+        .set({
+          margin: [0.5, 0.5],
+          filename: filename,
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+          },
+          jsPDF: {
+            unit: "in",
+            format: "letter",
+            orientation: "portrait",
+          },
+          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+        })
+        .from(element)
+        .save();
 
       setLoading(false);
       onSuccess("Resume downloaded successfully!");
@@ -89,7 +92,11 @@ export const PDFGenerator = ({
       setLoading(false);
       onError("Could not generate PDF. Try using Print instead.");
       setTimeout(() => {
-        if (window.confirm("PDF generation failed. Would you like to try printing instead?")) {
+        if (
+          window.confirm(
+            "PDF generation failed. Would you like to try printing instead?"
+          )
+        ) {
           window.print();
         }
       }, 500);
@@ -98,7 +105,7 @@ export const PDFGenerator = ({
 
   return {
     downloadPDF,
-    loading
+    loading,
   };
 };
 

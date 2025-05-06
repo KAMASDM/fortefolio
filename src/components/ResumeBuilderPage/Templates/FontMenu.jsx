@@ -1,7 +1,19 @@
 import React from "react";
-import { Menu, MenuItem, Typography, Box, ListItemIcon, Radio } from "@mui/material";
+import {
+  Menu,
+  MenuItem,
+  Typography,
+  ListItemIcon,
+  Radio,
+} from "@mui/material";
 
-export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONTS, fontFamily }) => {
+export const FontMenu = ({
+  fontMenu,
+  handleFontMenuClose,
+  changeFontFamily,
+  FONTS,
+  fontFamily,
+}) => {
   const handleFontSelection = (font) => {
     changeFontFamily(font);
     handleFontMenuClose();
@@ -18,11 +30,11 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         sx: {
           maxWidth: 250,
           mt: 1,
-          boxShadow: 3
-        }
+          boxShadow: 3,
+        },
       }}
       MenuListProps={{
-        dense: true
+        dense: true,
       }}
     >
       <MenuItem
@@ -34,7 +46,6 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.POPPINS }}>Poppins</Typography>
       </MenuItem>
-
       <MenuItem
         onClick={() => handleFontSelection(FONTS.ROBOTO)}
         selected={fontFamily === FONTS.ROBOTO}
@@ -44,7 +55,6 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.ROBOTO }}>Roboto</Typography>
       </MenuItem>
-
       <MenuItem
         onClick={() => handleFontSelection(FONTS.OPEN_SANS)}
         selected={fontFamily === FONTS.OPEN_SANS}
@@ -54,7 +64,6 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.OPEN_SANS }}>Open Sans</Typography>
       </MenuItem>
-
       <MenuItem
         onClick={() => handleFontSelection(FONTS.MONTSERRAT)}
         selected={fontFamily === FONTS.MONTSERRAT}
@@ -62,9 +71,10 @@ export const FontMenu = ({ fontMenu, handleFontMenuClose, changeFontFamily, FONT
         <ListItemIcon sx={{ minWidth: 36 }}>
           {fontFamily === FONTS.MONTSERRAT && <Radio checked size="small" />}
         </ListItemIcon>
-        <Typography sx={{ fontFamily: FONTS.MONTSERRAT }}>Montserrat</Typography>
+        <Typography sx={{ fontFamily: FONTS.MONTSERRAT }}>
+          Montserrat
+        </Typography>
       </MenuItem>
-
       <MenuItem
         onClick={() => handleFontSelection(FONTS.RALEWAY)}
         selected={fontFamily === FONTS.RALEWAY}

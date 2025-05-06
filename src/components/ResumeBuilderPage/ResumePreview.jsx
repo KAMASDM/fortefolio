@@ -15,9 +15,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Stack
+  Stack,
 } from "@mui/material";
-import { Download, FormatColorFill, TextFormat, Print } from "@mui/icons-material";
+import {
+  Download,
+  FormatColorFill,
+  TextFormat,
+  Print,
+} from "@mui/icons-material";
 
 import { TemplateSelector } from "./Templates/TemplateSelector";
 import { ResumeToolbar } from "./Templates/ResumeToolbar";
@@ -89,9 +94,9 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
     handleResize();
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const formatDate = (dateString) => {
@@ -234,7 +239,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         message: message,
         severity: "error",
       });
-    }
+    },
   });
 
   const downloadPDF = () => {
@@ -267,7 +272,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
       starredSections,
       getInitials,
       isMobile,
-      isSmallMobile
+      isSmallMobile,
     };
 
     switch (activeTemplate) {
@@ -287,7 +292,11 @@ const ResumePreview = ({ resumeData, onBack }) => {
   const speedDialActions = [
     { icon: <Download />, name: "Download PDF", action: downloadPDF },
     { icon: <Print />, name: "Print", action: printResume },
-    { icon: <FormatColorFill />, name: "Change Colors", action: handleColorMenuOpen },
+    {
+      icon: <FormatColorFill />,
+      name: "Change Colors",
+      action: handleColorMenuOpen,
+    },
     { icon: <TextFormat />, name: "Change Font", action: handleFontMenuOpen },
   ];
 
@@ -295,10 +304,10 @@ const ResumePreview = ({ resumeData, onBack }) => {
     <Stack
       spacing={0}
       sx={{
-        width: '100%',
-        height: '100%',
-        overflowX: 'hidden',
-        bgcolor: 'background.default'
+        width: "100%",
+        height: "100%",
+        overflowX: "hidden",
+        bgcolor: "background.default",
       }}
     >
       <ResumeToolbar
@@ -313,7 +322,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           mb: { xs: 1, sm: 2 },
           flexShrink: 0,
           py: { xs: 1, sm: 1.5 },
-          px: { xs: 1, sm: 2 }
+          px: { xs: 1, sm: 2 },
         }}
       />
 
@@ -324,30 +333,36 @@ const ResumePreview = ({ resumeData, onBack }) => {
           px: { xs: 1, sm: 2, md: 3 },
           pb: { xs: 8, md: 4 },
           flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%'
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
         }}
       >
         <Paper
           elevation={2}
           sx={{
-            width: '100%',
+            width: "100%",
             borderRadius: { xs: 1, sm: 2 },
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            height: { xs: 'calc(100vh - 136px)', sm: 'calc(100vh - 120px)', md: 'calc(100vh - 120px)' }
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            height: {
+              xs: "calc(100vh - 136px)",
+              sm: "calc(100vh - 120px)",
+              md: "calc(100vh - 120px)",
+            },
           }}
         >
           {isMobile ? (
-            <Box sx={{
-              px: 2,
-              py: 1.5,
-              borderBottom: 1,
-              borderColor: 'divider',
-              flexShrink: 0
-            }}>
+            <Box
+              sx={{
+                px: 2,
+                py: 1.5,
+                borderBottom: 1,
+                borderColor: "divider",
+                flexShrink: 0,
+              }}
+            >
               <FormControl fullWidth size="small">
                 <InputLabel id="template-select-label">Template</InputLabel>
                 <Select
@@ -360,7 +375,9 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem>
                   <MenuItem value={TEMPLATES.MINIMAL}>Minimal</MenuItem>
                   <MenuItem value={TEMPLATES.CREATIVE}>Creative</MenuItem>
-                  <MenuItem value={TEMPLATES.PROFESSIONAL}>Professional</MenuItem>
+                  <MenuItem value={TEMPLATES.PROFESSIONAL}>
+                    Professional
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -376,10 +393,10 @@ const ResumePreview = ({ resumeData, onBack }) => {
           <Box
             sx={{
               flexGrow: 1,
-              overflow: 'auto',
+              overflow: "auto",
               "&::-webkit-scrollbar": {
                 width: "6px",
-                height: "6px"
+                height: "6px",
               },
               "&::-webkit-scrollbar-track": {
                 backgroundColor: "rgba(0,0,0,0.05)",
@@ -389,32 +406,32 @@ const ResumePreview = ({ resumeData, onBack }) => {
                 borderRadius: "4px",
               },
               p: { xs: 1, sm: 2, md: 3 },
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'flex-start'
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-start",
             }}
           >
             <Box
               sx={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center'
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
               }}
             >
               <Box
                 ref={resumeRef}
                 className="resume-content resume-container"
                 sx={{
-                  WebkitPrintColorAdjust: 'exact',
-                  printColorAdjust: 'exact',
-                  colorAdjust: 'exact',
+                  WebkitPrintColorAdjust: "exact",
+                  printColorAdjust: "exact",
+                  colorAdjust: "exact",
                   transform: `scale(${scale})`,
-                  transformOrigin: 'top center',
-                  width: scale < 1 ? `${100 / scale}%` : '100%',
-                  maxWidth: scale < 1 ? undefined : '830px',
-                  transition: 'transform 0.2s ease',
-                  height: 'auto',
-                  margin: '0 auto'
+                  transformOrigin: "top center",
+                  width: scale < 1 ? `${100 / scale}%` : "100%",
+                  maxWidth: scale < 1 ? undefined : "830px",
+                  transition: "transform 0.2s ease",
+                  height: "auto",
+                  margin: "0 auto",
                 }}
                 data-pdf-container="true"
               >
@@ -442,10 +459,10 @@ const ResumePreview = ({ resumeData, onBack }) => {
           FabProps={{
             sx: {
               bgcolor: theme.palette.primary.main,
-              '&:hover': {
+              "&:hover": {
                 bgcolor: theme.palette.primary.dark,
-              }
-            }
+              },
+            },
           }}
         >
           {speedDialActions.map((action) => (
@@ -490,11 +507,11 @@ const ResumePreview = ({ resumeData, onBack }) => {
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: isSmallMobile ? 'center' : 'left'
+          vertical: "bottom",
+          horizontal: isSmallMobile ? "center" : "left",
         }}
         sx={{
-          bottom: { xs: 76, sm: 24 }
+          bottom: { xs: 76, sm: 24 },
         }}
       >
         <Alert
@@ -502,7 +519,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           severity={snackbar.severity}
           sx={{
             width: "100%",
-            boxShadow: 2
+            boxShadow: 2,
           }}
         >
           {snackbar.message}
