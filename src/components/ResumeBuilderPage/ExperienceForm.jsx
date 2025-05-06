@@ -218,8 +218,6 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
                   borderColor: "divider",
                 }}
               >
-
-
                 <Box
                   sx={{
                     display: "flex",
@@ -404,8 +402,9 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
                                 e.target.value
                               )
                             }
-                            placeholder={`Responsibility or achievement #${respIndex + 1
-                              }`}
+                            placeholder={`Responsibility or achievement #${
+                              respIndex + 1
+                            }`}
                             variant="outlined"
                             size="small"
                             multiline

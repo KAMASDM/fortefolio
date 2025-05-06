@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Link,
-  IconButton,
-  Chip,
-} from "@mui/material";
+import { Box, Typography, Grid, Link, IconButton, Chip } from "@mui/material";
 import {
   Email as EmailIcon,
   Phone as PhoneIcon,
@@ -36,9 +29,9 @@ export const ModernTemplate = ({
   } = resumeData;
 
   const pdfColorStyles = {
-    WebkitPrintColorAdjust: 'exact',
-    printColorAdjust: 'exact',
-    colorAdjust: 'exact'
+    WebkitPrintColorAdjust: "exact",
+    printColorAdjust: "exact",
+    colorAdjust: "exact",
   };
 
   return (
@@ -52,7 +45,7 @@ export const ModernTemplate = ({
         mx: "auto",
         borderRadius: 2,
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
-        ...pdfColorStyles
+        ...pdfColorStyles,
       }}
     >
       <Box
@@ -72,7 +65,7 @@ export const ModernTemplate = ({
             borderRadius: "2px",
             bgcolor: colorScheme.primary,
           },
-          ...pdfColorStyles
+          ...pdfColorStyles,
         }}
       >
         <Typography
@@ -84,7 +77,7 @@ export const ModernTemplate = ({
             mb: 1,
             fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
             letterSpacing: "-0.025em",
-            ...pdfColorStyles
+            ...pdfColorStyles,
           }}
         >
           {personalInfo.fullName || "Your Name"}
@@ -99,13 +92,12 @@ export const ModernTemplate = ({
               mb: 3,
               fontSize: { xs: "1.1rem", sm: "1.3rem" },
               letterSpacing: "0.02em",
-              ...pdfColorStyles
+              ...pdfColorStyles,
             }}
           >
             {personalInfo.jobTitle}
           </Typography>
         )}
-
         <Box
           sx={{
             display: "flex",
@@ -138,7 +130,6 @@ export const ModernTemplate = ({
               </Typography>
             </Box>
           )}
-
           {personalInfo.phone && (
             <Box
               sx={{
@@ -162,7 +153,6 @@ export const ModernTemplate = ({
               </Typography>
             </Box>
           )}
-
           {personalInfo.location && (
             <Box
               sx={{
@@ -186,7 +176,6 @@ export const ModernTemplate = ({
               </Typography>
             </Box>
           )}
-
           {personalInfo.linkedin && (
             <Box
               sx={{
@@ -218,7 +207,6 @@ export const ModernTemplate = ({
               </Link>
             </Box>
           )}
-
           {personalInfo.github && (
             <Box
               sx={{
@@ -250,7 +238,6 @@ export const ModernTemplate = ({
               </Link>
             </Box>
           )}
-
           {personalInfo.website && (
             <Box
               sx={{
@@ -282,7 +269,6 @@ export const ModernTemplate = ({
               </Link>
             </Box>
           )}
-
           {personalInfo.portfolio && (
             <Box
               sx={{
@@ -316,7 +302,6 @@ export const ModernTemplate = ({
           )}
         </Box>
       </Box>
-
       <Grid container spacing={4}>
         <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
           {personalInfo.summary && (
@@ -340,7 +325,7 @@ export const ModernTemplate = ({
                   borderTopLeftRadius: 2,
                   borderBottomLeftRadius: 2,
                 },
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -353,7 +338,7 @@ export const ModernTemplate = ({
                     display: "flex",
                     alignItems: "center",
                     fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Profile
@@ -386,7 +371,6 @@ export const ModernTemplate = ({
               </Typography>
             </Box>
           )}
-
           {!isSectionEmpty("experience") && (
             <Box sx={{ mb: 5 }}>
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -410,7 +394,7 @@ export const ModernTemplate = ({
                       borderRadius: "2px",
                       bgcolor: colorScheme.primary,
                     },
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Experience
@@ -430,7 +414,6 @@ export const ModernTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               {experience.map((exp, index) => (
                 <Box
                   key={exp.id || index}
@@ -457,7 +440,7 @@ export const ModernTemplate = ({
                       borderTopLeftRadius: 2,
                       borderBottomLeftRadius: 2,
                     },
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   <Grid container>
@@ -468,7 +451,7 @@ export const ModernTemplate = ({
                           fontWeight: 700,
                           color: colorScheme.secondary,
                           fontSize: { xs: "1.1rem", sm: "1.25rem" },
-                          ...pdfColorStyles
+                          ...pdfColorStyles,
                         }}
                       >
                         {exp.position || "Position Title"}
@@ -512,7 +495,7 @@ export const ModernTemplate = ({
                               mr: 0.5,
                               fontSize: "0.875rem",
                               color: colorScheme.primary,
-                              ...pdfColorStyles
+                              ...pdfColorStyles,
                             }}
                           />
                           {exp.location}
@@ -534,7 +517,6 @@ export const ModernTemplate = ({
                       </Typography>
                     </Grid>
                   </Grid>
-
                   {exp.description && (
                     <Typography
                       variant="body2"
@@ -548,7 +530,6 @@ export const ModernTemplate = ({
                       {exp.description}
                     </Typography>
                   )}
-
                   {Array.isArray(exp.responsibilities) &&
                     exp.responsibilities.filter(Boolean).length > 0 && (
                       <Box
@@ -561,45 +542,42 @@ export const ModernTemplate = ({
                           position: "relative",
                         }}
                       >
-                        {exp.responsibilities
-                          .filter(Boolean)
-                          .map(
-                            (responsibility, idx) =>
-                              responsibility.trim() && (
-                                <Typography
-                                  component="li"
-                                  variant="body2"
-                                  key={idx}
-                                  sx={{
-                                    mb: 1,
-                                    position: "relative",
-                                    pl: 3,
-                                    "&::before": {
-                                      content: '""',
-                                      position: "absolute",
-                                      left: 0,
-                                      top: "0.5em",
-                                      width: "0.5rem",
-                                      height: "0.5rem",
-                                      borderRadius: "50%",
-                                      bgcolor: colorScheme.accent,
-                                      border: `1px solid ${colorScheme.primary}`,
-                                    },
-                                    lineHeight: 1.6,
-                                    color: "rgba(0, 0, 0, 0.75)",
-                                  }}
-                                >
-                                  {responsibility}
-                                </Typography>
-                              )
-                          )}
+                        {exp.responsibilities.filter(Boolean).map(
+                          (responsibility, idx) =>
+                            responsibility.trim() && (
+                              <Typography
+                                component="li"
+                                variant="body2"
+                                key={idx}
+                                sx={{
+                                  mb: 1,
+                                  position: "relative",
+                                  pl: 3,
+                                  "&::before": {
+                                    content: '""',
+                                    position: "absolute",
+                                    left: 0,
+                                    top: "0.5em",
+                                    width: "0.5rem",
+                                    height: "0.5rem",
+                                    borderRadius: "50%",
+                                    bgcolor: colorScheme.accent,
+                                    border: `1px solid ${colorScheme.primary}`,
+                                  },
+                                  lineHeight: 1.6,
+                                  color: "rgba(0, 0, 0, 0.75)",
+                                }}
+                              >
+                                {responsibility}
+                              </Typography>
+                            )
+                        )}
                       </Box>
                     )}
                 </Box>
               ))}
             </Box>
           )}
-
           {!isSectionEmpty("projects") && (
             <Box sx={{ mb: 5 }}>
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -623,7 +601,7 @@ export const ModernTemplate = ({
                       borderRadius: "2px",
                       bgcolor: colorScheme.primary,
                     },
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Projects
@@ -643,7 +621,6 @@ export const ModernTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               <Grid container spacing={3}>
                 {projects.map((project, index) => (
                   <Grid item xs={12} sm={6} key={project.id || index}>
@@ -673,7 +650,7 @@ export const ModernTemplate = ({
                           borderTopLeftRadius: 2,
                           borderBottomLeftRadius: 2,
                         },
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       <Typography
@@ -685,7 +662,7 @@ export const ModernTemplate = ({
                           display: "flex",
                           alignItems: "flex-start",
                           justifyContent: "space-between",
-                          ...pdfColorStyles
+                          ...pdfColorStyles,
                         }}
                       >
                         <Box component="span" sx={{ pr: 1 }}>
@@ -710,7 +687,7 @@ export const ModernTemplate = ({
                               "&:hover": {
                                 opacity: 0.9,
                               },
-                              ...pdfColorStyles
+                              ...pdfColorStyles,
                             }}
                           >
                             <LanguageIcon
@@ -720,7 +697,6 @@ export const ModernTemplate = ({
                           </Link>
                         )}
                       </Typography>
-
                       {project.technologies && (
                         <Typography
                           variant="body2"
@@ -733,24 +709,25 @@ export const ModernTemplate = ({
                             gap: 0.75,
                           }}
                         >
-                          {project.technologies.split(/,\s*/).map((tech, idx) => (
-                            <Chip
-                              key={idx}
-                              label={tech}
-                              size="small"
-                              sx={{
-                                height: "auto",
-                                py: 0.25,
-                                fontSize: "0.7rem",
-                                bgcolor: "rgba(0, 0, 0, 0.05)",
-                                color: colorScheme.secondary,
-                                ...pdfColorStyles
-                              }}
-                            />
-                          ))}
+                          {project.technologies
+                            .split(/,\s*/)
+                            .map((tech, idx) => (
+                              <Chip
+                                key={idx}
+                                label={tech}
+                                size="small"
+                                sx={{
+                                  height: "auto",
+                                  py: 0.25,
+                                  fontSize: "0.7rem",
+                                  bgcolor: "rgba(0, 0, 0, 0.05)",
+                                  color: colorScheme.secondary,
+                                  ...pdfColorStyles,
+                                }}
+                              />
+                            ))}
                         </Typography>
                       )}
-
                       <Typography
                         variant="body2"
                         sx={{
@@ -765,7 +742,6 @@ export const ModernTemplate = ({
                           ? "Present"
                           : formatDate(project.endDate) || "End Date"}
                       </Typography>
-
                       {project.description && (
                         <Typography
                           variant="body2"
@@ -786,7 +762,6 @@ export const ModernTemplate = ({
             </Box>
           )}
         </Grid>
-
         <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
           <Box
             sx={{
@@ -806,7 +781,7 @@ export const ModernTemplate = ({
                 height: "6px",
                 bgcolor: colorScheme.primary,
               },
-              ...pdfColorStyles
+              ...pdfColorStyles,
             }}
           >
             {!isSectionEmpty("education") && (
@@ -830,7 +805,7 @@ export const ModernTemplate = ({
                         borderRadius: "2px",
                         bgcolor: colorScheme.primary,
                       },
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     Education
@@ -850,7 +825,6 @@ export const ModernTemplate = ({
                     )}
                   </IconButton>
                 </Box>
-
                 {education.map((edu, index) => (
                   <Box
                     key={edu.id || index}
@@ -871,7 +845,7 @@ export const ModernTemplate = ({
                         color: colorScheme.secondary,
                         fontSize: "1rem",
                         mb: 0.5,
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       {edu.degree || "Degree"} {edu.field && `in ${edu.field}`}
@@ -912,7 +886,7 @@ export const ModernTemplate = ({
                               mr: 0.5,
                               fontSize: "0.8rem",
                               color: colorScheme.primary,
-                              ...pdfColorStyles
+                              ...pdfColorStyles,
                             }}
                           />
                           {edu.location}
@@ -947,7 +921,6 @@ export const ModernTemplate = ({
                 ))}
               </Box>
             )}
-
             {!isSectionEmpty("skills") && (
               <Box sx={{ mb: 0 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -969,7 +942,7 @@ export const ModernTemplate = ({
                         borderRadius: "2px",
                         bgcolor: colorScheme.primary,
                       },
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     Skills
@@ -989,7 +962,6 @@ export const ModernTemplate = ({
                     )}
                   </IconButton>
                 </Box>
-
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                   {skills.map((category, index) => (
                     <Box key={category.id || index}>
@@ -1013,12 +985,11 @@ export const ModernTemplate = ({
                             borderRadius: "50%",
                             bgcolor: colorScheme.secondary,
                           },
-                          ...pdfColorStyles
+                          ...pdfColorStyles,
                         }}
                       >
                         {category.name || "Skill Category"}
                       </Typography>
-
                       <Box
                         sx={{
                           display: "flex",
@@ -1048,7 +1019,7 @@ export const ModernTemplate = ({
                                       color: "white",
                                       transform: "translateY(-2px)",
                                     },
-                                    ...pdfColorStyles
+                                    ...pdfColorStyles,
                                   }}
                                 />
                               )

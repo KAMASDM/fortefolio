@@ -33,11 +33,9 @@ import {
   Contacts as ContactIcon,
 } from "@mui/icons-material";
 
-const titleSuggestions = [
-];
+const titleSuggestions = [];
 
-const summaryExamples = [
-];
+const summaryExamples = [];
 
 const defaultPersonalInfo = {
   fullName: "",
@@ -197,7 +195,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
           icon={formComplete === 100 ? <CheckCircleIcon /> : undefined}
         />
       </Box>
-
       {formComplete < 30 && (
         <Alert
           severity="info"
@@ -207,7 +204,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
           Start by filling out your basic contact information.
         </Alert>
       )}
-
       <form onSubmit={handleSubmit}>
         <Paper
           elevation={2}
@@ -318,7 +314,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             </Grid>
           </Grid>
         </Paper>
-
         <Paper
           elevation={2}
           sx={{

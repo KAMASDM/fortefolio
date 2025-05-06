@@ -7,7 +7,7 @@ import {
   IconButton,
   Divider,
   Chip,
-  Stack
+  Stack,
 } from "@mui/material";
 import {
   Email as EmailIcon,
@@ -38,9 +38,9 @@ export const ProfessionalTemplate = ({
   } = resumeData;
 
   const pdfColorStyles = {
-    WebkitPrintColorAdjust: 'exact',
-    printColorAdjust: 'exact',
-    colorAdjust: 'exact'
+    WebkitPrintColorAdjust: "exact",
+    printColorAdjust: "exact",
+    colorAdjust: "exact",
   };
 
   return (
@@ -52,7 +52,7 @@ export const ProfessionalTemplate = ({
         p: 4,
         maxWidth: "1000px",
         mx: "auto",
-        ...pdfColorStyles
+        ...pdfColorStyles,
       }}
     >
       <Box
@@ -60,7 +60,7 @@ export const ProfessionalTemplate = ({
           borderBottom: `3px solid ${colorScheme.primary}`,
           pb: 3,
           mb: 4,
-          ...pdfColorStyles
+          ...pdfColorStyles,
         }}
       >
         <Grid container spacing={2} alignItems="center">
@@ -72,12 +72,11 @@ export const ProfessionalTemplate = ({
                 fontWeight: 700,
                 color: colorScheme.secondary,
                 fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               {personalInfo.fullName || "Your Name"}
             </Typography>
-
             {personalInfo.jobTitle && (
               <Typography
                 variant="h5"
@@ -85,20 +84,18 @@ export const ProfessionalTemplate = ({
                   color: colorScheme.primary,
                   fontWeight: 500,
                   mb: 2,
-                  ...pdfColorStyles
+                  ...pdfColorStyles,
                 }}
               >
                 {personalInfo.jobTitle}
               </Typography>
             )}
-
             {personalInfo.summary && (
               <Typography variant="body1" sx={{ maxWidth: "650px" }}>
                 {personalInfo.summary}
               </Typography>
             )}
           </Grid>
-
           <Grid item xs={12} md={4}>
             <Box
               sx={{
@@ -117,7 +114,6 @@ export const ProfessionalTemplate = ({
                   <Typography variant="body2">{personalInfo.email}</Typography>
                 </Box>
               )}
-
               {personalInfo.phone && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <PhoneIcon
@@ -127,7 +123,6 @@ export const ProfessionalTemplate = ({
                   <Typography variant="body2">{personalInfo.phone}</Typography>
                 </Box>
               )}
-
               {personalInfo.location && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <LocationIcon
@@ -139,7 +134,6 @@ export const ProfessionalTemplate = ({
                   </Typography>
                 </Box>
               )}
-
               {personalInfo.linkedin && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <LinkedInIcon
@@ -156,7 +150,6 @@ export const ProfessionalTemplate = ({
                   </Link>
                 </Box>
               )}
-
               {personalInfo.github && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <GitHubIcon
@@ -173,7 +166,6 @@ export const ProfessionalTemplate = ({
                   </Link>
                 </Box>
               )}
-
               {personalInfo.website && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <LanguageIcon
@@ -194,7 +186,6 @@ export const ProfessionalTemplate = ({
           </Grid>
         </Grid>
       </Box>
-
       <Grid container spacing={4}>
         <Grid item xs={12} md={8}>
           {!isSectionEmpty("experience") && (
@@ -206,7 +197,7 @@ export const ProfessionalTemplate = ({
                   mb: 2,
                   pb: 1,
                   borderBottom: `2px solid ${colorScheme.accent}`,
-                  ...pdfColorStyles
+                  ...pdfColorStyles,
                 }}
               >
                 <Typography
@@ -216,7 +207,7 @@ export const ProfessionalTemplate = ({
                     color: colorScheme.primary,
                     textTransform: "uppercase",
                     letterSpacing: 1,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Professional Experience
@@ -236,7 +227,6 @@ export const ProfessionalTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               {experience.map((exp, index) => (
                 <Box key={exp.id || index} sx={{ mb: 4 }}>
                   <Grid container>
@@ -254,7 +244,7 @@ export const ProfessionalTemplate = ({
                           sx={{
                             fontWeight: 600,
                             color: colorScheme.secondary,
-                            ...pdfColorStyles
+                            ...pdfColorStyles,
                           }}
                         >
                           {exp.position || "Position Title"}
@@ -264,7 +254,7 @@ export const ProfessionalTemplate = ({
                           sx={{
                             fontWeight: 500,
                             color: colorScheme.primary,
-                            ...pdfColorStyles
+                            ...pdfColorStyles,
                           }}
                         >
                           {formatDate(exp.startDate) || "Start Date"} -{" "}
@@ -296,13 +286,11 @@ export const ProfessionalTemplate = ({
                       </Box>
                     </Grid>
                   </Grid>
-
                   {exp.description && (
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       {exp.description}
                     </Typography>
                   )}
-
                   {typeof exp.responsibilities === "string" &&
                     exp.responsibilities.trim() && (
                       <Box component="ul" sx={{ pl: 2, mt: 1, mb: 0 }}>
@@ -321,13 +309,13 @@ export const ProfessionalTemplate = ({
                         )}
                       </Box>
                     )}
-
-                  {index < experience.length - 1 && <Divider sx={{ mt: 2, ...pdfColorStyles }} />}
+                  {index < experience.length - 1 && (
+                    <Divider sx={{ mt: 2, ...pdfColorStyles }} />
+                  )}
                 </Box>
               ))}
             </Box>
           )}
-
           {!isSectionEmpty("projects") && (
             <Box sx={{ mb: 5 }}>
               <Box
@@ -337,7 +325,7 @@ export const ProfessionalTemplate = ({
                   mb: 2,
                   pb: 1,
                   borderBottom: `2px solid ${colorScheme.accent}`,
-                  ...pdfColorStyles
+                  ...pdfColorStyles,
                 }}
               >
                 <Typography
@@ -347,7 +335,7 @@ export const ProfessionalTemplate = ({
                     color: colorScheme.primary,
                     textTransform: "uppercase",
                     letterSpacing: 1,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Projects
@@ -367,7 +355,6 @@ export const ProfessionalTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               {projects.map((project, index) => (
                 <Box key={project.id || index} sx={{ mb: 3 }}>
                   <Box
@@ -383,7 +370,7 @@ export const ProfessionalTemplate = ({
                       sx={{
                         fontWeight: 600,
                         color: colorScheme.secondary,
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       {project.title || "Project Title"}
@@ -396,20 +383,19 @@ export const ProfessionalTemplate = ({
                             ml: 1,
                             fontSize: "0.8rem",
                             color: colorScheme.primary,
-                            ...pdfColorStyles
+                            ...pdfColorStyles,
                           }}
                         >
                           View Project
                         </Link>
                       )}
                     </Typography>
-
                     <Typography
                       variant="body2"
                       sx={{
                         fontWeight: 500,
                         color: colorScheme.primary,
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       {formatDate(project.startDate) || "Start Date"} -{" "}
@@ -418,7 +404,6 @@ export const ProfessionalTemplate = ({
                         : formatDate(project.endDate) || "End Date"}
                     </Typography>
                   </Box>
-
                   {project.technologies && (
                     <Typography
                       variant="subtitle2"
@@ -427,20 +412,19 @@ export const ProfessionalTemplate = ({
                       {project.technologies}
                     </Typography>
                   )}
-
                   {project.description && (
                     <Typography variant="body2">
                       {project.description}
                     </Typography>
                   )}
-
-                  {index < projects.length - 1 && <Divider sx={{ my: 2, ...pdfColorStyles }} />}
+                  {index < projects.length - 1 && (
+                    <Divider sx={{ my: 2, ...pdfColorStyles }} />
+                  )}
                 </Box>
               ))}
             </Box>
           )}
         </Grid>
-
         <Grid item xs={12} md={4}>
           {!isSectionEmpty("education") && (
             <Box sx={{ mb: 5 }}>
@@ -451,7 +435,7 @@ export const ProfessionalTemplate = ({
                   mb: 2,
                   pb: 1,
                   borderBottom: `2px solid ${colorScheme.accent}`,
-                  ...pdfColorStyles
+                  ...pdfColorStyles,
                 }}
               >
                 <Typography
@@ -461,7 +445,7 @@ export const ProfessionalTemplate = ({
                     color: colorScheme.primary,
                     textTransform: "uppercase",
                     letterSpacing: 1,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Education
@@ -481,7 +465,6 @@ export const ProfessionalTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               {education.map((edu, index) => (
                 <Box key={edu.id || index} sx={{ mb: 3 }}>
                   <Typography
@@ -490,7 +473,7 @@ export const ProfessionalTemplate = ({
                       fontWeight: 600,
                       color: colorScheme.secondary,
                       fontSize: "1rem",
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     {edu.degree || "Degree"} {edu.field && `in ${edu.field}`}
@@ -499,7 +482,6 @@ export const ProfessionalTemplate = ({
                   <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>
                     {edu.institution || "Institution Name"}
                   </Typography>
-
                   <Box
                     sx={{
                       display: "flex",
@@ -522,19 +504,18 @@ export const ProfessionalTemplate = ({
                       {formatDate(edu.endDate) || "End Date"}
                     </Typography>
                   </Box>
-
                   {edu.description && (
                     <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
                       {edu.description}
                     </Typography>
                   )}
-
-                  {index < education.length - 1 && <Divider sx={{ my: 2, ...pdfColorStyles }} />}
+                  {index < education.length - 1 && (
+                    <Divider sx={{ my: 2, ...pdfColorStyles }} />
+                  )}
                 </Box>
               ))}
             </Box>
           )}
-
           {!isSectionEmpty("skills") && (
             <Box sx={{ mb: 5 }}>
               <Box
@@ -544,7 +525,7 @@ export const ProfessionalTemplate = ({
                   mb: 2,
                   pb: 1,
                   borderBottom: `2px solid ${colorScheme.accent}`,
-                  ...pdfColorStyles
+                  ...pdfColorStyles,
                 }}
               >
                 <Typography
@@ -554,7 +535,7 @@ export const ProfessionalTemplate = ({
                     color: colorScheme.primary,
                     textTransform: "uppercase",
                     letterSpacing: 1,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Skills
@@ -574,7 +555,6 @@ export const ProfessionalTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               <Stack spacing={2}>
                 {skills.map((category, index) => (
                   <Box key={category.id || index}>
@@ -584,12 +564,11 @@ export const ProfessionalTemplate = ({
                         fontWeight: 600,
                         color: colorScheme.secondary,
                         mb: 1,
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       {category.name || "Skill Category"}
                     </Typography>
-
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
                       {Array.isArray(category.skills) &&
                         category.skills.map(
@@ -603,7 +582,7 @@ export const ProfessionalTemplate = ({
                                   bgcolor: colorScheme.accent,
                                   color: colorScheme.secondary,
                                   fontWeight: 500,
-                                  ...pdfColorStyles
+                                  ...pdfColorStyles,
                                 }}
                               />
                             )

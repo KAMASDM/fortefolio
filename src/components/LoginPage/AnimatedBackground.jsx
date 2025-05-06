@@ -34,7 +34,6 @@ const AnimatedBackground = () => {
           background: `linear-gradient(135deg, ${lavenderPalette.light} 0%, ${lavenderPalette.soft} 100%)`,
         }}
       />
-
       <Box
         component={motion.div}
         animate={{
@@ -58,7 +57,6 @@ const AnimatedBackground = () => {
           filter: "blur(60px)",
         }}
       />
-
       <Box
         component={motion.div}
         animate={{
@@ -82,7 +80,6 @@ const AnimatedBackground = () => {
           filter: "blur(60px)",
         }}
       />
-
       <Box
         component={motion.div}
         animate={{

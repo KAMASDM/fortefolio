@@ -1,11 +1,11 @@
 import React from "react";
 import { Menu, MenuItem, ListItemIcon, ListItemText, Box } from "@mui/material";
 
-export const ColorMenu = ({ 
-  colorMenu, 
-  handleColorMenuClose, 
-  changeColorScheme, 
-  COLOR_SCHEMES 
+export const ColorMenu = ({
+  colorMenu,
+  handleColorMenuClose,
+  changeColorScheme,
+  COLOR_SCHEMES,
 }) => {
   return (
     <Menu

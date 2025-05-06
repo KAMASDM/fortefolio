@@ -9,7 +9,7 @@ import {
   Chip,
   Paper,
   Tooltip,
-  Stack
+  Stack,
 } from "@mui/material";
 import {
   Email as EmailIcon,
@@ -24,7 +24,7 @@ import {
   School as SchoolIcon,
   Psychology as PsychologyIcon,
   Code as CodeIcon,
-  Visibility as ViewIcon
+  Visibility as ViewIcon,
 } from "@mui/icons-material";
 
 export const CreativeTemplate = ({
@@ -35,7 +35,7 @@ export const CreativeTemplate = ({
   isSectionEmpty,
   toggleStarSection,
   starredSections,
-  getInitials
+  getInitials,
 }) => {
   const {
     personalInfo = {},
@@ -46,9 +46,9 @@ export const CreativeTemplate = ({
   } = resumeData;
 
   const pdfColorStyles = {
-    WebkitPrintColorAdjust: 'exact',
-    printColorAdjust: 'exact',
-    colorAdjust: 'exact'
+    WebkitPrintColorAdjust: "exact",
+    printColorAdjust: "exact",
+    colorAdjust: "exact",
   };
 
   return (
@@ -71,7 +71,7 @@ export const CreativeTemplate = ({
           bgcolor: colorScheme.primary,
           zIndex: 0,
         },
-        ...pdfColorStyles
+        ...pdfColorStyles,
       }}
     >
       <Box
@@ -83,7 +83,7 @@ export const CreativeTemplate = ({
           alignItems: { xs: "center", md: "flex-end" },
           mb: 3,
           gap: 3,
-          ...pdfColorStyles
+          ...pdfColorStyles,
         }}
       >
         <Avatar
@@ -96,12 +96,11 @@ export const CreativeTemplate = ({
             fontWeight: "bold",
             border: "4px solid white",
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-            ...pdfColorStyles
+            ...pdfColorStyles,
           }}
         >
           {personalInfo.fullName ? getInitials(personalInfo.fullName) : "N"}
         </Avatar>
-
         <Box sx={{ textAlign: { xs: "center", md: "left" } }}>
           <Typography
             variant="h3"
@@ -112,12 +111,11 @@ export const CreativeTemplate = ({
               mb: 0.5,
               fontSize: { xs: "2rem", md: "2.5rem" },
               textShadow: "0 2px 4px rgba(0,0,0,0.1)",
-              ...pdfColorStyles
+              ...pdfColorStyles,
             }}
           >
             {personalInfo.fullName || "Your Name"}
           </Typography>
-
           {personalInfo.jobTitle && (
             <Typography
               variant="h5"
@@ -126,14 +124,13 @@ export const CreativeTemplate = ({
                 color: "white",
                 fontSize: { xs: "1.2rem", md: "1.5rem" },
                 opacity: 0.9,
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               {personalInfo.jobTitle}
             </Typography>
           )}
         </Box>
-
         <Box
           sx={{
             ml: { xs: 0, md: "auto" },
@@ -150,7 +147,6 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-
           {personalInfo.phone && (
             <Tooltip title={personalInfo.phone}>
               <IconButton sx={{ color: "white", ...pdfColorStyles }}>
@@ -158,7 +154,6 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-
           {personalInfo.location && (
             <Tooltip title={personalInfo.location}>
               <IconButton sx={{ color: "white", ...pdfColorStyles }}>
@@ -166,7 +161,6 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-
           {personalInfo.linkedin && (
             <Tooltip title="LinkedIn Profile">
               <IconButton
@@ -179,7 +173,6 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-
           {personalInfo.github && (
             <Tooltip title="GitHub Profile">
               <IconButton
@@ -192,7 +185,6 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-
           {personalInfo.website && (
             <Tooltip title="Website">
               <IconButton
@@ -205,7 +197,6 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-
           {personalInfo.portfolio && (
             <Tooltip title="Portfolio Website">
               <IconButton
@@ -220,7 +211,6 @@ export const CreativeTemplate = ({
           )}
         </Box>
       </Box>
-
       {personalInfo.summary && (
         <Paper
           elevation={3}
@@ -240,7 +230,7 @@ export const CreativeTemplate = ({
               transform: "rotate(45deg)",
               zIndex: -1,
             },
-            ...pdfColorStyles
+            ...pdfColorStyles,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
@@ -250,7 +240,7 @@ export const CreativeTemplate = ({
               sx={{
                 fontWeight: 600,
                 color: colorScheme.primary,
-                ...pdfColorStyles
+                ...pdfColorStyles,
               }}
             >
               About Me
@@ -273,13 +263,21 @@ export const CreativeTemplate = ({
           <Typography variant="body1">{personalInfo.summary}</Typography>
         </Paper>
       )}
-
       <Grid container spacing={4}>
         <Grid item xs={12} md={7}>
           {!isSectionEmpty("experience") && (
-            <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 3, ...pdfColorStyles }}>
+            <Paper
+              elevation={2}
+              sx={{ p: 3, mb: 2, borderRadius: 3, ...pdfColorStyles }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                <Avatar sx={{ bgcolor: colorScheme.primary, mr: 2, ...pdfColorStyles }}>
+                <Avatar
+                  sx={{
+                    bgcolor: colorScheme.primary,
+                    mr: 2,
+                    ...pdfColorStyles,
+                  }}
+                >
                   <WorkIcon />
                 </Avatar>
                 <Typography
@@ -288,7 +286,7 @@ export const CreativeTemplate = ({
                   sx={{
                     fontWeight: 600,
                     color: colorScheme.primary,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Work Experience
@@ -308,7 +306,6 @@ export const CreativeTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               <Box
                 sx={{
                   position: "relative",
@@ -322,7 +319,7 @@ export const CreativeTemplate = ({
                     height: "100%",
                     bgcolor: colorScheme.accent,
                   },
-                  ...pdfColorStyles
+                  ...pdfColorStyles,
                 }}
               >
                 {experience.map((exp, index) => (
@@ -341,7 +338,7 @@ export const CreativeTemplate = ({
                         borderRadius: "50%",
                         bgcolor: colorScheme.primary,
                       },
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     <Box sx={{ mb: 1 }}>
@@ -350,7 +347,7 @@ export const CreativeTemplate = ({
                         sx={{
                           fontWeight: 600,
                           color: colorScheme.secondary,
-                          ...pdfColorStyles
+                          ...pdfColorStyles,
                         }}
                       >
                         {exp.position || "Position Title"}
@@ -382,13 +379,11 @@ export const CreativeTemplate = ({
                         </Typography>
                       </Box>
                     </Box>
-
                     {exp.description && (
                       <Typography variant="body2" sx={{ mb: 1 }}>
                         {exp.description}
                       </Typography>
                     )}
-
                     {typeof exp.responsibilities === "string" &&
                       exp.responsibilities.trim() && (
                         <Box component="ul" sx={{ pl: 2, mt: 1, mb: 0 }}>
@@ -412,11 +407,19 @@ export const CreativeTemplate = ({
               </Box>
             </Paper>
           )}
-
           {!isSectionEmpty("projects") && (
-            <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 3, ...pdfColorStyles }}>
+            <Paper
+              elevation={2}
+              sx={{ p: 3, mb: 2, borderRadius: 3, ...pdfColorStyles }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                <Avatar sx={{ bgcolor: colorScheme.primary, mr: 2, ...pdfColorStyles }}>
+                <Avatar
+                  sx={{
+                    bgcolor: colorScheme.primary,
+                    mr: 2,
+                    ...pdfColorStyles,
+                  }}
+                >
                   <CodeIcon />
                 </Avatar>
                 <Typography
@@ -425,7 +428,7 @@ export const CreativeTemplate = ({
                   sx={{
                     fontWeight: 600,
                     color: colorScheme.primary,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Projects
@@ -445,7 +448,6 @@ export const CreativeTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               <Grid container spacing={2}>
                 {projects.map((project, index) => (
                   <Grid item xs={12} key={project.id || index}>
@@ -457,7 +459,7 @@ export const CreativeTemplate = ({
                         borderLeft: "4px solid",
                         borderColor: colorScheme.primary,
                         borderRadius: 1,
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       <Box
@@ -474,7 +476,7 @@ export const CreativeTemplate = ({
                             sx={{
                               fontWeight: 600,
                               color: colorScheme.secondary,
-                              ...pdfColorStyles
+                              ...pdfColorStyles,
                             }}
                           >
                             {project.title || "Project Title"}
@@ -487,7 +489,7 @@ export const CreativeTemplate = ({
                                   ml: 1,
                                   fontSize: "0.8rem",
                                   color: colorScheme.primary,
-                                  ...pdfColorStyles
+                                  ...pdfColorStyles,
                                 }}
                               >
                                 <ViewIcon
@@ -498,7 +500,6 @@ export const CreativeTemplate = ({
                               </Link>
                             )}
                           </Typography>
-
                           <Box
                             sx={{
                               display: "flex",
@@ -527,14 +528,13 @@ export const CreativeTemplate = ({
                                   bgcolor: colorScheme.accent,
                                   color: colorScheme.secondary,
                                   fontSize: "0.75rem",
-                                  ...pdfColorStyles
+                                  ...pdfColorStyles,
                                 }}
                               />
                             )}
                           </Box>
                         </Box>
                       </Box>
-
                       {project.description && (
                         <Typography variant="body2" sx={{ mt: 1 }}>
                           {project.description}
@@ -547,12 +547,20 @@ export const CreativeTemplate = ({
             </Paper>
           )}
         </Grid>
-
         <Grid item xs={12} md={5}>
           {!isSectionEmpty("education") && (
-            <Paper elevation={2} sx={{ p: 3, mb: 2, borderRadius: 3, ...pdfColorStyles }}>
+            <Paper
+              elevation={2}
+              sx={{ p: 3, mb: 2, borderRadius: 3, ...pdfColorStyles }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <Avatar sx={{ bgcolor: colorScheme.primary, mr: 2, ...pdfColorStyles }}>
+                <Avatar
+                  sx={{
+                    bgcolor: colorScheme.primary,
+                    mr: 2,
+                    ...pdfColorStyles,
+                  }}
+                >
                   <SchoolIcon />
                 </Avatar>
                 <Typography
@@ -561,7 +569,7 @@ export const CreativeTemplate = ({
                   sx={{
                     fontWeight: 600,
                     color: colorScheme.primary,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Education
@@ -581,7 +589,6 @@ export const CreativeTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               <Stack spacing={2}>
                 {education.map((edu, index) => (
                   <Paper
@@ -591,7 +598,7 @@ export const CreativeTemplate = ({
                       p: 2,
                       borderRadius: 2,
                       borderColor: colorScheme.accent,
-                      ...pdfColorStyles
+                      ...pdfColorStyles,
                     }}
                   >
                     <Typography
@@ -600,7 +607,7 @@ export const CreativeTemplate = ({
                         fontWeight: 600,
                         color: colorScheme.secondary,
                         fontSize: "1rem",
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       {edu.degree || "Degree"} {edu.field && `in ${edu.field}`}
@@ -640,11 +647,19 @@ export const CreativeTemplate = ({
               </Stack>
             </Paper>
           )}
-
           {!isSectionEmpty("skills") && (
-            <Paper elevation={2} sx={{ p: 3, mb: 4, borderRadius: 3, ...pdfColorStyles }}>
+            <Paper
+              elevation={2}
+              sx={{ p: 3, mb: 4, borderRadius: 3, ...pdfColorStyles }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                <Avatar sx={{ bgcolor: colorScheme.primary, mr: 2, ...pdfColorStyles }}>
+                <Avatar
+                  sx={{
+                    bgcolor: colorScheme.primary,
+                    mr: 2,
+                    ...pdfColorStyles,
+                  }}
+                >
                   <PsychologyIcon />
                 </Avatar>
                 <Typography
@@ -653,7 +668,7 @@ export const CreativeTemplate = ({
                   sx={{
                     fontWeight: 600,
                     color: colorScheme.primary,
-                    ...pdfColorStyles
+                    ...pdfColorStyles,
                   }}
                 >
                   Skills
@@ -673,7 +688,6 @@ export const CreativeTemplate = ({
                   )}
                 </IconButton>
               </Box>
-
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {skills.map((category, index) => (
                   <Box key={category.id || index}>
@@ -686,12 +700,11 @@ export const CreativeTemplate = ({
                         backgroundColor: colorScheme.accent,
                         p: 1,
                         borderRadius: 1,
-                        ...pdfColorStyles
+                        ...pdfColorStyles,
                       }}
                     >
                       {category.name || "Skill Category"}
                     </Typography>
-
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                       {Array.isArray(category.skills) &&
                         category.skills.map(
@@ -710,7 +723,7 @@ export const CreativeTemplate = ({
                                     bgcolor: colorScheme.primary,
                                     color: "white",
                                   },
-                                  ...pdfColorStyles
+                                  ...pdfColorStyles,
                                 }}
                               />
                             )
