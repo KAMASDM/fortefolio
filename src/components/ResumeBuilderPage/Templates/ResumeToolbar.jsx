@@ -25,6 +25,7 @@ export const ResumeToolbar = ({
         mb: 3,
         gap: 2,
       }}
+      className="no-print"
     >
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Button
