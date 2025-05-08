@@ -71,6 +71,7 @@ const Navbar = ({
           bgcolor: darkMode ? "grey.900" : "grey.100",
           color: darkMode ? "grey.100" : "grey.900",
         }}
+        className="no-print"
       >
         <Toolbar sx={{ minHeight: { xs: 64, sm: 70 } }}>
           <IconButton

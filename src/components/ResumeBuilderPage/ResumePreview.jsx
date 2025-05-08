@@ -61,7 +61,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
   const [starredSections, setStarredSections] = useState([]);
   const [speedDialOpen, setSpeedDialOpen] = useState(false);
   const [scale, setScale] = useState(1);
-
+  const [isPrinting, setIsPrinting] = useState(false);
   const {
     personalInfo = {},
     education = [],
@@ -77,31 +77,21 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   useEffect(() => {
     const handleResize = () => {
+      if (isPrinting) return;
       const viewportWidth = window.innerWidth;
-
-      if (viewportWidth < 360) {
-        setScale(0.5);
-      } else if (viewportWidth < 600) {
-        setScale(1.0);
-      } else if (viewportWidth < 900) {
-        setScale(0.8);
-      } else if (viewportWidth < 1200) {
-        setScale(0.9);
-      } else {
-        setScale(1);
-      }
+      if (viewportWidth < 360) setScale(0.5);
+      else if (viewportWidth < 600) setScale(1.0);
+      else if (viewportWidth < 900) setScale(0.8);
+      else if (viewportWidth < 1200) setScale(0.9);
+      else setScale(1);
     };
-
     handleResize();
-
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isPrinting]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
@@ -116,78 +106,37 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    switch (newValue) {
-      case 0:
-        setActiveTemplate(TEMPLATES.MODERN);
-        break;
-      case 1:
-        setActiveTemplate(TEMPLATES.MINIMAL);
-        break;
-      case 2:
-        setActiveTemplate(TEMPLATES.CREATIVE);
-        break;
-      case 3:
-        setActiveTemplate(TEMPLATES.PROFESSIONAL);
-        break;
-      default:
-        setActiveTemplate(TEMPLATES.MODERN);
-    }
+    const newTemplate =
+      {
+        0: TEMPLATES.MODERN,
+        1: TEMPLATES.MINIMAL,
+        2: TEMPLATES.CREATIVE,
+        3: TEMPLATES.PROFESSIONAL,
+      }[newValue] || TEMPLATES.MODERN;
+    setActiveTemplate(newTemplate);
   };
 
   const handleDropdownChange = (event) => {
     const selectedTemplate = event.target.value;
-    let tabIndex = 0;
-    switch (selectedTemplate) {
-      case TEMPLATES.MODERN:
-        tabIndex = 0;
-        break;
-      case TEMPLATES.MINIMAL:
-        tabIndex = 1;
-        break;
-      case TEMPLATES.CREATIVE:
-        tabIndex = 2;
-        break;
-      case TEMPLATES.PROFESSIONAL:
-        tabIndex = 3;
-        break;
-      default:
-        tabIndex = 0;
-    }
-    setActiveTab(tabIndex);
+    const tabIndex = Object.values(TEMPLATES).indexOf(selectedTemplate);
+    setActiveTab(tabIndex >= 0 ? tabIndex : 0);
     setActiveTemplate(selectedTemplate);
   };
 
   const toggleStarSection = (section) => {
-    if (starredSections.includes(section)) {
-      setStarredSections(starredSections.filter((s) => s !== section));
-    } else {
-      setStarredSections([...starredSections, section]);
-    }
+    setStarredSections(
+      starredSections.includes(section)
+        ? starredSections.filter((s) => s !== section)
+        : [...starredSections, section]
+    );
   };
 
-  const handleColorMenuOpen = (event) => {
-    setColorMenu(event.currentTarget);
-  };
-
-  const handleColorMenuClose = () => {
-    setColorMenu(null);
-  };
-
-  const handleFontMenuOpen = (event) => {
-    setFontMenu(event.currentTarget);
-  };
-
-  const handleFontMenuClose = () => {
-    setFontMenu(null);
-  };
-
-  const handleExportMenuOpen = (event) => {
-    setExportMenu(event.currentTarget);
-  };
-
-  const handleExportMenuClose = () => {
-    setExportMenu(null);
-  };
+  const handleColorMenuOpen = (event) => setColorMenu(event.currentTarget);
+  const handleColorMenuClose = () => setColorMenu(null);
+  const handleFontMenuOpen = (event) => setFontMenu(event.currentTarget);
+  const handleFontMenuClose = () => setFontMenu(null);
+  const handleExportMenuOpen = (event) => setExportMenu(event.currentTarget);
+  const handleExportMenuClose = () => setExportMenu(null);
 
   const changeColorScheme = (scheme) => {
     setColorScheme(scheme);
@@ -199,9 +148,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
     handleFontMenuClose();
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   const isSectionEmpty = (section) => {
     switch (section) {
@@ -226,29 +173,31 @@ const ResumePreview = ({ resumeData, onBack }) => {
     setLoading,
     personalInfo,
     onSuccess: (message) => {
-      setSnackbar({
-        open: true,
-        message: message,
-        severity: "success",
-      });
+      setSnackbar({ open: true, message, severity: "success" });
       handleExportMenuClose();
     },
     onError: (message) => {
-      setSnackbar({
-        open: true,
-        message: message,
-        severity: "error",
-      });
+      setSnackbar({ open: true, message, severity: "error" });
     },
   });
 
-  const downloadPDF = () => {
-    pdfGenerator.downloadPDF();
-  };
+  const downloadPDF = () => pdfGenerator.downloadPDF();
 
   const printResume = () => {
-    window.print();
-    handleExportMenuClose();
+    setIsPrinting(true);
+
+    setTimeout(() => {
+      if (resumeRef.current) {
+        resumeRef.current.scrollIntoView({ behavior: "auto", block: "start" });
+        resumeRef.current.focus();
+      }
+
+      setTimeout(() => {
+        window.print();
+        setIsPrinting(false);
+        handleExportMenuClose();
+      }, 250);
+    }, 200);
   };
 
   const getInitials = (name) => {
@@ -274,19 +223,14 @@ const ResumePreview = ({ resumeData, onBack }) => {
       isMobile,
       isSmallMobile,
     };
-
-    switch (activeTemplate) {
-      case TEMPLATES.MODERN:
-        return <ModernTemplate {...commonProps} />;
-      case TEMPLATES.MINIMAL:
-        return <MinimalTemplate {...commonProps} />;
-      case TEMPLATES.CREATIVE:
-        return <CreativeTemplate {...commonProps} />;
-      case TEMPLATES.PROFESSIONAL:
-        return <ProfessionalTemplate {...commonProps} />;
-      default:
-        return <ModernTemplate {...commonProps} />;
-    }
+    const TemplateComponent =
+      {
+        [TEMPLATES.MODERN]: ModernTemplate,
+        [TEMPLATES.MINIMAL]: MinimalTemplate,
+        [TEMPLATES.CREATIVE]: CreativeTemplate,
+        [TEMPLATES.PROFESSIONAL]: ProfessionalTemplate,
+      }[activeTemplate] || ModernTemplate;
+    return <TemplateComponent {...commonProps} />;
   };
 
   const speedDialActions = [
@@ -305,10 +249,11 @@ const ResumePreview = ({ resumeData, onBack }) => {
       spacing={0}
       sx={{
         width: "100%",
-        height: "100%",
-        overflowX: "hidden",
-        bgcolor: "background.default",
+        height: isPrinting ? "auto" : "100%",
+        overflowX: isPrinting ? "visible" : "hidden",
+        overflowY: isPrinting ? "visible" : "auto",
       }}
+      className={isPrinting ? "print-mode" : ""}
     >
       <ResumeToolbar
         onBack={onBack}
@@ -318,42 +263,51 @@ const ResumePreview = ({ resumeData, onBack }) => {
         handleFontMenuOpen={handleFontMenuOpen}
         handleExportMenuOpen={handleExportMenuOpen}
         sx={{
+          display: isPrinting ? "none" : undefined,
           width: "100%",
           mb: { xs: 1, sm: 2 },
           flexShrink: 0,
           py: { xs: 1, sm: 1.5 },
           px: { xs: 1, sm: 2 },
         }}
+        className="no-print"
       />
-
       <Container
-        disableGutters={isExtraSmallMobile}
-        maxWidth="lg"
+        disableGutters={isExtraSmallMobile || isPrinting}
+        maxWidth={isPrinting ? false : "lg"}
         sx={{
-          px: { xs: 1, sm: 2, md: 3 },
-          pb: { xs: 8, md: 4 },
+          px: isPrinting ? 0 : { xs: 1, sm: 2, md: 3 },
+          pb: isPrinting ? 0 : { xs: 8, md: 4 },
           flexGrow: 1,
           display: "flex",
-          flexDirection: "column",
-          width: "100%",
+          width: isPrinting ? "100%" : "100%",
+          background: isPrinting ? "#fff" : undefined,
+          margin: isPrinting ? "0 !important" : undefined,
+          padding: isPrinting ? "0 !important" : undefined,
         }}
       >
         <Paper
-          elevation={2}
+          elevation={isPrinting ? 0 : 2}
           sx={{
             width: "100%",
-            borderRadius: { xs: 1, sm: 2 },
-            overflow: "hidden",
+            borderRadius: isPrinting ? 0 : { xs: 1, sm: 2 },
+            overflow: isPrinting ? "visible" : "hidden",
             display: "flex",
             flexDirection: "column",
-            height: {
-              xs: "calc(100vh - 136px)",
-              sm: "calc(100vh - 120px)",
-              md: "calc(100vh - 120px)",
-            },
+            height: isPrinting
+              ? "auto"
+              : {
+                  xs: "calc(100vh - 136px)",
+                  sm: "calc(100vh - 120px)",
+                  md: "calc(100vh - 120px)",
+                },
+            boxShadow: isPrinting ? "none !important" : undefined,
+            background: isPrinting ? "transparent !important" : undefined,
+            margin: isPrinting ? "0 !important" : undefined,
+            padding: isPrinting ? "0 !important" : undefined,
           }}
         >
-          {isMobile ? (
+          {isMobile && !isPrinting && (
             <Box
               sx={{
                 px: 2,
@@ -362,6 +316,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                 borderColor: "divider",
                 flexShrink: 0,
               }}
+              className="no-print"
             >
               <FormControl fullWidth size="small">
                 <InputLabel id="template-select-label">Template</InputLabel>
@@ -371,6 +326,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   value={activeTemplate}
                   onChange={handleDropdownChange}
                   label="Template"
+                  className="no-print"
                 >
                   <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem>
                   <MenuItem value={TEMPLATES.MINIMAL}>Minimal</MenuItem>
@@ -381,7 +337,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
                 </Select>
               </FormControl>
             </Box>
-          ) : (
+          )}
+          {!isMobile && !isPrinting && (
             <TemplateSelector
               activeTab={activeTab}
               handleTemplateChange={handleTabChange}
@@ -389,49 +346,71 @@ const ResumePreview = ({ resumeData, onBack }) => {
               sx={{ flexShrink: 0 }}
             />
           )}
-
           <Box
             sx={{
               flexGrow: 1,
-              overflow: "auto",
+              overflow: isPrinting ? "visible" : "auto",
               "&::-webkit-scrollbar": {
-                width: "6px",
-                height: "6px",
+                width: isPrinting ? "0px" : "6px",
+                height: isPrinting ? "0px" : "6px",
               },
               "&::-webkit-scrollbar-track": {
-                backgroundColor: "rgba(0,0,0,0.05)",
+                backgroundColor: isPrinting
+                  ? "transparent"
+                  : "rgba(0,0,0,0.05)",
               },
               "&::-webkit-scrollbar-thumb": {
-                backgroundColor: colorScheme.primary,
+                backgroundColor: isPrinting
+                  ? "transparent"
+                  : colorScheme.primary,
                 borderRadius: "4px",
               },
-              p: { xs: 1, sm: 2, md: 3 },
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "flex-start",
+              padding: isPrinting ? 0 : { xs: 1, sm: 2, md: 3 },
+              display: isPrinting ? "block" : "flex",
+              justifyContent: isPrinting ? undefined : "center",
+              alignItems: isPrinting ? undefined : "flex-start",
+              width: isPrinting ? "auto" : "100%",
+              height: isPrinting ? "auto" : undefined,
             }}
           >
             <Box
               sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
+                width: isPrinting ? "auto" : "100%",
+                display: isPrinting ? "block" : "flex",
+                justifyContent: isPrinting ? undefined : "center",
               }}
             >
               <Box
                 ref={resumeRef}
                 className="resume-content resume-container"
+                tabIndex={-1}
                 sx={{
                   WebkitPrintColorAdjust: "exact",
                   printColorAdjust: "exact",
                   colorAdjust: "exact",
-                  transform: `scale(${scale})`,
-                  transformOrigin: "top center",
-                  width: scale < 1 ? `${100 / scale}%` : "100%",
-                  maxWidth: scale < 1 ? undefined : "830px",
-                  transition: "transform 0.2s ease",
+
+                  transform: isPrinting ? "none" : `scale(${scale})`,
+
+                  width: isPrinting
+                    ? "830px"
+                    : scale < 1 && !isMobile
+                    ? `${100 / scale}%`
+                    : "100%",
+
+                  maxWidth: isPrinting
+                    ? "830px"
+                    : scale < 1 && !isMobile
+                    ? undefined
+                    : "830px",
+
+                  transformOrigin: isPrinting ? "top left" : "top center",
+                  margin: isPrinting ? "0 auto" : "0 auto",
+                  boxShadow: isPrinting ? "none" : undefined,
+                  transition: isPrinting ? "none" : "transform 0.2s ease",
                   height: "auto",
-                  margin: "0 auto",
+                  pageBreakInside: "auto",
+                  pageBreakBefore: "auto",
+                  pageBreakAfter: "auto",
                 }}
                 data-pdf-container="true"
               >
@@ -441,11 +420,11 @@ const ResumePreview = ({ resumeData, onBack }) => {
           </Box>
         </Paper>
       </Container>
-
-      <Zoom in={isMobile}>
+      <Zoom in={isMobile && !isPrinting}>
         <SpeedDial
           ariaLabel="Resume actions"
           sx={{
+            display: isPrinting ? "none" : undefined,
             position: "fixed",
             bottom: { xs: 70, sm: 16 },
             right: 16,
@@ -459,9 +438,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           FabProps={{
             sx: {
               bgcolor: theme.palette.primary.main,
-              "&:hover": {
-                bgcolor: theme.palette.primary.dark,
-              },
+              "&:hover": { bgcolor: theme.palette.primary.dark },
             },
           }}
         >
@@ -476,34 +453,37 @@ const ResumePreview = ({ resumeData, onBack }) => {
           ))}
         </SpeedDial>
       </Zoom>
-
-      <ColorMenu
-        colorMenu={colorMenu}
-        handleColorMenuClose={handleColorMenuClose}
-        changeColorScheme={changeColorScheme}
-        COLOR_SCHEMES={COLOR_SCHEMES}
-        isMobile={isMobile}
-      />
-
-      <FontMenu
-        fontMenu={fontMenu}
-        handleFontMenuClose={handleFontMenuClose}
-        changeFontFamily={changeFontFamily}
-        FONTS={FONTS}
-        isMobile={isMobile}
-      />
-
-      <ExportMenu
-        exportMenu={exportMenu}
-        handleExportMenuClose={handleExportMenuClose}
-        downloadPDF={downloadPDF}
-        printResume={printResume}
-        loading={loading}
-        isMobile={isMobile}
-      />
-
+      {!isPrinting && (
+        <>
+          <ColorMenu
+            colorMenu={colorMenu}
+            handleColorMenuClose={handleColorMenuClose}
+            changeColorScheme={changeColorScheme}
+            COLOR_SCHEMES={COLOR_SCHEMES}
+            isMobile={isMobile}
+            className="no-print"
+          />
+          <FontMenu
+            fontMenu={fontMenu}
+            handleFontMenuClose={handleFontMenuClose}
+            changeFontFamily={changeFontFamily}
+            FONTS={FONTS}
+            isMobile={isMobile}
+            className="no-print"
+          />
+          <ExportMenu
+            exportMenu={exportMenu}
+            handleExportMenuClose={handleExportMenuClose}
+            downloadPDF={downloadPDF}
+            printResume={printResume}
+            loading={loading}
+            isMobile={isMobile}
+            className="no-print"
+          />
+        </>
+      )}
       <Snackbar
-        open={snackbar.open}
+        open={snackbar.open && !isPrinting}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{
@@ -511,16 +491,15 @@ const ResumePreview = ({ resumeData, onBack }) => {
           horizontal: isSmallMobile ? "center" : "left",
         }}
         sx={{
+          display: isPrinting ? "none" : undefined,
           bottom: { xs: 76, sm: 24 },
         }}
+        className="no-print"
       >
         <Alert
           onClose={handleSnackbarClose}
           severity={snackbar.severity}
-          sx={{
-            width: "100%",
-            boxShadow: 2,
-          }}
+          sx={{ width: "100%", boxShadow: 2 }}
         >
           {snackbar.message}
         </Alert>
