@@ -1,6 +1,7 @@
 import React from "react";
 import { Tabs, Tab } from "@mui/material";
 import { Description, Article, Brush, Work } from "@mui/icons-material";
+import ViewSidebarIcon from "@mui/icons-material/ViewSidebar";
 
 export const TemplateSelector = ({
   activeTab,
@@ -24,6 +25,7 @@ export const TemplateSelector = ({
       <Tab label="Minimal" icon={<Article />} iconPosition="start" />
       <Tab label="Creative" icon={<Brush />} iconPosition="start" />
       <Tab label="Professional" icon={<Work />} iconPosition="start" />
+      <Tab label="Sidebar" icon={<ViewSidebarIcon />} iconPosition="start" />
     </Tabs>
   );
 };

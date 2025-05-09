@@ -13,6 +13,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import ResumeBuilderPage from "./pages/ResumeBuilderPage";
 import theme from "./theme";
+import ResumeOnlyView from "./components/ResumeBuilderPage/DisplayResume/ResumeOnlyView";
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -57,6 +58,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/preview-only" element={<ResumeOnlyView />} />
             <Route path="*" element={<AuthRedirector />} />
           </Routes>
         </Router>

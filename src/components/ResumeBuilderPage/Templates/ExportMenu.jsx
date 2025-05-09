@@ -15,6 +15,7 @@ export const ExportMenu = ({
   downloadPDF,
   printResume,
   loading,
+  handleDisplayresume,
 }) => {
   return (
     <Menu
@@ -30,17 +31,23 @@ export const ExportMenu = ({
         </ListItemIcon>
         <ListItemText>Print</ListItemText>
       </MenuItem>
-      <MenuItem>
+      {/* <MenuItem>
         <ListItemIcon>
           <ShareIcon />
         </ListItemIcon>
         <ListItemText>Share</ListItemText>
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem onClick={downloadPDF} disabled={loading}>
         <ListItemIcon>
           {loading ? <CircularProgress size={20} /> : <PictureAsPdf />}
         </ListItemIcon>
         <ListItemText>Download PDF</ListItemText>
+      </MenuItem>
+      <MenuItem onClick={handleDisplayresume}>
+        <ListItemIcon>
+          <ShareIcon />
+        </ListItemIcon>
+        <ListItemText>Display Resume</ListItemText>
       </MenuItem>
     </Menu>
   );

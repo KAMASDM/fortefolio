@@ -33,14 +33,17 @@ import { ModernTemplate } from "./Templates/ModernTemplate";
 import { MinimalTemplate } from "./Templates/MinimalTemplate";
 import { CreativeTemplate } from "./Templates/CreativeTemplate";
 import { ProfessionalTemplate } from "./Templates/ProfessionalTemplate";
+import { SidebarTemplate } from "./Templates/SidebarTemplate";
 import { PDFGenerator } from "./Templates/PDFGenerator";
 import { constants } from "./Templates/constants";
 import { injectPrintStyles } from "./utils/pdfUtils";
+import { useNavigate } from "react-router-dom";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
 const ResumePreview = ({ resumeData, onBack }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isExtraSmallMobile = useMediaQuery("(max-width:400px)");
@@ -112,6 +115,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         1: TEMPLATES.MINIMAL,
         2: TEMPLATES.CREATIVE,
         3: TEMPLATES.PROFESSIONAL,
+        4: TEMPLATES.SIDEBAR,
       }[newValue] || TEMPLATES.MODERN;
     setActiveTemplate(newTemplate);
   };
@@ -137,6 +141,18 @@ const ResumePreview = ({ resumeData, onBack }) => {
   const handleFontMenuClose = () => setFontMenu(null);
   const handleExportMenuOpen = (event) => setExportMenu(event.currentTarget);
   const handleExportMenuClose = () => setExportMenu(null);
+
+  const handleDisplayresume = () => {
+    handleExportMenuClose();
+    navigate("/preview-only", {
+      state: {
+        resumeData,
+        activeTemplate,
+        fontFamily,
+        colorScheme,
+      },
+    });
+  };
 
   const changeColorScheme = (scheme) => {
     setColorScheme(scheme);
@@ -229,6 +245,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         [TEMPLATES.MINIMAL]: MinimalTemplate,
         [TEMPLATES.CREATIVE]: CreativeTemplate,
         [TEMPLATES.PROFESSIONAL]: ProfessionalTemplate,
+        [TEMPLATES.SIDEBAR]: SidebarTemplate,
       }[activeTemplate] || ModernTemplate;
     return <TemplateComponent {...commonProps} />;
   };
@@ -333,6 +350,9 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   <MenuItem value={TEMPLATES.CREATIVE}>Creative</MenuItem>
                   <MenuItem value={TEMPLATES.PROFESSIONAL}>
                     Professional
+                  </MenuItem>
+                  <MenuItem value={TEMPLATES.SIDEBAR}>
+                    Sidebar Template
                   </MenuItem>
                 </Select>
               </FormControl>
@@ -478,6 +498,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
             printResume={printResume}
             loading={loading}
             isMobile={isMobile}
+            handleDisplayresume={handleDisplayresume}
             className="no-print"
           />
         </>

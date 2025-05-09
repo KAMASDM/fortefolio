@@ -188,6 +188,7 @@ const CreateResumeDialog = ({
             { id: "minimal", name: "Minimal" },
             { id: "creative", name: "Creative" },
             { id: "professional", name: "Professional" },
+            { id: "sidebar", name: "Sidebar" },
           ].map((template) => (
             <Grid item xs={6} sm={3} key={template.id}>
               <Box
