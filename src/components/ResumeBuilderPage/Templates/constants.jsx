@@ -4,6 +4,7 @@ export const constants = {
     MINIMAL: "minimal",
     CREATIVE: "creative",
     PROFESSIONAL: "professional",
+    SIDEBAR: "sidebar",
   },
 
   FONTS: {
