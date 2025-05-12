@@ -1,4 +1,3 @@
-import React from "react";
 import { Menu, MenuItem, Typography, ListItemIcon, Radio } from "@mui/material";
 
 export const FontMenu = ({

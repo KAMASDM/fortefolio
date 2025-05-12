@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -225,6 +224,7 @@ export const MinimalTemplate = ({
           sx={{ mt: 3, borderColor: colorScheme.primary, ...pdfColorStyles }}
         />
       </Box>
+
       {!isSectionEmpty("experience") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -242,7 +242,7 @@ export const MinimalTemplate = ({
             <IconButton
               size="small"
               onClick={() => toggleStarSection("experience")}
-              sx={{ ml: 1 }}
+              sx={{ ml: 2 }}
             >
               {starredSections.includes("experience") ? (
                 <StarIcon
@@ -256,7 +256,7 @@ export const MinimalTemplate = ({
           </Box>
           {experience.map((exp, index) => (
             <Box key={exp.id || index} sx={{ mb: 3 }}>
-              <Grid container spacing={2}>
+              <Grid container spacing={2} sx={{ alignItems: "flex-start" }}>
                 <Grid item xs={12} sm={3} md={2}>
                   <Typography
                     variant="body2"
@@ -285,6 +285,7 @@ export const MinimalTemplate = ({
                       fontWeight: 600,
                       color: colorScheme.secondary,
                       fontSize: "1.1rem",
+                      ml: 4,
                       ...pdfColorStyles,
                     }}
                   >
@@ -292,7 +293,7 @@ export const MinimalTemplate = ({
                   </Typography>
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 500, mb: 1 }}
+                    sx={{ fontWeight: 500, mb: 1, ml: 4 }}
                   >
                     {exp.company || "Company Name"}
                   </Typography>
@@ -347,6 +348,7 @@ export const MinimalTemplate = ({
           ))}
         </Box>
       )}
+
       {!isSectionEmpty("education") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -429,6 +431,7 @@ export const MinimalTemplate = ({
           </Grid>
         </Box>
       )}
+
       {!isSectionEmpty("skills") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
@@ -499,6 +502,7 @@ export const MinimalTemplate = ({
           </Grid>
         </Box>
       )}
+
       {!isSectionEmpty("projects") && (
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
