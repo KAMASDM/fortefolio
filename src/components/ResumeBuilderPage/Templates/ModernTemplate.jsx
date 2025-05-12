@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Typography, Grid, Link, IconButton, Chip } from "@mui/material";
 import {
   Email as EmailIcon,
@@ -40,7 +39,7 @@ export const ModernTemplate = ({
         fontFamily: fontFamily,
         color: "#2d3748",
         bgcolor: "#f8fafc",
-        p: { xs: 2, sm: 4 },
+        p: { xs: 1, sm: 2 },
         maxWidth: "1000px",
         mx: "auto",
         borderRadius: 2,
@@ -51,8 +50,8 @@ export const ModernTemplate = ({
       <Box
         sx={{
           textAlign: "center",
-          mb: 5,
-          pb: 4,
+          mb: 4,
+          pb: 2,
           position: "relative",
           "&::after": {
             content: '""',
@@ -266,37 +265,6 @@ export const ModernTemplate = ({
                 }}
               >
                 Website
-              </Link>
-            </Box>
-          )}
-          {personalInfo.portfolio && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                transition: "transform 0.2s",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              <LanguageIcon
-                fontSize="small"
-                sx={{ mr: 0.8, color: colorScheme.primary, ...pdfColorStyles }}
-              />
-              <Link
-                href={personalInfo.portfolio}
-                target="_blank"
-                variant="body2"
-                underline="hover"
-                sx={{
-                  fontSize: "0.9rem",
-                  fontWeight: 500,
-                  color: colorScheme.text,
-                  "&:hover": { color: colorScheme.primary },
-                }}
-              >
-                Portfolio
               </Link>
             </Box>
           )}

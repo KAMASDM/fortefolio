@@ -1,4 +1,3 @@
-import React from "react";
 import { Tabs, Tab } from "@mui/material";
 import { Description, Article, Brush, Work } from "@mui/icons-material";
 import ViewSidebarIcon from "@mui/icons-material/ViewSidebar";

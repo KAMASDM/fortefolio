@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -57,7 +56,7 @@ export const CreativeTemplate = ({
         fontFamily: fontFamily,
         color: colorScheme.text,
         bgcolor: colorScheme.background,
-        p: 2,
+        p: 1,
         maxWidth: "1000px",
         mx: "auto",
         position: "relative",
@@ -81,7 +80,7 @@ export const CreativeTemplate = ({
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: { xs: "center", md: "flex-end" },
-          mb: 3,
+          mb: 4,
           gap: 3,
           ...pdfColorStyles,
         }}
@@ -92,7 +91,7 @@ export const CreativeTemplate = ({
             height: { xs: 100, md: 120 },
             bgcolor: colorScheme.secondary,
             color: "white",
-            fontSize: "3rem",
+            fontSize: "2rem",
             fontWeight: "bold",
             border: "4px solid white",
             boxShadow: "0 4px 20px rgba(0,0,0,0.1)",

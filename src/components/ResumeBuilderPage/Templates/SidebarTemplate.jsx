@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -6,7 +5,6 @@ import {
   Link,
   Stack,
   IconButton,
-  Divider,
   Chip,
 } from "@mui/material";
 import {
@@ -91,7 +89,7 @@ export const SidebarTemplate = ({
         fontFamily: fontFamily,
         color: colorScheme.text,
         bgcolor: colorScheme.background,
-        p: 3,
+        p: 2,
         maxWidth: "1000px",
         mx: "auto",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
@@ -138,11 +136,11 @@ export const SidebarTemplate = ({
         <Grid item xs={12} md={4}>
           <Box
             sx={{
-              bgcolor: colorScheme.sidebarBackground || colorScheme.background, 
-              p: { xs: 2, md: 3 },
+              bgcolor: colorScheme.sidebarBackground || colorScheme.background,
+              p: { xs: 1, md: 2 },
               borderRadius: 2,
               boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              height: "100%", 
+              height: "100%",
               ...pdfColorStyles,
             }}
           >
@@ -498,7 +496,7 @@ export const SidebarTemplate = ({
                       variant="body2"
                       sx={{
                         mb: 1,
-                        display: "block", 
+                        display: "block",
                         color: colorScheme.primary,
                         ...pdfColorStyles,
                       }}
