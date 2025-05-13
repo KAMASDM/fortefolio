@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -240,7 +240,7 @@ function LoginPage() {
                 width: "4px",
                 display: { xs: "none", md: "block" },
                 backgroundImage: lavenderPalette.accentGradient,
-                borderRadius: "2px",  
+                borderRadius: "2px",
               }}
             />
             <Box
