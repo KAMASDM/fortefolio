@@ -26,9 +26,9 @@ import {
 
 import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
 import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
-import { ExportMenu } from "./Templates/ExportMenu";
-import { ColorMenu } from "./Templates/ColorMenu";
-import { FontMenu } from "./Templates/FontMenu";
+import { ExportMenu } from "../ExportMenu/ExportMenu";
+import { ColorMenu } from "../ColorMenu/ColorMenu";
+import { FontMenu } from "../FontMenu/FontMenu";
 import { ModernTemplate } from "../Templates/ModernTemplate";
 import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";

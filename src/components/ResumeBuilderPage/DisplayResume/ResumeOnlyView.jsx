@@ -17,7 +17,7 @@ import {
   ContentCopy as CopyIcon,
 } from "@mui/icons-material";
 import { ResumeTemplateContent } from "./ResumeTemplateContent";
-import { constants } from "../Templates/constants";
+import { constants } from "../ResumePreview/constants";
 import { formatDate, isSectionEmpty, getInitials } from "../utils/resumeUtils";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;

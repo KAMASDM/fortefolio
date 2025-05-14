@@ -53,14 +53,14 @@ import {
   ArrowForward as ArrowForwardIcon,
 } from "@mui/icons-material";
 
-import PersonalInfoForm from "../components/ResumeBuilderPage/PersonalInfoForm";
-import EducationForm from "../components/ResumeBuilderPage/EducationForm";
-import ExperienceForm from "../components/ResumeBuilderPage/ExperienceForm";
-import SkillsForm from "../components/ResumeBuilderPage/SkillsForm";
-import ProjectsForm from "../components/ResumeBuilderPage/ProjectsForm";
-import ResumePreview from "../components/ResumeBuilderPage/ResumePreview";
-import UpdateResumeName from "../components/ResumeBuilderPage/UpdateResumeName";
-import Navbar from "../components/ResumeBuilderPage/Navbar";
+import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
+import EducationForm from "../components/ResumeBuilderPage/Forms/EducationForm";
+import ExperienceForm from "../components/ResumeBuilderPage/Forms/ExperienceForm";
+import SkillsForm from "../components/ResumeBuilderPage/Forms/SkillsForm";
+import ProjectsForm from "../components/ResumeBuilderPage/Forms/ProjectsForm";
+import ResumePreview from "../components/ResumeBuilderPage/ResumePreview/ResumePreview";
+import UpdateResumeName from "../components/ResumeBuilderPage/UpdateResumeName/UpdateResumeName";
+import Navbar from "../components/ResumeBuilderPage/NavbarForResumeBuilder/Navbar";
 import { getCustomTheme } from "../theme/customTheme";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
