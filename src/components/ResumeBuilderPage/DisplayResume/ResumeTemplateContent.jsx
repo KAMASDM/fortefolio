@@ -3,7 +3,7 @@ import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
 import { SidebarTemplate } from "../Templates/SidebarTemplate";
-import { constants } from "../Templates/constants";
+import { constants } from "../ResumePreview/constants";
 
 const { TEMPLATES } = constants;
 
