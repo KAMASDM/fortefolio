@@ -54,8 +54,8 @@ import {
   ArrowForward as ArrowForwardIcon,
   PersonOutline as PersonOutlineIcon,
   QuestionAnswerOutlined as QuestionAnswerIcon,
-  ArticleOutlined as ArticleIcon, // For Cover Letter/SOP
-  GavelOutlined as GavelIcon, // For Visa Interview Questions (or another appropriate icon)
+  ArticleOutlined as ArticleIcon,
+  GavelOutlined as GavelIcon,
 } from "@mui/icons-material";
 
 import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
@@ -67,8 +67,7 @@ import ReferenceForm from "../components/ResumeBuilderPage/Forms/RefrenceForm";
 import ResumePreview from "../components/ResumeBuilderPage/ResumePreview/ResumePreview";
 import UpdateResumeName from "../components/ResumeBuilderPage/UpdateResumeName/UpdateResumeName";
 import Navbar from "../components/ResumeBuilderPage/NavbarForResumeBuilder/Navbar";
-// We will make this dialog more general
-import GeneratedContentDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/GeneratedContentDialog"; // Updated import name
+import GeneratedContentDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/GeneratedContentDialog";
 import { getCustomTheme } from "../theme/customTheme";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -234,7 +233,6 @@ function ResumeBuilderPage() {
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
 
-  // New states for AI generation functionalities
   const [generatedContentTitle, setGeneratedContentTitle] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
   const [showGeneratedContentDialog, setShowGeneratedContentDialog] =

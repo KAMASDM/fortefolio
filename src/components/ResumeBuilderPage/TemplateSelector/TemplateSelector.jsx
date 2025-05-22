@@ -25,7 +25,6 @@ export const TemplateSelector = ({
       <Tab label="Professional" icon={<Work />} iconPosition="start" />
       <Tab label="Elegant" icon={<Brush />} iconPosition="start" />
 
-      {/* Country Tabs with Flag Icons */}
       <Tab
         label="Canada"
         icon={
