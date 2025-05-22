@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   Container,
@@ -596,8 +596,27 @@ function LoginPage() {
             mb: 1,
           }}
         >
-          © {new Date().getFullYear()} ForteFolio | Privacy Policy | Terms of
-          Service
+          © {new Date().getFullYear()} MakeMyForte |{" "}
+          <Link
+            to="/privacy-policy"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            Privacy Policy
+          </Link>{" "}
+          |{" "}
+          <Link
+            to="/terms-conditions"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            Terms of Service
+          </Link>{" "}
+          |{" "}
+          <Link
+            to="/copyright-notice"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            Copyright Notice
+          </Link>
         </Typography>
         <Typography
           variant="caption"
