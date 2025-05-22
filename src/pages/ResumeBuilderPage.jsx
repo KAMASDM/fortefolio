@@ -35,6 +35,7 @@ import {
   styled,
   alpha,
   useMediaQuery,
+  Snackbar, // Import Snackbar for notifications
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -51,6 +52,10 @@ import {
   CheckCircleOutline as CheckCircleIcon,
   DashboardOutlined as DashboardIcon,
   ArrowForward as ArrowForwardIcon,
+  PersonOutline as PersonOutlineIcon,
+  QuestionAnswerOutlined as QuestionAnswerIcon,
+  ArticleOutlined as ArticleIcon, // For Cover Letter/SOP
+  GavelOutlined as GavelIcon, // For Visa Interview Questions (or another appropriate icon)
 } from "@mui/icons-material";
 
 import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
@@ -58,9 +63,12 @@ import EducationForm from "../components/ResumeBuilderPage/Forms/EducationForm";
 import ExperienceForm from "../components/ResumeBuilderPage/Forms/ExperienceForm";
 import SkillsForm from "../components/ResumeBuilderPage/Forms/SkillsForm";
 import ProjectsForm from "../components/ResumeBuilderPage/Forms/ProjectsForm";
+import ReferenceForm from "../components/ResumeBuilderPage/Forms/RefrenceForm";
 import ResumePreview from "../components/ResumeBuilderPage/ResumePreview/ResumePreview";
 import UpdateResumeName from "../components/ResumeBuilderPage/UpdateResumeName/UpdateResumeName";
 import Navbar from "../components/ResumeBuilderPage/NavbarForResumeBuilder/Navbar";
+// We will make this dialog more general
+import GeneratedContentDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/GeneratedContentDialog"; // Updated import name
 import { getCustomTheme } from "../theme/customTheme";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -95,6 +103,7 @@ const initialResumeState = {
   experience: [],
   skills: [],
   projects: [],
+  references: [],
 };
 
 const sections = [
@@ -133,6 +142,13 @@ const sections = [
     icon: <ConstructionIcon />,
     form: ProjectsForm,
   },
+  {
+    id: 6,
+    key: "references",
+    label: "References",
+    icon: <PersonOutlineIcon />,
+    form: ReferenceForm,
+  },
 ];
 const totalSteps = sections.length;
 const previewStepId = totalSteps + 1;
@@ -144,16 +160,30 @@ const isSectionComplete = (sectionKey, data) => {
       return !!(data.fullName && data.email);
     case "education":
       return (
-        data.length > 0 && data.every((item) => item.institution && item.degree)
+        data.length > 0 && data.some((item) => item.institution && item.degree)
       );
     case "experience":
       return (
-        data.length > 0 && data.every((item) => item.company && item.position)
+        data.length > 0 && data.some((item) => item.company && item.position)
       );
     case "skills":
-      return data.length > 0;
+      return (
+        data.length > 0 &&
+        data.some(
+          (category) =>
+            category.name &&
+            category.skills &&
+            category.skills.length > 0 &&
+            category.skills.some((s) => s.trim() !== "")
+        )
+      );
     case "projects":
-      return data.length > 0 && data.every((item) => item.title);
+      return data.length > 0 && data.some((item) => item.title);
+    case "references":
+      return (
+        data.length > 0 &&
+        data.some((item) => item.name && item.name.trim() !== "")
+      );
     default:
       return false;
   }
@@ -204,6 +234,14 @@ function ResumeBuilderPage() {
   const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
 
+  // New states for AI generation functionalities
+  const [generatedContentTitle, setGeneratedContentTitle] = useState("");
+  const [generatedContent, setGeneratedContent] = useState("");
+  const [showGeneratedContentDialog, setShowGeneratedContentDialog] =
+    useState(false);
+  const [isGeneratingContent, setIsGeneratingContent] = useState(false);
+  const [generateContentError, setGenerateContentError] = useState("");
+
   const completedSections = useMemo(() => {
     const completed = {};
     sections.forEach((sec) => {
@@ -245,6 +283,7 @@ function ResumeBuilderPage() {
             experience: data.resumeData?.experience || [],
             skills: data.resumeData?.skills || [],
             projects: data.resumeData?.projects || [],
+            references: data.resumeData?.references || [],
           };
           setResumeData(loadedData);
           setResumeMetadata(
@@ -342,7 +381,6 @@ function ResumeBuilderPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [unsavedChanges]);
 
-  // new
   useEffect(() => {
     if (unsavedChanges) {
       const debounce = setTimeout(() => {
@@ -452,6 +490,107 @@ function ResumeBuilderPage() {
   };
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
+
+  const generateContent = async (type) => {
+    if (!currentUser || !resumeId) {
+      setGenerateContentError("User not authenticated or resume ID missing.");
+      return;
+    }
+
+    setGeneratedContentTitle(`Generated ${type}`);
+    setShowGeneratedContentDialog(true);
+    setIsGeneratingContent(true);
+    setGeneratedContent("");
+    setGenerateContentError("");
+
+    let basePrompt = `Based on the following resume data, please generate a ${type}. `;
+    switch (type) {
+      case "Interview Questions":
+        basePrompt +=
+          "Focus on questions that would assess the candidate's skills, experience, personality, and suitability for roles related to their profile. Provide a concise list of questions, formatted as a numbered list.";
+        break;
+      case "Cover Letter":
+        basePrompt +=
+          "Write a professional and compelling cover letter. Start with a general salutation and make it adaptable. Highlight key skills and experiences relevant to typical job applications. Ensure it is concise and impactful.";
+        break;
+      case "Statement of Purpose":
+        basePrompt +=
+          "Write a comprehensive Statement of Purpose (SOP) with a minimum of 600 words. Detail academic background, career aspirations, motivations for pursuing further studies/goals, relevant experiences, and how your skills align with your objectives. Use a formal and persuasive tone.";
+        break;
+      case "Visa Interview Questions":
+        basePrompt +=
+          "Generate a list of common visa interview questions a candidate with this resume might face, focusing on their background, academic/professional goals, and ties to their home country. Provide direct and concise questions as a numbered list.";
+        break;
+      default:
+        basePrompt += "";
+    }
+
+    const fullPrompt = `${basePrompt}\n\nResume Data:\n${JSON.stringify(
+      resumeData,
+      null,
+      2
+    )}\n\n${type}:`;
+
+    try {
+      const apiKey = import.meta.env.VITE_APP_OPENAI_API_KEY;
+      if (!apiKey) {
+        throw new Error("OpenAI API key is not configured.");
+      }
+      console.log(apiKey);
+      const apiUrl = "https://api.openai.com/v1/chat/completions";
+
+      const payload = {
+        model: "gpt-4",
+        messages: [
+          {
+            role: "user",
+            content: fullPrompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: type === "Statement of Purpose" ? 1500 : 800,
+      };
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `OpenAI API error: ${response.status} ${
+            errorData.error?.message || response.statusText
+          }`
+        );
+      }
+
+      const result = await response.json();
+      const message = result.choices?.[0]?.message?.content;
+
+      if (message) {
+        setGeneratedContent(message.trim());
+      } else {
+        setGenerateContentError(`No ${type} generated. Please try again.`);
+      }
+    } catch (err) {
+      console.error(`Error generating ${type}:`, err);
+      setGenerateContentError(`Failed to generate ${type}: ${err.message}`);
+    } finally {
+      setIsGeneratingContent(false);
+    }
+  };
+
+  const handleGenerateInterviewQuestions = () =>
+    generateContent("Interview Questions");
+  const handleGenerateCoverLetter = () => generateContent("Cover Letter");
+  const handleGenerateSOP = () => generateContent("Statement of Purpose");
+  const handleGenerateVisaQuestions = () =>
+    generateContent("Visa Interview Questions");
 
   if (isLoading) {
     return (
@@ -629,8 +768,8 @@ function ResumeBuilderPage() {
           py: 2,
           px: 2.5,
           bgcolor: "primary.main",
-          color: "primary.contrastText",
           backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+          color: theme.palette.primary.contrastText,
         }}
       >
         <Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5 }}>
@@ -754,6 +893,50 @@ function ResumeBuilderPage() {
                 fontWeight: isPreviewMode ? 600 : 500,
                 variant: "body2",
               }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleGenerateInterviewQuestions}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <QuestionAnswerIcon />{" "}
+            </ListItemIcon>
+            <ListItemText
+              primary="Generate Interview Questions"
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleGenerateCoverLetter}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <ArticleIcon />{" "}
+            </ListItemIcon>
+            <ListItemText
+              primary="Generate Cover Letter"
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleGenerateSOP}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <ArticleIcon />{" "}
+            </ListItemIcon>
+            <ListItemText
+              primary="Generate Statement of Purpose"
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+            />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleGenerateVisaQuestions}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <GavelIcon />{" "}
+            </ListItemIcon>
+            <ListItemText
+              primary="Generate Visa Interview Questions"
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
@@ -1005,6 +1188,28 @@ function ResumeBuilderPage() {
           setShowLeaveConfirmation={setShowLeaveConfirmation}
           handleConfirmedNavigation={handleConfirmedNavigation}
         />
+        <GeneratedContentDialog
+          open={showGeneratedContentDialog}
+          onClose={() => setShowGeneratedContentDialog(false)}
+          title={generatedContentTitle}
+          content={generatedContent}
+          loading={isGeneratingContent}
+          error={generateContentError}
+        />
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={6000}
+          onClose={handleCloseNotification}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleCloseNotification}
+            severity={notification.severity}
+            sx={{ width: "100%" }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
         <Box
           sx={{
             position: "fixed",
@@ -1015,7 +1220,7 @@ function ResumeBuilderPage() {
             minWidth: 160,
           }}
         ></Box>
-      </Box>{" "}
+      </Box>
     </ThemeProvider>
   );
 }

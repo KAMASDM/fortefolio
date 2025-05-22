@@ -25,6 +25,7 @@ export const ModernTemplate = ({
     experience = [],
     skills = [],
     projects = [],
+    references = [],
   } = resumeData;
 
   const pdfColorStyles = {
@@ -993,6 +994,134 @@ export const ModernTemplate = ({
                               )
                           )}
                       </Box>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
+            {references.length > 0 && (
+              <Box sx={{ mt: 4 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                  <Typography
+                    variant="h5"
+                    component="h2"
+                    sx={{
+                      fontWeight: 700,
+                      color: colorScheme.primary,
+                      fontSize: { xs: "1.25rem", sm: "1.4rem" },
+                      position: "relative",
+                      "&::after": {
+                        content: '""',
+                        position: "absolute",
+                        bottom: -6,
+                        left: 0,
+                        width: "2.5rem",
+                        height: "3px",
+                        borderRadius: "2px",
+                        bgcolor: colorScheme.primary,
+                      },
+                      ...pdfColorStyles,
+                    }}
+                  >
+                    References
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => toggleStarSection("references")}
+                    sx={{ ml: 1 }}
+                  >
+                    {starredSections.includes("references") ? (
+                      <StarIcon
+                        fontSize="small"
+                        sx={{ color: colorScheme.primary, ...pdfColorStyles }}
+                      />
+                    ) : (
+                      <StarBorderIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  {references.map((reference, index) => (
+                    <Box
+                      key={reference.id || index}
+                      sx={{
+                        borderBottom:
+                          index < references.length - 1
+                            ? "1px dashed rgba(0,0,0,0.1)"
+                            : "none",
+                        pb: index < references.length - 1 ? 3 : 0,
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 700,
+                          color: colorScheme.secondary,
+                          fontSize: "1rem",
+                          mb: 0.5,
+                          ...pdfColorStyles,
+                        }}
+                      >
+                        {reference.name || "Reference Name"}
+                      </Typography>
+                      {reference.position && (
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 600,
+                            color: "rgba(0, 0, 0, 0.75)",
+                            mb: 0.5,
+                          }}
+                        >
+                          {reference.position}
+                        </Typography>
+                      )}
+                      {reference.company && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "rgba(0, 0, 0, 0.6)",
+                            display: "flex",
+                            alignItems: "center",
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          {reference.company}
+                        </Typography>
+                      )}
+                      {reference.email && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "rgba(0, 0, 0, 0.6)",
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          Email: {reference.email}
+                        </Typography>
+                      )}
+                      {reference.contact && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "rgba(0, 0, 0, 0.6)",
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          Phone: {reference.contact}
+                        </Typography>
+                      )}
+                      {reference.relationship && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "rgba(0, 0, 0, 0.6)",
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          Relationship: {reference.relationship}
+                        </Typography>
+                      )}
                     </Box>
                   ))}
                 </Box>

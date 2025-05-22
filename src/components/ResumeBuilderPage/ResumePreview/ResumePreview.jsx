@@ -34,6 +34,11 @@ import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
 import { SidebarTemplate } from "../Templates/SidebarTemplate";
+import { CanadaTemplate } from "../Templates/CanadaTemplate";
+import { EuropenUnionTemplate } from "../Templates/EuropenUnionTemplate";
+import { EuropassTemplate } from "../Templates/NewTemplate";
+import { AustraliaTemplate } from "../Templates/AustraliaTemplate";
+import { UsaTemplate } from "../Templates/UsaTemplate";
 import { PDFGenerator } from "../utils/PDFGenerator";
 import { constants } from "./constants";
 import { injectPrintStyles } from "../utils/pdfUtils";
@@ -115,7 +120,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
         1: TEMPLATES.MINIMAL,
         2: TEMPLATES.CREATIVE,
         3: TEMPLATES.PROFESSIONAL,
-        4: TEMPLATES.SIDEBAR,
+        // 4: TEMPLATES.SIDEBAR,
+        4: TEMPLATES.EUROPASS,
+        5: TEMPLATES.CANADA,
+        6: TEMPLATES.EUROPE,
+        7: TEMPLATES.AUSTRALIA,
+        8: TEMPLATES.USA,
       }[newValue] || TEMPLATES.MODERN;
     setActiveTemplate(newTemplate);
   };
@@ -245,7 +255,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
         [TEMPLATES.MINIMAL]: MinimalTemplate,
         [TEMPLATES.CREATIVE]: CreativeTemplate,
         [TEMPLATES.PROFESSIONAL]: ProfessionalTemplate,
-        [TEMPLATES.SIDEBAR]: SidebarTemplate,
+        // [TEMPLATES.SIDEBAR]: SidebarTemplate,
+        [TEMPLATES.EUROPASS]: EuropassTemplate,
+        [TEMPLATES.CANADA]: CanadaTemplate,
+        [TEMPLATES.EUROPE]: EuropenUnionTemplate,
+        [TEMPLATES.AUSTRALIA]: AustraliaTemplate,
+        [TEMPLATES.USA]: UsaTemplate,
       }[activeTemplate] || ModernTemplate;
     return <TemplateComponent {...commonProps} />;
   };
@@ -351,9 +366,18 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   <MenuItem value={TEMPLATES.PROFESSIONAL}>
                     Professional
                   </MenuItem>
-                  <MenuItem value={TEMPLATES.SIDEBAR}>
+                  {/* <MenuItem value={TEMPLATES.SIDEBAR}>
                     Sidebar Template
+                  </MenuItem> */}
+                  <MenuItem value={TEMPLATES.EUROPASS}>Elegant</MenuItem>
+                  <MenuItem value={TEMPLATES.CANADA}>Canada Template</MenuItem>
+                  <MenuItem value={TEMPLATES.EUROPE}>
+                    Europen Union Template
                   </MenuItem>
+                  <MenuItem value={TEMPLATES.AUSTRALIA}>
+                    Australia Template
+                  </MenuItem>
+                  <MenuItem value={TEMPLATES.USA}>USA Template</MenuItem>
                 </Select>
               </FormControl>
             </Box>

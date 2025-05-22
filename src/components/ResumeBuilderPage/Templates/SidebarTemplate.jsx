@@ -33,6 +33,7 @@ export const SidebarTemplate = ({
     experience = [],
     skills = [],
     projects = [],
+    references = [],
   } = resumeData;
 
   const pdfColorStyles = {
@@ -519,6 +520,57 @@ export const SidebarTemplate = ({
                   )}
                 </Box>
               ))}
+            </Box>
+          )}
+
+          {references.length > 0 && (
+            <Box sx={{ mt: 4 }}>
+              <SectionTitle title="References" sectionName="references" />
+              <Stack spacing={2}>
+                {references.map((reference, index) => (
+                  <Box key={reference.id || index}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 600,
+                        color: colorScheme.secondary,
+                        fontSize: "1rem",
+                        ...pdfColorStyles,
+                      }}
+                    >
+                      {reference.name || "Reference Name"}
+                    </Typography>
+                    {reference.position && (
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, mb: 0.5 }}
+                      >
+                        {reference.position}
+                      </Typography>
+                    )}
+                    {reference.company && (
+                      <Typography variant="body2" color="text.secondary">
+                        {reference.company}
+                      </Typography>
+                    )}
+                    {reference.email && (
+                      <Typography variant="body2" color="text.secondary">
+                        Email: {reference.email}
+                      </Typography>
+                    )}
+                    {reference.contact && (
+                      <Typography variant="body2" color="text.secondary">
+                        Phone: {reference.contact}
+                      </Typography>
+                    )}
+                    {reference.relationship && (
+                      <Typography variant="body2" color="text.secondary">
+                        Relationship: {reference.relationship}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+              </Stack>
             </Box>
           )}
         </Grid>
