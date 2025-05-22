@@ -34,6 +34,7 @@ export const MinimalTemplate = ({
     experience = [],
     skills = [],
     projects = [],
+    references = [],
   } = resumeData;
 
   const pdfColorStyles = {
@@ -599,6 +600,88 @@ export const MinimalTemplate = ({
               </Grid>
             ))}
           </Grid>
+        </Box>
+      )}
+      {references.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{
+                fontWeight: 600,
+                color: colorScheme.primary,
+                ...pdfColorStyles,
+              }}
+            >
+              References
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => toggleStarSection("references")}
+              sx={{ ml: 1 }}
+            >
+              {starredSections.includes("references") ? (
+                <StarIcon
+                  fontSize="small"
+                  sx={{ color: colorScheme.primary, ...pdfColorStyles }}
+                />
+              ) : (
+                <StarBorderIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Box>
+          <Stack spacing={2}>
+            {references.map((reference, index) => (
+              <Box
+                key={reference.id || index}
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  p: 2,
+                  ...pdfColorStyles,
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    color: colorScheme.secondary,
+                    fontSize: "1rem",
+                    ...pdfColorStyles,
+                  }}
+                >
+                  {reference.name || "Reference Name"}
+                </Typography>
+                {reference.position && (
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {reference.position}
+                  </Typography>
+                )}
+                {reference.company && (
+                  <Typography variant="body2" color="text.secondary">
+                    {reference.company}
+                  </Typography>
+                )}
+                {reference.email && (
+                  <Typography variant="body2" color="text.secondary">
+                    Email: {reference.email}
+                  </Typography>
+                )}
+                {reference.contact && (
+                  <Typography variant="body2" color="text.secondary">
+                    Phone: {reference.contact}
+                  </Typography>
+                )}
+                {reference.relationship && (
+                  <Typography variant="body2" color="text.secondary">
+                    Relationship: {reference.relationship}
+                  </Typography>
+                )}
+              </Box>
+            ))}
+          </Stack>
         </Box>
       )}
     </Box>

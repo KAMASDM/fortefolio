@@ -4,7 +4,12 @@ export const constants = {
     MINIMAL: "minimal",
     CREATIVE: "creative",
     PROFESSIONAL: "professional",
-    SIDEBAR: "sidebar",
+    // SIDEBAR: "sidebar",
+    EUROPASS: "europass",
+    CANADA: "canada",
+    EUROPE: "europe",
+    AUSTRALIA: "australia",
+    USA: "usa",
   },
 
   FONTS: {

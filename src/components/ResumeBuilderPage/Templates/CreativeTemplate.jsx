@@ -24,7 +24,9 @@ import {
   Psychology as PsychologyIcon,
   Code as CodeIcon,
   Visibility as ViewIcon,
+  PersonOutline as PersonIcon,
 } from "@mui/icons-material";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 export const CreativeTemplate = ({
   resumeData,
@@ -42,7 +44,10 @@ export const CreativeTemplate = ({
     experience = [],
     skills = [],
     projects = [],
+    references = [],
   } = resumeData;
+
+  console.log("resumeData:", references);
 
   const pdfColorStyles = {
     WebkitPrintColorAdjust: "exact",
@@ -156,7 +161,7 @@ export const CreativeTemplate = ({
           {personalInfo.location && (
             <Tooltip title={personalInfo.location}>
               <IconButton sx={{ color: "white", ...pdfColorStyles }}>
-                <LocationIcon />
+                <LocationOnIcon />
               </IconButton>
             </Tooltip>
           )}
@@ -543,6 +548,100 @@ export const CreativeTemplate = ({
                   </Grid>
                 ))}
               </Grid>
+            </Paper>
+          )}
+          {references.length > 0 && (
+            <Paper
+              elevation={2}
+              sx={{ p: 3, mb: 4, borderRadius: 3, ...pdfColorStyles }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: colorScheme.primary,
+                    mr: 2,
+                    ...pdfColorStyles,
+                  }}
+                >
+                  <PersonIcon />
+                </Avatar>
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  sx={{
+                    fontWeight: 600,
+                    color: colorScheme.primary,
+                    ...pdfColorStyles,
+                  }}
+                >
+                  References
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() => toggleStarSection("references")}
+                  sx={{ ml: 1 }}
+                >
+                  {starredSections.includes("references") ? (
+                    <StarIcon
+                      fontSize="small"
+                      sx={{ color: colorScheme.primary, ...pdfColorStyles }}
+                    />
+                  ) : (
+                    <StarBorderIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Box>
+              <Stack spacing={2}>
+                {references.map((reference, index) => (
+                  <Box
+                    key={reference.id || index}
+                    sx={{
+                      borderBottom:
+                        index < references.length - 1
+                          ? `1px dashed ${colorScheme.accent}`
+                          : "none",
+                      pb: index < references.length - 1 ? 2 : 0,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: colorScheme.secondary,
+                        fontSize: "1rem",
+                        ...pdfColorStyles,
+                      }}
+                    >
+                      {reference.name || "Reference Name"}
+                    </Typography>
+                    {reference.position && (
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {reference.position}
+                      </Typography>
+                    )}
+                    {reference.company && (
+                      <Typography variant="body2" color="text.secondary">
+                        {reference.company}
+                      </Typography>
+                    )}
+                    {reference.email && (
+                      <Typography variant="body2" color="text.secondary">
+                        Email: {reference.email}
+                      </Typography>
+                    )}
+                    {reference.contact && (
+                      <Typography variant="body2" color="text.secondary">
+                        Phone: {reference.contact}
+                      </Typography>
+                    )}
+                    {reference.relationship && (
+                      <Typography variant="body2" color="text.secondary">
+                        Relationship: {reference.relationship}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+              </Stack>
             </Paper>
           )}
         </Grid>
