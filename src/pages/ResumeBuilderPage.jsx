@@ -35,7 +35,7 @@ import {
   styled,
   alpha,
   useMediaQuery,
-  Snackbar, // Import Snackbar for notifications
+  Snackbar,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
