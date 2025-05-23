@@ -36,6 +36,10 @@ import {
   alpha,
   useMediaQuery,
   Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -56,6 +60,7 @@ import {
   QuestionAnswerOutlined as QuestionAnswerIcon,
   ArticleOutlined as ArticleIcon,
   GavelOutlined as GavelIcon,
+  Lightbulb as LightbulbIcon, // Import LightbulbIcon
 } from "@mui/icons-material";
 
 import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
@@ -68,6 +73,7 @@ import ResumePreview from "../components/ResumeBuilderPage/ResumePreview/ResumeP
 import UpdateResumeName from "../components/ResumeBuilderPage/UpdateResumeName/UpdateResumeName";
 import Navbar from "../components/ResumeBuilderPage/NavbarForResumeBuilder/Navbar";
 import GeneratedContentDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/GeneratedContentDialog";
+import ResumeTipsDialog from "../components/ResumeBuilderPage/ResumeTipsDialog/ResumeTipsDialog";
 import { getCustomTheme } from "../theme/customTheme";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -239,6 +245,8 @@ function ResumeBuilderPage() {
     useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generateContentError, setGenerateContentError] = useState("");
+  const [showCountrySelection, setShowCountrySelection] = useState(false);
+  const [showResumeTips, setShowResumeTips] = useState(false); // New state for resume tips dialog
 
   const completedSections = useMemo(() => {
     const completed = {};
@@ -489,7 +497,7 @@ function ResumeBuilderPage() {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  const generateContent = async (type) => {
+  const generateContent = async (type, country = null) => {
     if (!currentUser || !resumeId) {
       setGenerateContentError("User not authenticated or resume ID missing.");
       return;
@@ -505,7 +513,7 @@ function ResumeBuilderPage() {
     switch (type) {
       case "Interview Questions":
         basePrompt +=
-          "Focus on questions that would assess the candidate's skills, experience, personality, and suitability for roles related to their profile. Provide a concise list of questions, formatted as a numbered list.";
+          "Focus on questions that would assess the candidate's skills, experience, personality, and suitability for roles related to their profile. **For each question, also provide a concise and ideal answer.** Format the output as a numbered list of 'Question: [question]\nAnswer: [answer]'.";
         break;
       case "Cover Letter":
         basePrompt +=
@@ -513,11 +521,18 @@ function ResumeBuilderPage() {
         break;
       case "Statement of Purpose":
         basePrompt +=
-          "Write a compelling and professional statement of purpose for my graduate school application. Here are my details: Personal Information: Name: [Your name] Program applying to: [Specific program name and degree level] University/Institution: [University name] Field of study: [Your field/major] Academic Background: Current degree/status: [Your current degree, GPA if strong, graduation year] Relevant coursework: [List 3-5 most relevant courses] Academic achievements: [Honors, awards, scholarships, publications] Research experience: [Any research projects, labs, thesis work] Professional Experience: Work experience: [Relevant jobs, internships, roles with brief descriptions] Skills developed: [Technical skills, software, methodologies] Leadership roles: [Any leadership positions, responsibilities] Industry exposure: [Relevant industry experience or knowledge] Research Interests: Primary research interests: [Your main research areas/questions] Specific topics: [2-3 specific problems or areas you want to explore] Methodology preferences: [Quantitative, qualitative, mixed methods, etc.] Long-term research goals: [What you hope to contribute to the field] Program-Specific Information: Why this program: [Specific reasons this program fits your goals] Faculty of interest: [2-3 faculty members whose work aligns with yours] Program resources: [Labs, centers, opportunities that attract you] Unique program aspects: [What makes this program special] Career Goals: Short-term goals: [What you want to do immediately after graduation] Long-term career vision: [5-10 year career objectives] Impact you want to make: [How you want to contribute to field/society] Industry or sector preference: [Academic, industry, government, non-profit] Personal Story/Motivation: What sparked your interest: [The moment or experience that got you interested in this field] Challenges overcome: [Any obstacles that shaped your resilience] Unique perspective: [What makes your background/viewpoint distinctive] Personal qualities: [Your strengths relevant to graduate study] Additional Information: Word limit: [Specify word count - typically 500-1000 words] Tone preference: [Professional but personal, enthusiastic, analytical, etc.] Special circumstances: [Any unique aspects of your situation to address] Writing Instructions: Write a cohesive statement that: Opens with an engaging hook related to my interest in the field Seamlessly integrates my background, interests, and goals Demonstrates clear knowledge of and fit with the specific program Shows genuine passion and commitment to the field Concludes with a strong statement about my future contributions Uses specific examples and avoids generic language Maintains professional tone while showing authentic personality Stays within the word limit specified above Make sure the statement tells a compelling story of my academic and professional journey while clearly articulating why I'm an excellent fit for this specific program.";
+          "Write a compelling and professional statement of purpose for my graduate school application. Here are my details: Personal Information: Name: [Your name] Program applying to: [Specific program name and degree level] University/Institution: [University name] Field of study: [Your field/major] Academic Background: Current degree/status: [Your current degree, GPA if strong, graduation year] Relevant coursework: [List 3-5 most relevant courses] Academic achievements: [Honors, awards, scholarships, publications] Research experience: [Any research projects, labs, thesis work] Professional Experience: Work experience: [Relevant jobs, internships, roles with brief descriptions] Skills developed: [Technical skills, software, methodologies] Leadership roles: [Any leadership positions, responsibilities] Industry exposure: [Relevant industry experience or knowledge] Research Interests: Primary research interests: [Your main research areas/questions] Specific topics: [2-3 specific problems or areas you want to explore] Methodology preferences: [Quantitative, qualitative, mixed methods, etc.] Long-term research goals: [What you hope to contribute to the field] Program-Specific Information: Why this program: [Specific reasons this program fits your goals] Faculty of interest: [2-3 faculty members whose work aligns with yours] Program resources: [Labs, centers, opportunities that attract you] Unique program aspects: [What makes this program special] Career Goals: Short-term goals: [What you want to do immediately after graduation] Long-term career vision: [5-10 year career objectives] Impact you want to make: [How you want to contribute to field/society] Industry or sector preference: [Academic, industry, government, non-profit] Personal Story/Motivation: What sparked your interest: [The moment or experience that got you interested in this field] Challenges overcome: [Any obstacles that shaped your resilience] Unique perspective: [What makes your background/viewpoint distinctive] Personal qualities: [Your strengths relevant to graduate study] Additional Information: Word limit: [Specify word count - typically 500-1000 words] Tone preference: [Professional but personal, enthusiastic, analytical, etc.] Special circumstances: [Career change, gap in employment, etc.] Writing Instructions: Write a cohesive statement that: Opens with an engaging hook related to my interest in the field Seamlessly integrates my background, interests, and goals Demonstrates clear knowledge of and fit with the specific program Shows genuine passion and commitment to the field Concludes with a strong statement about my future contributions Uses specific examples and avoids generic language Maintains professional tone while showing authentic personality Stays within the word limit specified above Make sure the statement tells a compelling story of my academic and professional journey while clearly articulating why I'm an excellent fit for this specific program.";
         break;
       case "Visa Interview Questions":
-        basePrompt +=
-          "Generate a comprehensive list of visa interview questions tailored to my specific situation. Create realistic questions that visa officers typically ask, organized by category, along with tips for answering them effectively. Visa Application Details: Visa type: [Student F-1, Work H-1B, Tourist B-2, Business B-1, etc.] Destination country: [USA, Canada, UK, Australia, etc.] Duration of stay: [How long you plan to stay] Purpose of visit: [Study, work, tourism, business, family visit, etc.] Consulate/Embassy location: [Where you're interviewing] Interview language: [English, or specify if different] Personal Background: Age: [Your age] Marital status: [Single, married, divorced, etc.] Current occupation: [Your current job/student status] Education level: [Highest degree completed] Home country: [Your country of citizenship] City of residence: [Where you currently live] Language skills: [Languages you speak and proficiency levels] Travel and Visa History: Previous visa applications: [Any previous visas applied for and outcomes] Countries visited: [List of countries you've traveled to] Visa refusals: [Any previous rejections and reasons if known] Immigration violations: [Any overstays or issues - be honest] Current valid visas: [Other country visas you currently hold] Financial Information: Income source: [Salary, business, family support, scholarships, etc.] Monthly income: [Your regular income in local currency] Bank balance: [Approximate savings amount] Financial sponsor: [If someone else is funding your trip] Employment status: [Full-time, part-time, unemployed, student, etc.] Assets owned: [Property, investments, business ownership] Purpose-Specific Details (Fill relevant section): For Student Visa: University/School: [Name of institution] Program: [Degree program and field of study] Duration: [Length of study program] Tuition fees: [Annual cost] Funding source: [How you're paying for education] Post-graduation plans: [Career plans after graduation] For Work Visa: Company name: [Employing company] Job position: [Your role/title] Salary offered: [Annual compensation] Work experience: [Years of relevant experience] Relationship to company: [How you got the job] Work location: [Where you'll be working] For Tourist/Business Visa: Travel itinerary: [Places you plan to visit] Accommodation: [Where you'll stay] Travel companions: [Who you're traveling with] Trip duration: [Exact dates of travel] Business contacts: [If business visa, who you're meeting] Return travel plans: [Your return ticket details] Ties to Home Country: Family ties: [Parents, spouse, children living in home country] Property ownership: [Real estate, business owned] Job obligations: [Employment requiring your return] Social connections: [Community involvement, responsibilities] Future commitments: [Planned events, obligations at home] Reasons to return: [Why you must/want to come back] Potential Concerns/Weaknesses: Application weak points: [Any aspects of your application that might raise questions] Employment gaps: [Any periods of unemployment] Inconsistencies: [Any discrepancies in your application] Age factors: [If very young or older applicant] Single/unmarried status: [If this might be seen as lacking ties] Previous rejections: [How to address past refusals] Specific Preparation Needs: Difficult questions to practice: [Areas you're most worried about] Document explanations needed: [Complex financial or personal situations] Language barriers: [If English isn't your first language] Nervousness factors: [What makes you most anxious about the interview] Question Generation Instructions: Generate interview questions that cover: Basic Information Questions (5-8 questions) Personal background and current situation Purpose of Visit Questions (8-12 questions) Specific to my visa type and travel purpose Financial Questions (6-10 questions) Income, expenses, funding sources, financial stability Ties to Home Country Questions (5-8 questions) Reasons to return, obligations, connections Travel History Questions (4-6 questions) Previous travel, visa history, compliance Specific Concern Questions (5-8 questions) Based on potential weaknesses in my application Tricky/Complex Questions (4-6 questions) Challenging scenarios and hypothetical situations For each question, provide: The question as typically asked by visa officers Why this question is asked (officer's concern) Key points to include in your answer What NOT to say or avoid Sample strong answer framework Additional Requirements: Include both straightforward and challenging questions Cover questions about [specific concerns you mentioned above] Provide questions in order from basic to more complex Include follow-up questions that officers might ask Add cultural/country-specific questions relevant to [destination country] Include questions that test consistency with your application documents Make the questions realistic and reflect actual visa interview experiences, focusing on the most critical areas that determine visa approval for my specific situation.";
+        if (!country) {
+          setGenerateContentError(
+            "Please select a country (US or UK) for Visa Interview Questions."
+          );
+          setIsGeneratingContent(false);
+          setShowGeneratedContentDialog(false);
+          return;
+        }
+        basePrompt += `Generate a comprehensive list of visa interview questions tailored to my specific situation for a **${country}** visa. Create realistic questions that visa officers typically ask, organized by category, along with concise and ideal answers for each question. Visa Application Details: Visa type: [Student F-1, Work H-1B, Tourist B-2, Business B-1, etc.] Destination country: [${country}] Duration of stay: [How long you plan to stay] Purpose of visit: [Study, work, tourism, business, family visit, etc.] Consulate/Embassy location: [Where you're interviewing] Interview language: [English, or specify if different] Personal Background: Age: [Your age] Marital status: [Single, married, divorced, etc.] Current occupation: [Your current job/student status] Education level: [Highest degree completed] Home country: [Your country of citizenship] City of residence: [Where you currently live] Language skills: [Languages you speak and proficiency levels] Travel and Visa History: Previous visa applications: [Any previous visas applied for and outcomes] Countries visited: [List of countries you've traveled to] Visa refusals: [Any previous rejections and reasons if known] Immigration violations: [Any overstays or issues - be honest] Current valid visas: [Other country visas you currently hold] Financial Information: Income source: [Salary, business, family support, scholarships, etc.] Monthly income: [Your regular income in local currency] Bank balance: [Approximate savings amount] Financial sponsor: [If someone else is funding your trip] Employment status: [Full-time, part-time, unemployed, student, etc.] Assets owned: [Property, investments, business ownership] Purpose-Specific Details (Fill relevant section): For Student Visa: University/School: [Name of institution] Program: [Degree program and field of study] Duration: [Length of study program] Tuition fees: [Annual cost] Funding source: [How you're paying for education] Post-graduation plans: [Career plans after graduation] For Work Visa: Company name: [Employing company] Job position: [Your role/title] Salary offered: [Annual compensation] Work experience: [Years of relevant experience] Relationship to company: [How you got the job] Work location: [Where you'll be working] For Tourist/Business Visa: Travel itinerary: [Places you plan to visit] Accommodation: [Where you'll stay] Travel companions: [Who you're traveling with] Trip duration: [Exact dates of travel] Business contacts: [If business visa, who you're meeting] Return travel plans: [Your return ticket details] Ties to Home Country: Family ties: [Parents, spouse, children living in home country] Property ownership: [Real estate, business owned] Job obligations: [Employment requiring your return] Social connections: [Community involvement, responsibilities] Future commitments: [Planned events, obligations at home] Reasons to return: [Why you must/want to come back] Potential Concerns/Weaknesses: Application weak points: [Any aspects of your application that might raise questions] Employment gaps: [Any periods of unemployment] Inconsistencies: [Any discrepancies in your application] Age factors: [If very young or older applicant] Single/unmarried status: [If this might be seen as lacking ties] Previous rejections: [How to address past refusals] Specific Preparation Needs: Difficult questions to practice: [Areas you're most worried about] Document explanations needed: [Complex financial or personal situations] Language barriers: [If English isn't your first language] Nervousness factors: [What makes you most anxious about the interview] Question Generation Instructions: Generate interview questions that cover: Basic Information Questions (5-8 questions) Personal background and current situation Purpose of Visit Questions (8-12 questions) Specific to my visa type and travel purpose Financial Questions (6-10 questions) Income, expenses, funding sources, financial stability Ties to Home Country Questions (5-8 questions) Reasons to return, obligations, connections Travel History Questions (4-6 questions) Previous travel, visa history, compliance Specific Concern Questions (5-8 questions) Based on potential weaknesses in my application Tricky/Complex Questions (4-6 questions) Challenging scenarios and hypothetical situations For each question, provide: The question as typically asked by visa officers A concise and ideal answer for the question What NOT to say or avoid Additional Requirements: Include both straightforward and challenging questions Cover questions about [specific concerns you mentioned above] Provide questions in order from basic to more complex Include follow-up questions that officers might ask Add cultural/country-specific questions relevant to ${country} Include questions that test consistency with your application documents Make the questions realistic and reflect actual visa interview experiences, focusing on the most critical areas that determine visa approval for my specific situation.`;
         break;
       default:
         basePrompt += "";
@@ -587,8 +602,11 @@ function ResumeBuilderPage() {
     generateContent("Interview Questions");
   const handleGenerateCoverLetter = () => generateContent("Cover Letter");
   const handleGenerateSOP = () => generateContent("Statement of Purpose");
-  const handleGenerateVisaQuestions = () =>
-    generateContent("Visa Interview Questions");
+
+  const handleGenerateVisaQuestionsClick = (country) => {
+    setShowCountrySelection(false);
+    generateContent("Visa Interview Questions", country);
+  };
 
   if (isLoading) {
     return (
@@ -928,7 +946,7 @@ function ResumeBuilderPage() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={handleGenerateVisaQuestions}>
+          <ListItemButton onClick={() => setShowCountrySelection(true)}>
             <ListItemIcon sx={{ minWidth: 40 }}>
               <GavelIcon />{" "}
             </ListItemIcon>
@@ -1063,6 +1081,7 @@ function ResumeBuilderPage() {
             handleNavItemClick={handleNavItemClick}
             previewStepId={previewStepId}
             handleDrawerToggle={handleDrawerToggle}
+            onOpenResumeTips={() => setShowResumeTips(true)} // Pass the new handler
           />
 
           <Container
@@ -1194,6 +1213,40 @@ function ResumeBuilderPage() {
           loading={isGeneratingContent}
           error={generateContentError}
         />
+        <Dialog
+          open={showCountrySelection}
+          onClose={() => setShowCountrySelection(false)}
+        >
+          <DialogTitle>Select Country for Visa Questions</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Which country's visa interview questions would you like to
+              generate?
+            </DialogContentText>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-around", mt: 2 }}
+            >
+              <Button
+                variant="contained"
+                onClick={() => handleGenerateVisaQuestionsClick("US")}
+              >
+                US Visa
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleGenerateVisaQuestionsClick("UK")}
+              >
+                UK Visa
+              </Button>
+            </Box>
+          </DialogContent>
+        </Dialog>
+        {/* New Resume Tips Dialog */}
+        <ResumeTipsDialog
+          open={showResumeTips}
+          onClose={() => setShowResumeTips(false)}
+        />
+        {/* End New Resume Tips Dialog */}
         <Snackbar
           open={notification.open}
           autoHideDuration={6000}
