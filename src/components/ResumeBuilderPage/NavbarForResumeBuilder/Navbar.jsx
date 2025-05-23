@@ -18,6 +18,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
 
 const ProgressContainer = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -59,6 +60,7 @@ const Navbar = ({
   handleNavItemClick,
   previewStepId,
   handleDrawerToggle,
+  onOpenResumeTips, // New prop for opening resume tips
 }) => {
   return (
     <HideOnScroll>
@@ -125,6 +127,16 @@ const Navbar = ({
               </ProgressContainer>
             </Tooltip>
           </Box>
+          <Tooltip title="Resume Building Tips">
+            <IconButton
+              onClick={onOpenResumeTips}
+              color="inherit"
+              sx={{ mr: 0.5 }}
+            >
+              <Typography>Tips</Typography>
+              <LightbulbIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip
             title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
