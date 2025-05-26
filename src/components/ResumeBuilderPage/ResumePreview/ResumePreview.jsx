@@ -33,7 +33,7 @@ import { ModernTemplate } from "../Templates/ModernTemplate";
 import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
-import { SidebarTemplate } from "../Templates/SidebarTemplate";
+// import { SidebarTemplate } from "../Templates/SidebarTemplate";
 import { CanadaTemplate } from "../Templates/CanadaTemplate";
 import { EuropenUnionTemplate } from "../Templates/EuropenUnionTemplate";
 import { EuropassTemplate } from "../Templates/NewTemplate";
@@ -43,6 +43,7 @@ import { PDFGenerator } from "../utils/PDFGenerator";
 import { constants } from "./constants";
 import { injectPrintStyles } from "../utils/pdfUtils";
 import { useNavigate } from "react-router-dom";
+import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
@@ -70,6 +71,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
   const [speedDialOpen, setSpeedDialOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [showEnhanceDialog, setShowEnhanceDialog] = useState(false);
   const {
     personalInfo = {},
     education = [],
@@ -172,6 +174,10 @@ const ResumePreview = ({ resumeData, onBack }) => {
   const changeFontFamily = (font) => {
     setFontFamily(font);
     handleFontMenuClose();
+  };
+
+  const handleOpenEnhanceDialog = () => {
+    setShowEnhanceDialog(true);
   };
 
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
@@ -294,6 +300,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         handleColorMenuOpen={handleColorMenuOpen}
         handleFontMenuOpen={handleFontMenuOpen}
         handleExportMenuOpen={handleExportMenuOpen}
+        onEnhanceResume={handleOpenEnhanceDialog}
         sx={{
           display: isPrinting ? "none" : undefined,
           width: "100%",
@@ -527,6 +534,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
           />
         </>
       )}
+
+      <EnhanceResumeDialog
+        open={showEnhanceDialog}
+        onClose={() => setShowEnhanceDialog(false)}
+        resumeData={resumeData}
+      />
       <Snackbar
         open={snackbar.open && !isPrinting}
         autoHideDuration={6000}

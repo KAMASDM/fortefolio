@@ -46,7 +46,6 @@ import {
   SaveOutlined as SaveIcon,
   EditOutlined as EditIcon,
   ErrorOutline as ErrorIcon,
-  KeyboardArrowUp as KeyboardArrowUpIcon,
   DescriptionOutlined as DescriptionIcon,
   SchoolOutlined as SchoolIcon,
   WorkOutlineOutlined as WorkIcon,
@@ -60,7 +59,6 @@ import {
   QuestionAnswerOutlined as QuestionAnswerIcon,
   ArticleOutlined as ArticleIcon,
   GavelOutlined as GavelIcon,
-  Lightbulb as LightbulbIcon, // Import LightbulbIcon
 } from "@mui/icons-material";
 
 import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
@@ -155,6 +153,7 @@ const sections = [
     form: ReferenceForm,
   },
 ];
+
 const totalSteps = sections.length;
 const previewStepId = totalSteps + 1;
 
@@ -246,7 +245,7 @@ function ResumeBuilderPage() {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generateContentError, setGenerateContentError] = useState("");
   const [showCountrySelection, setShowCountrySelection] = useState(false);
-  const [showResumeTips, setShowResumeTips] = useState(false); // New state for resume tips dialog
+  const [showResumeTips, setShowResumeTips] = useState(false);
 
   const completedSections = useMemo(() => {
     const completed = {};
@@ -549,7 +548,6 @@ function ResumeBuilderPage() {
       if (!apiKey) {
         throw new Error("OpenAI API key is not configured.");
       }
-      console.log(apiKey);
       const apiUrl = "https://api.openai.com/v1/chat/completions";
 
       const payload = {
@@ -1081,7 +1079,7 @@ function ResumeBuilderPage() {
             handleNavItemClick={handleNavItemClick}
             previewStepId={previewStepId}
             handleDrawerToggle={handleDrawerToggle}
-            onOpenResumeTips={() => setShowResumeTips(true)} // Pass the new handler
+            onOpenResumeTips={() => setShowResumeTips(true)}
           />
 
           <Container
@@ -1241,7 +1239,6 @@ function ResumeBuilderPage() {
             </Box>
           </DialogContent>
         </Dialog>
-        {/* New Resume Tips Dialog */}
         <ResumeTipsDialog
           open={showResumeTips}
           onClose={() => setShowResumeTips(false)}

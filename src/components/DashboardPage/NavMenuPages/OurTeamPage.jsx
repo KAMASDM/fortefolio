@@ -7,11 +7,14 @@ import {
   Avatar,
   useTheme,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import ForteFolioLogo from "../ForteFolioLogo";
 import AnimatedBackground from "../AnimatedBackground";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FloatingElements from "../FloatingElements";
+import { useNavigate } from "react-router-dom";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -53,9 +56,12 @@ const teamMembers = [
 ];
 
 function OurTeamPage() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const handleBackClick = () => {
+    navigate("/dashboard");
+  };
   return (
     <>
       <AnimatedBackground />
@@ -110,6 +116,33 @@ function OurTeamPage() {
           </Box>
         </Box>
 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: { xs: 3, sm: 4 },
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBackClick}
+            sx={{
+              color: lavenderPalette.deep,
+              borderColor: lavenderPalette.medium,
+              "&:hover": {
+                borderColor: lavenderPalette.deep,
+                backgroundColor: "rgba(147, 112, 219, 0.05)",
+              },
+            }}
+            size="small"
+          >
+            Back
+          </Button>
+
+          <Box sx={{ width: theme.spacing(10) }} />
+        </Box>
         <Grid container spacing={4} justifyContent="center">
           {teamMembers.map((member, index) => (
             <Grid item xs={12} sm={6} md={4} key={member.name}>
