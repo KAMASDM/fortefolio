@@ -39,44 +39,6 @@ export const FontMenu = ({
         </ListItemIcon>
         <Typography sx={{ fontFamily: FONTS.POPPINS }}>Poppins</Typography>
       </MenuItem>
-      <MenuItem
-        onClick={() => handleFontSelection(FONTS.ROBOTO)}
-        selected={fontFamily === FONTS.ROBOTO}
-      >
-        <ListItemIcon sx={{ minWidth: 36 }}>
-          {fontFamily === FONTS.ROBOTO && <Radio checked size="small" />}
-        </ListItemIcon>
-        <Typography sx={{ fontFamily: FONTS.ROBOTO }}>Roboto</Typography>
-      </MenuItem>
-      <MenuItem
-        onClick={() => handleFontSelection(FONTS.OPEN_SANS)}
-        selected={fontFamily === FONTS.OPEN_SANS}
-      >
-        <ListItemIcon sx={{ minWidth: 36 }}>
-          {fontFamily === FONTS.OPEN_SANS && <Radio checked size="small" />}
-        </ListItemIcon>
-        <Typography sx={{ fontFamily: FONTS.OPEN_SANS }}>Open Sans</Typography>
-      </MenuItem>
-      <MenuItem
-        onClick={() => handleFontSelection(FONTS.MONTSERRAT)}
-        selected={fontFamily === FONTS.MONTSERRAT}
-      >
-        <ListItemIcon sx={{ minWidth: 36 }}>
-          {fontFamily === FONTS.MONTSERRAT && <Radio checked size="small" />}
-        </ListItemIcon>
-        <Typography sx={{ fontFamily: FONTS.MONTSERRAT }}>
-          Montserrat
-        </Typography>
-      </MenuItem>
-      <MenuItem
-        onClick={() => handleFontSelection(FONTS.RALEWAY)}
-        selected={fontFamily === FONTS.RALEWAY}
-      >
-        <ListItemIcon sx={{ minWidth: 36 }}>
-          {fontFamily === FONTS.RALEWAY && <Radio checked size="small" />}
-        </ListItemIcon>
-        <Typography sx={{ fontFamily: FONTS.RALEWAY }}>Raleway</Typography>
-      </MenuItem>
     </Menu>
   );
 };
