@@ -60,7 +60,7 @@ const Navbar = ({
   handleNavItemClick,
   previewStepId,
   handleDrawerToggle,
-  onOpenResumeTips, // New prop for opening resume tips
+  onOpenResumeTips,
 }) => {
   return (
     <HideOnScroll>
