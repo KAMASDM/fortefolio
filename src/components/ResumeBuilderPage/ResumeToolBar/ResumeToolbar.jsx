@@ -2,7 +2,6 @@ import { Box, Button, Typography, Tooltip } from "@mui/material";
 import {
   ArrowBack,
   FormatColorFill,
-  TextFormat,
   Download,
   KeyboardArrowDown,
   AutoFixHigh as EnhanceIcon,
@@ -12,7 +11,6 @@ export const ResumeToolbar = ({
   onBack,
   isMobile,
   handleColorMenuOpen,
-  handleFontMenuOpen,
   handleExportMenuOpen,
   onEnhanceResume,
   completionProgress,
@@ -71,14 +69,6 @@ export const ResumeToolbar = ({
             >
               Color
             </Button>
-            <Button
-              variant="outlined"
-              startIcon={<TextFormat />}
-              onClick={handleFontMenuOpen}
-              size="small"
-            >
-              Font
-            </Button>
           </>
         )}
         {!isResumeComplete && (
@@ -90,7 +80,7 @@ export const ResumeToolbar = ({
               onClick={onEnhanceResume}
               size="small"
             >
-              Enhance Resume
+              Enhance Resume With AI
             </Button>
           </Tooltip>
         )}{" "}
