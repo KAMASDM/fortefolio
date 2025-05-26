@@ -1,4 +1,3 @@
-// src/theme/customTheme.js
 import { createTheme, alpha } from "@mui/material/styles";
 import theme from "../theme";
 

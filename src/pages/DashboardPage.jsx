@@ -2,6 +2,8 @@
   import { useNavigate, Link } from "react-router-dom";
   import InfoIcon from "@mui/icons-material/Info";
   import GroupIcon from "@mui/icons-material/Group";
+  import ReceiptIcon from '@mui/icons-material/Receipt';
+  import ContactPageIcon from '@mui/icons-material/ContactPage';
   import { useAuth } from "../context/AuthContext";
   import { database } from "../firebaseConfig";
   import {
@@ -743,6 +745,51 @@
                   >
                     Our Team
                   </Button>
+
+                  <Button
+                  component={Link}
+                  to="/blogs"
+                  size={isMobile ? "small" : "medium"}
+                  startIcon={<ReceiptIcon />}
+                  sx={{
+                    color: lavenderPalette.text,
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderRadius: 6,
+                    px: { xs: 1, sm: 2 },
+                    py: { xs: 0.5, sm: 1 },
+                    border: `1px solid transparent`,
+                    "&:hover": {
+                      backgroundColor: lavenderPalette.light,
+                      borderColor: lavenderPalette.soft,
+                    },
+                  }}
+                >
+                  Blog
+                </Button>
+
+                <Button
+                  component={Link}
+                  to="/contact-us"
+                  size={isMobile ? "small" : "medium"}
+                  startIcon={<ContactPageIcon />}
+                  sx={{
+                    color: lavenderPalette.text,
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderRadius: 6,
+                    px: { xs: 1, sm: 2 },
+                    py: { xs: 0.5, sm: 1 },
+                    border: `1px solid transparent`,
+                    "&:hover": {
+                      backgroundColor: lavenderPalette.light,
+                      borderColor: lavenderPalette.soft,
+                    },
+                  }}
+                >
+                  Contact Us
+                </Button>
+
                 </Box>
 
                 {currentUser && (

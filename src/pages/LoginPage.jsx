@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Container,
   Box,
@@ -16,20 +17,20 @@ import {
   Avatar,
   Divider,
 } from "@mui/material";
-import GoogleIcon from "@mui/icons-material/Google";
-import DescriptionIcon from "@mui/icons-material/Description";
-import EditIcon from "@mui/icons-material/Edit";
-import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import BoltIcon from "@mui/icons-material/Bolt";
+import EditIcon from "@mui/icons-material/Edit";
+import GoogleIcon from "@mui/icons-material/Google";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { motion, AnimatePresence } from "framer-motion";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
+import Footer from "../components/Footer/Footer";
+import FeatureCard from "../components/LoginPage/FeatureCard";
+import StatisticsBar from "../components/LoginPage/StatisticsBar";
 import ForteFolioLogo from "../components/LoginPage/ForteFolioLogo";
 import FloatingElements from "../components/LoginPage/FloatingElements";
-import StatisticsBar from "../components/LoginPage/StatisticsBar";
 import TestimonialBadge from "../components/LoginPage/TestimonialBadge";
 import AnimatedBackground from "../components/LoginPage/AnimatedBackground";
-import FeatureCard from "../components/LoginPage/FeatureCard";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -573,62 +574,7 @@ function LoginPage() {
           <TestimonialBadge />
         </Grid>
       </Container>
-      <Box
-        component={motion.div}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.5 }}
-        sx={{
-          pt: { xs: 3, md: 4 },
-          pb: { xs: 3, md: 4 },
-          borderTop: `1px solid ${lavenderPalette.soft}40`,
-          textAlign: "center",
-          width: "100%",
-          marginTop: "auto",
-        }}
-      >
-        <Typography
-          variant="caption"
-          sx={{
-            color: lavenderPalette.text,
-            opacity: 0.8,
-            display: "block",
-            mb: 1,
-          }}
-        >
-          © {new Date().getFullYear()} MakeMyForte |{" "}
-          <Link
-            to="/privacy-policy"
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            Privacy Policy
-          </Link>{" "}
-          |{" "}
-          <Link
-            to="/terms-conditions"
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            Terms of Service
-          </Link>{" "}
-          |{" "}
-          <Link
-            to="/copyright-notice"
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            Copyright Notice
-          </Link>
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{
-            color: lavenderPalette.text,
-            opacity: 0.6,
-            fontSize: "0.7rem",
-          }}
-        >
-          All rights reserved
-        </Typography>
-      </Box>
+      <Footer />
     </Box>
   );
 }
