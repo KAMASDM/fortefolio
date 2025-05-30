@@ -17,8 +17,8 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import AnimatedBackground from "../DashboardPage/AnimatedBackground";
-import FloatingElements from "../DashboardPage/FloatingElements";
+import AnimatedBackground from "../../AnimatedBackground";
+import FloatingElements from "../../FloatingElements";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -176,6 +176,10 @@ const Blogs = () => {
             sx={{
               fontWeight: 700,
               color: lavenderPalette.darkText,
+              background: lavenderPalette.gradient,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
               mb: 2,
             }}
           >

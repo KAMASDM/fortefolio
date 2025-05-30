@@ -15,8 +15,8 @@ import {
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import AnimatedBackground from "../DashboardPage/AnimatedBackground";
-import FloatingElements from "../DashboardPage/FloatingElements";
+import AnimatedBackground from "../../AnimatedBackground";
+import FloatingElements from "../../FloatingElements";
 
 const lavenderPalette = {
   light: "#EAE4F7",

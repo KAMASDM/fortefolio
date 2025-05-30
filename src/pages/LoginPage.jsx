@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,6 +17,10 @@ import {
   Avatar,
   Divider,
 } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import GroupIcon from "@mui/icons-material/Group";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import ContactPageIcon from "@mui/icons-material/ContactPage";
 import BoltIcon from "@mui/icons-material/Bolt";
 import EditIcon from "@mui/icons-material/Edit";
 import GoogleIcon from "@mui/icons-material/Google";
@@ -76,7 +80,6 @@ function LoginPage() {
   const navigate = useNavigate();
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hoverButton, setHoverButton] = useState(false);
@@ -128,67 +131,167 @@ function LoginPage() {
       >
         <Box
           component={motion.div}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mb: { xs: 3, md: 4 },
-            mt: { xs: 2, md: 3 },
-          }}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          sx={{}}
         >
-          <Box
-            component={motion.div}
-            animate={{
-              rotate: [0, 10, 0, -10, 0],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            whileHover={{
-              scale: 1.1,
-              transition: { duration: 0.3 },
-            }}
-          >
-            <ForteFolioLogo
-              width={isSmall ? 50 : 70}
-              height={isSmall ? 50 : 70}
-            />
-          </Box>
-          <Typography
-            variant={isSmall ? "h4" : "h3"}
-            component="h1"
-            sx={{
-              ml: 2,
-              fontWeight: 800,
-              background: lavenderPalette.gradient,
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              textShadow: `0 4px 12px ${lavenderPalette.medium}30`,
-              position: "relative",
-            }}
-          >
-            MakeMyForte
+          <Container maxWidth="lg">
             <Box
-              component={motion.div}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
               sx={{
-                position: "absolute",
-                top: -10,
-                right: -15,
-                color: lavenderPalette.deep,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                py: 1.5,
+                flexWrap: "wrap",
               }}
             >
-              <AutoAwesomeIcon fontSize="small" />
+              <Box
+                component={motion.div}
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: { xs: 1, sm: 0 },
+                }}
+              >
+                <Box
+                  component={motion.div}
+                  whileHover={{
+                    rotate: [0, -10, 10, -5, 0],
+                    transition: { duration: 0.5 },
+                  }}
+                  sx={{ mr: 1.5, display: "flex" }}
+                >
+                  <ForteFolioLogo />
+                </Box>
+                <Typography
+                  variant="h5"
+                  component="h1"
+                  sx={{
+                    fontWeight: 700,
+                    background: lavenderPalette.gradient,
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {" "}
+                  MakeMyForte{" "}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: { xs: 1, sm: 2 },
+                  flexWrap: "wrap",
+                  justifyContent: { xs: "flex-start", sm: "flex-end" },
+                  width: { xs: "100%", sm: "auto" },
+                  mt: { xs: 2, sm: 0 },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: { xs: 0.5, sm: 1 },
+                    mr: { xs: 0, sm: 2 },
+                    order: { xs: 1, sm: 0 },
+                  }}
+                >
+                  <Button
+                    component={Link}
+                    to="/about-us"
+                    size={isSmall ? "small" : "medium"}
+                    startIcon={<InfoIcon />}
+                    sx={{
+                      color: lavenderPalette.text,
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 6,
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 0.5, sm: 1 },
+                      border: `1px solid transparent`,
+                      "&:hover": {
+                        backgroundColor: lavenderPalette.light,
+                        borderColor: lavenderPalette.soft,
+                      },
+                    }}
+                  >
+                    About Us
+                  </Button>
+
+                  <Button
+                    component={Link}
+                    to="/our-team"
+                    size={isSmall ? "small" : "medium"}
+                    startIcon={<GroupIcon />}
+                    sx={{
+                      color: lavenderPalette.text,
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 6,
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 0.5, sm: 1 },
+                      border: `1px solid transparent`,
+                      "&:hover": {
+                        backgroundColor: lavenderPalette.light,
+                        borderColor: lavenderPalette.soft,
+                      },
+                    }}
+                  >
+                    Our Team
+                  </Button>
+
+                  <Button
+                    component={Link}
+                    to="/blogs"
+                    size={isSmall ? "small" : "medium"}
+                    startIcon={<ReceiptIcon />}
+                    sx={{
+                      color: lavenderPalette.text,
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 6,
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 0.5, sm: 1 },
+                      border: `1px solid transparent`,
+                      "&:hover": {
+                        backgroundColor: lavenderPalette.light,
+                        borderColor: lavenderPalette.soft,
+                      },
+                    }}
+                  >
+                    Blog
+                  </Button>
+
+                  <Button
+                    component={Link}
+                    to="/contact-us"
+                    size={isSmall ? "small" : "medium"}
+                    startIcon={<ContactPageIcon />}
+                    sx={{
+                      color: lavenderPalette.text,
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 6,
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 0.5, sm: 1 },
+                      border: `1px solid transparent`,
+                      "&:hover": {
+                        backgroundColor: lavenderPalette.light,
+                        borderColor: lavenderPalette.soft,
+                      },
+                    }}
+                  >
+                    Contact Us
+                  </Button>
+                </Box>
+              </Box>
             </Box>
-          </Typography>
+          </Container>
         </Box>
         <Typography
           variant="h6"

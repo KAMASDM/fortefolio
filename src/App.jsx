@@ -9,18 +9,18 @@ import theme from "./theme";
 import CssBaseline from "@mui/material/CssBaseline";
 import ThemeProvider from "@mui/material/styles/ThemeProvider";
 import LoginPage from "./pages/LoginPage";
-import Blogs from "./components/Blog/Blogs";
+import Blogs from "./components/LoginPage/NavMenuPages/Blog/Blogs";
 import DashboardPage from "./pages/DashboardPage";
-import BlogDetails from "./components/Blog/BlogDetails";
+import BlogDetails from "./components/LoginPage/NavMenuPages/Blog/BlogDetails";
 import ResumeBuilderPage from "./pages/ResumeBuilderPage";
 import Terms from "./components/LoginPage/FooterPages/Terms";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import Privacy from "./components/LoginPage/FooterPages/Privacy";
 import Copyright from "./components/LoginPage/FooterPages/Copyright";
-import AboutUsPage from "./components/DashboardPage/NavMenuPages/AboutUsPage";
-import OurTeamPage from "./components/DashboardPage/NavMenuPages/OurTeamPage";
+import AboutUsPage from "./components/LoginPage/NavMenuPages/AboutUsPage";
+import OurTeamPage from "./components/LoginPage/NavMenuPages/OurTeamPage";
 import ResumeOnlyView from "./components/ResumeBuilderPage/DisplayResume/ResumeOnlyView";
-import ContactUs from "./components/ContactUs/ContactUs";
+import ContactUs from "./components/LoginPage/NavMenuPages/ContactUs/ContactUs";
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();

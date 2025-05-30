@@ -286,32 +286,6 @@ const EducationForm = ({ data, updateData, nextStep }) => {
                             <DegreeIcon color="action" />
                           </InputAdornment>
                         ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Tooltip title="View degree suggestions">
-                              <IconButton
-                                onClick={() =>
-                                  setShowDegreeSuggestions(
-                                    education.id === showDegreeSuggestions
-                                      ? null
-                                      : education.id
-                                  )
-                                }
-                                edge="end"
-                                size="small"
-                              >
-                                <InfoIcon
-                                  color={
-                                    showDegreeSuggestions === education.id
-                                      ? "primary"
-                                      : "action"
-                                  }
-                                  fontSize="small"
-                                />
-                              </IconButton>
-                            </Tooltip>
-                          </InputAdornment>
-                        ),
                       }}
                     />
                     {showDegreeSuggestions === education.id && (
@@ -362,32 +336,6 @@ const EducationForm = ({ data, updateData, nextStep }) => {
                         startAdornment: (
                           <InputAdornment position="start">
                             <FieldIcon color="action" />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <Tooltip title="View field suggestions">
-                              <IconButton
-                                onClick={() =>
-                                  setShowFieldSuggestions(
-                                    education.id === showFieldSuggestions
-                                      ? null
-                                      : education.id
-                                  )
-                                }
-                                edge="end"
-                                size="small"
-                              >
-                                <InfoIcon
-                                  color={
-                                    showFieldSuggestions === education.id
-                                      ? "primary"
-                                      : "action"
-                                  }
-                                  fontSize="small"
-                                />
-                              </IconButton>
-                            </Tooltip>
                           </InputAdornment>
                         ),
                       }}
