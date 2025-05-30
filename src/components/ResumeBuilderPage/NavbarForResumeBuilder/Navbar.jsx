@@ -159,7 +159,7 @@ const Navbar = ({
               Preview
             </Button>
           )}
-          <Button
+          {/* <Button
             variant={unsavedChanges ? "contained" : "outlined"}
             color={unsavedChanges ? "warning" : "primary"}
             onClick={handleManualSave}
@@ -184,7 +184,7 @@ const Navbar = ({
             }}
           >
             {isSaving ? "Saving" : unsavedChanges ? "Save" : "Saved"}
-          </Button>
+          </Button> */}
           <Box sx={{ display: { xs: "flex", md: "none" }, ml: 1 }}>
             {unsavedChanges && !isSaving && (
               <Tooltip title="Save Changes">
