@@ -412,7 +412,7 @@ function ResumeBuilderPage() {
       ...prevData,
       [sectionKey]: data,
     }));
-    setUnsavedChanges(true);
+    // setUnsavedChanges(true);
   }, []);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
