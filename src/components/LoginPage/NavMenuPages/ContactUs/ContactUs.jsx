@@ -147,7 +147,7 @@ const ContactUs = () => {
               },
             }}
           >
-            Back to Dashboard
+            Back
           </Button>
         </MotionBox>
 
