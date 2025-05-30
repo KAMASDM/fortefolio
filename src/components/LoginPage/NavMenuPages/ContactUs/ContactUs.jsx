@@ -21,8 +21,8 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import SendIcon from "@mui/icons-material/Send";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import AnimatedBackground from "../DashboardPage/AnimatedBackground";
-import FloatingElements from "../DashboardPage/FloatingElements";
+import AnimatedBackground from "../../AnimatedBackground";
+import FloatingElements from "../../FloatingElements";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -162,7 +162,9 @@ const ContactUs = () => {
             variant={isMobile ? "h4" : "h3"}
             component="h1"
             fontWeight={700}
-            sx={{ color: lavenderPalette.darkText }}
+            sx={{
+              color: lavenderPalette.gradient,
+            }}
             gutterBottom
           >
             Get in Touch

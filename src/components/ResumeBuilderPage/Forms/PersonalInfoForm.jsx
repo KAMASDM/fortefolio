@@ -262,23 +262,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
                       <PermIdentityIcon color="action" />
                     </InputAdornment>
                   ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Tooltip title="View suggested titles">
-                        <IconButton
-                          onClick={() =>
-                            setShowTitleSuggestions(!showTitleSuggestions)
-                          }
-                          edge="end"
-                          size="small"
-                        >
-                          <LightbulbIcon
-                            color={showTitleSuggestions ? "primary" : "action"}
-                          />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  ),
                 }}
               />
               {showTitleSuggestions && (
@@ -509,16 +492,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
                 color={summaryOptimal ? "success" : "default"}
                 variant={summaryWordCount > 0 ? "outlined" : "filled"}
               />
-              <Tooltip title="Show summary examples">
-                <IconButton
-                  onClick={() => setShowSummaryExamples(!showSummaryExamples)}
-                  size="small"
-                >
-                  <HelpIcon
-                    color={showSummaryExamples ? "primary" : "action"}
-                  />
-                </IconButton>
-              </Tooltip>
             </Box>
           </Box>
           <TextField
@@ -540,36 +513,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             Tip: Tailor this summary to the specific job you're applying for.
             (Aim for 50-200 words)
           </Typography>
-
-          {showSummaryExamples && (
-            <Fade in>
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Example summaries (click to use):
-                </Typography>
-                <Stack spacing={1.5}>
-                  {summaryExamples.map((summary, index) => (
-                    <Card
-                      key={index}
-                      variant="outlined"
-                      sx={{
-                        cursor: "pointer",
-                        "&:hover": {
-                          borderColor: "primary.main",
-                          bgcolor: "action.hover",
-                        },
-                      }}
-                      onClick={() => selectSummaryExample(summary)}
-                    >
-                      <CardContent sx={{ p: 1.5 }}>
-                        <Typography variant="body2">{summary}</Typography>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Stack>
-              </Box>
-            </Fade>
-          )}
         </Paper>
       </form>
     </Box>
