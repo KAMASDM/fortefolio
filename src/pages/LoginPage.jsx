@@ -16,6 +16,13 @@ import {
   alpha,
   Avatar,
   Divider,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import GroupIcon from "@mui/icons-material/Group";
@@ -25,9 +32,10 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import EditIcon from "@mui/icons-material/Edit";
 import GoogleIcon from "@mui/icons-material/Google";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
+import MenuIcon from "@mui/icons-material/Menu";
+
 import Footer from "../components/Footer/Footer";
 import FeatureCard from "../components/LoginPage/FeatureCard";
 import StatisticsBar from "../components/LoginPage/StatisticsBar";
@@ -75,6 +83,29 @@ const features = [
   },
 ];
 
+const navItems = [
+  {
+    text: "About Us",
+    icon: <InfoIcon sx={{ color: lavenderPalette.primary }} />,
+    to: "/about-us",
+  },
+  {
+    text: "Our Team",
+    icon: <GroupIcon sx={{ color: lavenderPalette.primary }} />,
+    to: "/our-team",
+  },
+  {
+    text: "Blog",
+    icon: <ReceiptIcon sx={{ color: lavenderPalette.primary }} />,
+    to: "/blogs",
+  },
+  {
+    text: "Contact Us",
+    icon: <ContactPageIcon sx={{ color: lavenderPalette.primary }} />,
+    to: "/contact-us",
+  },
+];
+
 function LoginPage() {
   const { handleGoogleLogin } = useAuth();
   const navigate = useNavigate();
@@ -83,6 +114,12 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hoverButton, setHoverButton] = useState(false);
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   const onGoogleSignIn = async () => {
     setIsLoading(true);
@@ -101,6 +138,8 @@ function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  const drawerWidth = 240;
 
   return (
     <Box
@@ -134,9 +173,9 @@ function LoginPage() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          sx={{}}
         >
           <Container maxWidth="lg">
+            {" "}
             <Box
               sx={{
                 display: "flex",
@@ -154,7 +193,7 @@ function LoginPage() {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  mb: { xs: 1, sm: 0 },
+                  mb: { xs: isSmall && !mobileOpen ? 1 : 0, sm: 0 }, // Adjust margin if wrapping occurs
                 }}
               >
                 <Box
@@ -168,7 +207,7 @@ function LoginPage() {
                   <ForteFolioLogo />
                 </Box>
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   component="h1"
                   sx={{
                     fontWeight: 700,
@@ -178,152 +217,204 @@ function LoginPage() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  {" "}
-                  MakeMyForte{" "}
+                  MakeMyForte
                 </Typography>
               </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: { xs: 1, sm: 2 },
-                  flexWrap: "wrap",
-                  justifyContent: { xs: "flex-start", sm: "flex-end" },
-                  width: { xs: "100%", sm: "auto" },
-                  mt: { xs: 2, sm: 0 },
-                }}
-              >
+
+              {isSmall ? (
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="end"
+                  onClick={handleDrawerToggle}
+                  sx={{ color: lavenderPalette.text }}
+                >
+                  <MenuIcon fontSize="large" />
+                </IconButton>
+              ) : (
                 <Box
                   sx={{
                     display: "flex",
-                    gap: { xs: 0.5, sm: 1 },
-                    mr: { xs: 0, sm: 2 },
-                    order: { xs: 1, sm: 0 },
+                    alignItems: "center",
+                    gap: { xs: 1, sm: 2 },
+                    flexWrap: "wrap",
+                    justifyContent: { sm: "flex-end" },
+                    width: { sm: "auto" },
                   }}
                 >
-                  <Button
-                    component={Link}
-                    to="/about-us"
-                    size={isSmall ? "small" : "medium"}
-                    startIcon={<InfoIcon />}
+                  <Box
                     sx={{
-                      color: lavenderPalette.text,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 6,
-                      px: { xs: 1, sm: 2 },
-                      py: { xs: 0.5, sm: 1 },
-                      border: `1px solid transparent`,
-                      "&:hover": {
-                        backgroundColor: lavenderPalette.light,
-                        borderColor: lavenderPalette.soft,
-                      },
+                      display: "flex",
+                      gap: { xs: 0.5, sm: 1 }, // Gap between buttons
+                      // mr: { xs: 0, sm: 2 }, // Margin right for the button group
+                      // order: { xs: 1, sm: 0 }, // This was in original, implies ordering relative to siblings not shown in snippet
+                      // If this is the only child of its parent, 'order' has no direct effect.
+                      // For simplicity and direct application of user's snippet, these are kept.
                     }}
                   >
-                    About Us
-                  </Button>
-
-                  <Button
-                    component={Link}
-                    to="/our-team"
-                    size={isSmall ? "small" : "medium"}
-                    startIcon={<GroupIcon />}
-                    sx={{
-                      color: lavenderPalette.text,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 6,
-                      px: { xs: 1, sm: 2 },
-                      py: { xs: 0.5, sm: 1 },
-                      border: `1px solid transparent`,
-                      "&:hover": {
-                        backgroundColor: lavenderPalette.light,
-                        borderColor: lavenderPalette.soft,
-                      },
-                    }}
-                  >
-                    Our Team
-                  </Button>
-
-                  <Button
-                    component={Link}
-                    to="/blogs"
-                    size={isSmall ? "small" : "medium"}
-                    startIcon={<ReceiptIcon />}
-                    sx={{
-                      color: lavenderPalette.text,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 6,
-                      px: { xs: 1, sm: 2 },
-                      py: { xs: 0.5, sm: 1 },
-                      border: `1px solid transparent`,
-                      "&:hover": {
-                        backgroundColor: lavenderPalette.light,
-                        borderColor: lavenderPalette.soft,
-                      },
-                    }}
-                  >
-                    Blog
-                  </Button>
-
-                  <Button
-                    component={Link}
-                    to="/contact-us"
-                    size={isSmall ? "small" : "medium"}
-                    startIcon={<ContactPageIcon />}
-                    sx={{
-                      color: lavenderPalette.text,
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 6,
-                      px: { xs: 1, sm: 2 },
-                      py: { xs: 0.5, sm: 1 },
-                      border: `1px solid transparent`,
-                      "&:hover": {
-                        backgroundColor: lavenderPalette.light,
-                        borderColor: lavenderPalette.soft,
-                      },
-                    }}
-                  >
-                    Contact Us
-                  </Button>
+                    <Button
+                      component={Link}
+                      to="/about-us"
+                      size={"medium"}
+                      startIcon={<InfoIcon />}
+                      sx={{
+                        color: lavenderPalette.text,
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 6,
+                        px: { xs: 1, sm: 2 },
+                        py: { xs: 0.5, sm: 1 },
+                        border: `1px solid transparent`,
+                        "&:hover": {
+                          backgroundColor: lavenderPalette.light,
+                          borderColor: lavenderPalette.soft,
+                        },
+                      }}
+                    >
+                      About Us
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/our-team"
+                      size={"medium"}
+                      startIcon={<GroupIcon />}
+                      sx={{
+                        color: lavenderPalette.text,
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 6,
+                        px: { xs: 1, sm: 2 },
+                        py: { xs: 0.5, sm: 1 },
+                        border: `1px solid transparent`,
+                        "&:hover": {
+                          backgroundColor: lavenderPalette.light,
+                          borderColor: lavenderPalette.soft,
+                        },
+                      }}
+                    >
+                      Our Team
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/blogs"
+                      size={"medium"}
+                      startIcon={<ReceiptIcon />}
+                      sx={{
+                        color: lavenderPalette.text,
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 6,
+                        px: { xs: 1, sm: 2 },
+                        py: { xs: 0.5, sm: 1 },
+                        border: `1px solid transparent`,
+                        "&:hover": {
+                          backgroundColor: lavenderPalette.light,
+                          borderColor: lavenderPalette.soft,
+                        },
+                      }}
+                    >
+                      Blog
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/contact-us"
+                      size={"medium"}
+                      startIcon={<ContactPageIcon />}
+                      sx={{
+                        color: lavenderPalette.text,
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 6,
+                        px: { xs: 1, sm: 2 },
+                        py: { xs: 0.5, sm: 1 },
+                        border: `1px solid transparent`,
+                        "&:hover": {
+                          backgroundColor: lavenderPalette.light,
+                          borderColor: lavenderPalette.soft,
+                        },
+                      }}
+                    >
+                      Contact Us
+                    </Button>
+                  </Box>
                 </Box>
-              </Box>
+              )}
             </Box>
           </Container>
         </Box>
+        <Drawer
+          anchor="right"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              backgroundColor: lavenderPalette.light,
+              paddingTop: 2,
+            },
+          }}
+        >
+          <Box sx={{ textAlign: "center" }} role="presentation">
+            <List>
+              {navItems.map((item) => (
+                <ListItem key={item.text} disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    to={item.to}
+                    onClick={handleDrawerToggle}
+                  >
+                    {" "}
+                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemText
+                      primary={item.text}
+                      sx={{ color: lavenderPalette.darkText, fontWeight: 500 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        </Drawer>
         <Typography
           variant="h6"
           component="h3"
           sx={{
             fontWeight: 400,
             color: lavenderPalette.text,
+            mt: 2,
           }}
           align="center"
         >
           Create professional resumes that help you stand out and land your
           dream job
         </Typography>
-        <Grid item xs={12} md={6} sx={{ order: { xs: 2, md: 1 } }}>
-          <Box
-            display="flex"
-            flexDirection={{ xs: "column", md: "row" }}
-            alignItems="center"
-            justifyContent="space-between"
-            gap={6}
-            mt={8}
-            width="100%"
-          >
+        <Grid
+          container
+          spacing={4}
+          sx={{
+            mt: { xs: 2, md: 4 },
+            flexGrow: 1,
+            alignItems: "center",
+          }}
+        >
+          <Grid item xs={12} md={6} sx={{ order: { xs: 2, md: 1 } }}>
+            {" "}
             <Box
-              flex={1}
               sx={{
                 textAlign: { xs: "center", md: "left" },
-                mb: { xs: 4, md: 0 },
-                order: { xs: 2, md: 0 },
               }}
             >
-              <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+              <Grid
+                container
+                spacing={{ xs: 2, sm: 3 }}
+                sx={{ mb: { xs: 4, md: 0 } }}
+              >
+                {" "}
                 {features.map((feature, index) => (
                   <Grid item xs={12} sm={6} key={feature.title}>
                     <FeatureCard
@@ -337,345 +428,338 @@ function LoginPage() {
                 ))}
               </Grid>
             </Box>
+          </Grid>
+
+          <Grid
+            item
+            md={1}
+            sx={{
+              display: { xs: "none", md: "flex" },
+              justifyContent: "center",
+              order: { md: 2 },
+            }}
+          >
             <Divider
               flexItem
               orientation="vertical"
               sx={{
-                width: "4px",
-                display: { xs: "none", md: "block" },
+                minHeight: "200px",
                 backgroundImage: lavenderPalette.accentGradient,
                 borderRadius: "2px",
               }}
             />
+          </Grid>
+
+          <Grid item xs={12} md={5} sx={{ order: { xs: 1, md: 3 } }}>
+            {" "}
             <Box
-              flexShrink={0}
               sx={{
-                width: { xs: "100%", sm: "100%", md: "auto" },
+                width: "100%",
                 display: "flex",
-                justifyContent: { xs: "center", md: "flex-end" },
-                mb: 4,
-                order: { xs: 1, md: 0 },
+                justifyContent: "center",
               }}
             >
-              <Grid item xs={12} md={6} sx={{ order: { xs: 1, md: 2 } }}>
+              <Box
+                component={motion.div}
+                whileHover={{
+                  boxShadow: `0 30px 100px ${lavenderPalette.primary}30`,
+                  transition: { duration: 0.3 },
+                }}
+                sx={{
+                  width: "100%",
+                  maxWidth: "430px",
+                  position: "relative",
+                  mx: "auto",
+                }}
+              >
                 <Box
                   component={motion.div}
-                  whileHover={{
-                    boxShadow: `0 30px 100px ${lavenderPalette.primary}30`,
-                    transition: { duration: 0.3 },
-                  }}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.9, duration: 0.5 }}
                   sx={{
+                    position: "absolute",
+                    top: -20,
+                    right: -15,
+                    width: 40,
+                    height: 40,
+                    borderRadius: "12px",
+                    background: lavenderPalette.medium,
+                    transform: "rotate(15deg)",
+                    zIndex: 0,
+                  }}
+                />
+                <Box
+                  component={motion.div}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1, duration: 0.5 }}
+                  sx={{
+                    position: "absolute",
+                    bottom: -15,
+                    left: -15,
+                    width: 30,
+                    height: 30,
+                    borderRadius: "50%",
+                    background: lavenderPalette.deep,
+                    zIndex: 0,
+                  }}
+                />
+                <Paper
+                  elevation={16}
+                  sx={{
+                    p: { xs: 3, sm: 4 },
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
                     width: "100%",
-                    maxWidth: "430px",
+                    borderRadius: 4,
+                    backdropFilter: "blur(20px)",
+                    background: "rgba(255, 255, 255, 0.9)",
+                    boxShadow: `0 20px 80px ${lavenderPalette.primary}25`,
                     position: "relative",
+                    overflow: "hidden",
+                    border: `1px solid ${lavenderPalette.soft}70`,
+                    zIndex: 1,
+                    mb: { xs: 4, md: 0 },
                   }}
                 >
                   <Box
                     component={motion.div}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.9, duration: 0.5 }}
-                    sx={{
-                      position: "absolute",
-                      top: -20,
-                      right: -15,
-                      width: 40,
-                      height: 40,
-                      borderRadius: "12px",
-                      background: lavenderPalette.medium,
-                      transform: "rotate(15deg)",
-                      zIndex: 0,
+                    whileHover={{
+                      y: -5,
+                      boxShadow: `0 20px 30px ${lavenderPalette.primary}30`,
+                      transition: { duration: 0.3 },
                     }}
-                  />
-                  <Box
-                    component={motion.div}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1, duration: 0.5 }}
                     sx={{
-                      position: "absolute",
-                      bottom: -15,
-                      left: -15,
-                      width: 30,
-                      height: 30,
+                      backgroundColor: lavenderPalette.medium,
                       borderRadius: "50%",
-                      background: lavenderPalette.deep,
-                      zIndex: 0,
-                    }}
-                  />
-
-                  <Paper
-                    elevation={16}
-                    sx={{
-                      p: { xs: 3, sm: 4 },
+                      padding: 1.5,
+                      mb: 3,
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
-                      width: "100%",
-                      borderRadius: 4,
-                      backdropFilter: "blur(20px)",
-                      background: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: `0 20px 80px ${lavenderPalette.primary}25`,
-                      position: "relative",
-                      overflow: "hidden",
-                      border: `1px solid ${lavenderPalette.soft}70`,
-                      zIndex: 1,
+                      justifyContent: "center",
+                      width: 112,
+                      height: 112,
                     }}
                   >
-                    <Box
-                      component={motion.div}
-                      whileHover={{
-                        y: -5,
-                        boxShadow: `0 20px 30px ${lavenderPalette.primary}30`,
-                        transition: { duration: 0.3 },
-                      }}
+                    <Avatar
                       sx={{
-                        backgroundColor: lavenderPalette.medium,
-                        borderRadius: "50%",
-                        padding: 1.5,
-                        mb: 3,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        width: 80,
+                        height: 80,
+                        backgroundColor: "white",
                         position: "relative",
-                        width: 112,
-                        height: 112,
+                        overflow: "visible",
                       }}
                     >
-                      <Avatar
-                        sx={{
-                          width: 80,
-                          height: 80,
-                          backgroundColor: "white",
-                          position: "relative",
-                          overflow: "visible",
-                        }}
-                      >
-                        <Box
-                          component={motion.div}
-                          animate={{
-                            rotate: [0, 360],
-                          }}
-                          transition={{
-                            duration: 20,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                          sx={{
-                            position: "absolute",
-                            top: "-6px",
-                            left: "-6px",
-                            width: "calc(100% + 12px)",
-                            height: "calc(100% + 12px)",
-                            borderRadius: "50%",
-                            border: `4px dashed ${lavenderPalette.soft}70`,
-                          }}
-                        />
-                        <ForteFolioLogo width={50} height={50} />
-                      </Avatar>
-                    </Box>
-                    <Typography
-                      variant="h4"
-                      component="h2"
-                      sx={{
-                        fontWeight: "bold",
-                        color: lavenderPalette.darkText,
-                        textAlign: "center",
-                        mb: 1,
-                        position: "relative",
-                      }}
-                    >
-                      Welcome to MakeMyForte
                       <Box
                         component={motion.div}
-                        animate={{
-                          width: ["0%", "100%", "0%"],
-                        }}
+                        animate={{ rotate: [0, 360] }}
                         transition={{
-                          duration: 3,
+                          duration: 20,
                           repeat: Infinity,
-                          repeatDelay: 1,
+                          ease: "linear",
                         }}
                         sx={{
                           position: "absolute",
-                          bottom: "-4px",
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          height: "4px",
-                          background: lavenderPalette.gradient,
-                          borderRadius: "2px",
+                          top: "-6px",
+                          left: "-6px",
+                          width: "calc(100% + 12px)",
+                          height: "calc(100% + 12px)",
+                          borderRadius: "50%",
+                          border: `4px dashed ${lavenderPalette.soft}70`,
                         }}
                       />
-                    </Typography>
-                    <Typography
-                      variant="body1"
+                      <ForteFolioLogo width={50} height={50} />
+                    </Avatar>
+                  </Box>
+                  <Typography
+                    variant="h4"
+                    component="h2"
+                    sx={{
+                      fontWeight: "bold",
+                      color: lavenderPalette.darkText,
+                      textAlign: "center",
+                      mb: 1,
+                      position: "relative",
+                    }}
+                  >
+                    Welcome to MakeMyForte
+                    <Box
+                      component={motion.div}
+                      animate={{ width: ["0%", "100%", "0%"] }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        repeatDelay: 1,
+                      }}
                       sx={{
-                        mb: 5,
-                        textAlign: "center",
-                        maxWidth: "320px",
-                        color: lavenderPalette.text,
+                        position: "absolute",
+                        bottom: "-4px",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        height: "4px",
+                        background: lavenderPalette.gradient,
+                        borderRadius: "2px",
+                      }}
+                    />
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 5,
+                      textAlign: "center",
+                      maxWidth: "320px",
+                      color: lavenderPalette.text,
+                    }}
+                  >
+                    Begin your journey to creating impressive, job-winning
+                    resumes
+                  </Typography>
+                  {error && (
+                    <Alert
+                      severity="error"
+                      sx={{
+                        mb: 3,
+                        width: "100%",
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "error.light",
                       }}
                     >
-                      Begin your journey to creating impressive, job-winning
-                      resumes
-                    </Typography>
-                    {error && (
-                      <Alert
-                        severity="error"
-                        sx={{
-                          mb: 3,
+                      {error}
+                    </Alert>
+                  )}
+                  <Box
+                    component={motion.div}
+                    whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                    whileTap={{ scale: 0.97 }}
+                    sx={{ width: "100%" }}
+                    onHoverStart={() => setHoverButton(true)}
+                    onHoverEnd={() => setHoverButton(false)}
+                  >
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      size="large"
+                      startIcon={
+                        isLoading ? (
+                          <CircularProgress size={24} color="inherit" />
+                        ) : (
+                          <Box
+                            component={motion.div}
+                            animate={
+                              hoverButton ? { rotate: [0, -10, 10, -5, 0] } : {}
+                            }
+                            transition={{ duration: 0.5 }}
+                          >
+                            <GoogleIcon />
+                          </Box>
+                        )
+                      }
+                      onClick={onGoogleSignIn}
+                      disabled={isLoading}
+                      sx={{
+                        py: 1.8,
+                        borderRadius: "16px",
+                        textTransform: "none",
+                        fontSize: { xs: "1rem", sm: "1.1rem" },
+                        fontWeight: 600,
+                        letterSpacing: 0.5,
+                        boxShadow: `0 10px 20px ${lavenderPalette.medium}30`,
+                        background: lavenderPalette.gradient,
+                        color: "white",
+                        position: "relative",
+                        overflow: "hidden",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          top: 0,
+                          left: "-100%",
                           width: "100%",
-                          borderRadius: 2,
-                          border: "1px solid",
-                          borderColor: "error.light",
-                        }}
-                      >
-                        {error}
-                      </Alert>
-                    )}
-                    <Box
-                      component={motion.div}
-                      whileHover={{
-                        scale: 1.03,
-                        transition: { duration: 0.2 },
+                          height: "100%",
+                          background: `linear-gradient(90deg, transparent, ${alpha(
+                            lavenderPalette.light,
+                            0.4
+                          )}, transparent)`,
+                          transition: "all 0.6s ease",
+                        },
+                        "&:hover": {
+                          boxShadow: `0 15px 25px ${lavenderPalette.medium}40`,
+                          "&::before": { left: "100%" },
+                        },
                       }}
-                      whileTap={{ scale: 0.97 }}
-                      sx={{ width: "100%" }}
-                      onHoverStart={() => setHoverButton(true)}
-                      onHoverEnd={() => setHoverButton(false)}
                     >
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        size="large"
-                        startIcon={
-                          isLoading ? (
-                            <CircularProgress size={24} color="inherit" />
-                          ) : (
+                      {isLoading ? "Signing In..." : "Continue with Google"}
+                      <AnimatePresence>
+                        {hoverButton &&
+                          !isLoading &&
+                          [...Array(5)].map((_, i) => (
                             <Box
+                              key={`particle-${i}`}
                               component={motion.div}
-                              animate={
-                                hoverButton
-                                  ? {
-                                      rotate: [0, -10, 10, -5, 0],
-                                    }
-                                  : {}
-                              }
-                              transition={{ duration: 0.5 }}
-                            >
-                              <GoogleIcon />
-                            </Box>
-                          )
-                        }
-                        onClick={onGoogleSignIn}
-                        disabled={isLoading}
-                        sx={{
-                          py: 1.8,
-                          borderRadius: "16px",
-                          textTransform: "none",
-                          fontSize: { xs: "1rem", sm: "1.1rem" },
-                          fontWeight: 600,
-                          letterSpacing: 0.5,
-                          boxShadow: `0 10px 20px ${lavenderPalette.medium}30`,
-                          background: lavenderPalette.gradient,
-                          color: "white",
-                          position: "relative",
-                          overflow: "hidden",
-                          "&::before": {
-                            content: '""',
-                            position: "absolute",
-                            top: 0,
-                            left: "-100%",
-                            width: "100%",
-                            height: "100%",
-                            background: `linear-gradient(90deg, transparent, ${alpha(
-                              lavenderPalette.light,
-                              0.4
-                            )}, transparent)`,
-                            transition: "all 0.6s ease",
-                          },
-                          "&:hover": {
-                            boxShadow: `0 15px 25px ${lavenderPalette.medium}40`,
-                            "&::before": {
-                              left: "100%",
-                            },
-                          },
-                        }}
-                      >
-                        {isLoading ? "Signing In..." : "Continue with Google"}
-                        <AnimatePresence>
-                          {hoverButton &&
-                            !isLoading &&
-                            [...Array(5)].map((_, i) => (
-                              <Box
-                                key={`particle-${i}`}
-                                component={motion.div}
-                                initial={{
-                                  opacity: 1,
-                                  scale: 0,
-                                  x: "50%",
-                                  y: "50%",
-                                }}
-                                animate={{
-                                  opacity: 0,
-                                  scale: Math.random() * 0.5 + 0.5,
-                                  x: `${(Math.random() - 0.5) * 200}%`,
-                                  y: `${(Math.random() - 0.5) * 200}%`,
-                                }}
-                                exit={{ opacity: 0 }}
-                                transition={{
-                                  duration: Math.random() * 0.5 + 0.4,
-                                }}
-                                sx={{
-                                  position: "absolute",
-                                  top: "50%",
-                                  left: "50%",
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: "50%",
-                                  backgroundColor: "white",
-                                  pointerEvents: "none",
-                                }}
-                              />
-                            ))}
-                        </AnimatePresence>
-                      </Button>
-                    </Box>
-                    <Box
-                      component={motion.div}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1.2, duration: 0.5 }}
-                      sx={{
-                        mt: 3,
-                        textAlign: "center",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.5,
-                      }}
+                              initial={{
+                                opacity: 1,
+                                scale: 0,
+                                x: "50%",
+                                y: "50%",
+                              }}
+                              animate={{
+                                opacity: 0,
+                                scale: Math.random() * 0.5 + 0.5,
+                                x: `${(Math.random() - 0.5) * 200}%`,
+                                y: `${(Math.random() - 0.5) * 200}%`,
+                              }}
+                              exit={{ opacity: 0 }}
+                              transition={{
+                                duration: Math.random() * 0.5 + 0.4,
+                              }}
+                              sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                backgroundColor: "white",
+                                pointerEvents: "none",
+                              }}
+                            />
+                          ))}
+                      </AnimatePresence>
+                    </Button>
+                  </Box>
+                  <Box
+                    component={motion.div}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.2, duration: 0.5 }}
+                    sx={{
+                      mt: 3,
+                      textAlign: "center",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 0.5,
+                    }}
+                  >
+                    <AccessTimeIcon
+                      sx={{ color: lavenderPalette.primary, fontSize: 16 }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: lavenderPalette.text, fontStyle: "italic" }}
                     >
-                      <AccessTimeIcon
-                        sx={{ color: lavenderPalette.primary, fontSize: 16 }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: lavenderPalette.text,
-                          fontStyle: "italic",
-                        }}
-                      >
-                        Setup takes less than 1 minute
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Box>
-              </Grid>
+                      Setup takes less than 1 minute
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
             </Box>
-          </Box>
-          <StatisticsBar />
-          <TestimonialBadge />
-        </Grid>
+          </Grid>
+        </Grid>{" "}
+        <StatisticsBar />
+        <TestimonialBadge />
       </Container>
       <Footer />
     </Box>
