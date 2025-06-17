@@ -36,10 +36,6 @@ import {
   alpha,
   useMediaQuery,
   Snackbar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -72,6 +68,7 @@ import UpdateResumeName from "../components/ResumeBuilderPage/UpdateResumeName/U
 import Navbar from "../components/ResumeBuilderPage/NavbarForResumeBuilder/Navbar";
 import GeneratedContentDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/GeneratedContentDialog";
 import ResumeTipsDialog from "../components/ResumeBuilderPage/ResumeTipsDialog/ResumeTipsDialog";
+import VisaInterviewFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/VisaInterviewFormDialog";
 
 import { getCustomTheme } from "../theme/customTheme";
 import SOPFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/SOPFormDialog";
@@ -246,7 +243,7 @@ function ResumeBuilderPage() {
     useState(false);
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
   const [generateContentError, setGenerateContentError] = useState("");
-  const [showCountrySelection, setShowCountrySelection] = useState(false);
+  const [showVisaFormDialog, setShowVisaFormDialog] = useState(false);
   const [showResumeTips, setShowResumeTips] = useState(false);
   const [showSOPFormDialog, setShowSOPFormDialog] = useState(false);
 
@@ -562,35 +559,146 @@ function ResumeBuilderPage() {
 
       Now, write the Statement of Purpose based on all the provided details.`;
     } else {
-      let basePrompt = `Based on the following resume data, please generate a ${type}. `;
-      switch (type) {
-        case "Interview Questions":
-          basePrompt +=
-            "Focus on questions that would assess the candidate's skills, experience, personality, and suitability for roles related to their profile. **For each question, also provide a concise and ideal answer.** Format the output as a numbered list of 'Question: [question]\\nAnswer: [answer]'.";
-          break;
-        case "Cover Letter":
-          basePrompt +=
-            "Write a professional and compelling cover letter for my job application. Here are my details: Job Application Information: Position title: [Exact job title from posting] Company name: [Company name] Department/Team: [If specified in job posting] Job posting source: [Where you found the job - LinkedIn, company website, etc.] Application deadline: [If mentioned] Company Research: Company mission/values: [What the company stands for] Recent company news: [Recent achievements, expansions, products, or initiatives] Company culture: [What you know about their work environment] Industry position: [Their role in the industry, competitors, market position] Why you want to work there: [Specific reasons beyond just the job] Job Requirements Analysis: Key qualifications required: [Top 5-6 requirements from job posting] Preferred qualifications: [Additional skills/experience they want] Specific skills mentioned: [Technical skills, software, methodologies listed] Experience level required: [Years of experience, seniority level] Education requirements: [Degree requirements, certifications needed] Your Background: Current position/status: [Your current job title and company] Years of relevant experience: [Total experience in this field/role] Education: [Highest degree, relevant certifications, graduation year] Industry experience: [Industries you've worked in] Career progression: [Brief overview of your career growth] Relevant Experience: Most relevant role: [Job title, company, duration, key responsibilities] Relevant project 1: [Specific project that matches job requirements] Relevant project 2: [Another project showcasing required skills] Leadership experience: [Any management, team lead, or project lead roles] Cross-functional collaboration: [Experience working with different teams] Key Achievements: Quantifiable achievement 1: [Specific result with numbers/percentages] Quantifiable achievement 2: [Another measurable accomplishment] Award or recognition: [Any awards, recognition, or special acknowledgments] Problem-solving example: [A challenge you solved and the impact] Innovation/improvement: [Process improvements or innovations you've made] Skills Match: Technical skills: [Skills that directly match job requirements] Soft skills: [Communication, leadership, analytical skills, etc.] Industry knowledge: [Specific industry expertise relevant to role] Tools/software: [Specific tools mentioned in job posting that you know] Certifications: [Relevant certifications you hold] Personal Motivation: Why this role interests you: [Specific aspects of the job that excite you] Career goals alignment: [How this role fits your career trajectory] What you hope to contribute: [How you plan to add value to the team] Growth opportunities: [What you hope to learn/develop in this role] Connection/Referral: Referral source: [If someone referred you, mention their name and role] Networking connection: [If you met someone from the company] Previous interaction: [Any prior contact with the company] Mutual connections: [LinkedIn connections or professional relationships] Availability and Logistics: Start date availability: [When you can begin] Location preference: [Remote, hybrid, on-site flexibility] Salary expectations: [If you want to mention this] Relocation willingness: [If job requires relocation] Additional Information: Cover letter length: [Typically 3-4 paragraphs, 250-400 words] Tone preference: [Professional, enthusiastic, confident, etc.] Industry style: [Conservative for finance, creative for marketing, etc.] Special circumstances: [Career change, gap in employment, etc.] Writing Instructions: Write a cover letter that: Opens with a strong hook that shows knowledge of the company and enthusiasm for the role Clearly connects my experience and skills to the specific job requirements Highlights 2-3 specific achievements that demonstrate my ability to excel in this role Shows genuine interest in the company and explains why I want to work there Demonstrates cultural fit and alignment with company values Includes a confident call to action for next steps Maintains professional tone while showing personality and enthusiasm Uses specific examples and quantifiable results where possible Avoids generic language and clearly differentiates me from other candidates Follows standard business letter format with proper salutation and closing Make sure the letter tells a compelling story of why I'm the ideal candidate for this specific role at this specific company, focusing on mutual benefit and value creation.";
-          break;
-        case "Visa Interview Questions":
-          if (!additionalData || !additionalData.country) {
-            setGenerateContentError(
-              "Please select a country for Visa Interview Questions."
-            );
-            setIsGeneratingContent(false);
-            setShowGeneratedContentDialog(false);
-            return;
-          }
-          basePrompt += `Generate a comprehensive list of visa interview questions tailored to my specific situation for a **${country}** visa. Create realistic questions that visa officers typically ask, organized by category, along with concise and ideal answers for each question. Visa Application Details: Visa type: [Student F-1, Work H-1B, Tourist B-2, Business B-1, etc.] Destination country: [${country}] Duration of stay: [How long you plan to stay] Purpose of visit: [Study, work, tourism, business, family visit, etc.] Consulate/Embassy location: [Where you're interviewing] Interview language: [English, or specify if different] Personal Background: Age: [Your age] Marital status: [Single, married, divorced, etc.] Current occupation: [Your current job/student status] Education level: [Highest degree completed] Home country: [Your country of citizenship] City of residence: [Where you currently live] Language skills: [Languages you speak and proficiency levels] Travel and Visa History: Previous visa applications: [Any previous visas applied for and outcomes] Countries visited: [List of countries you've traveled to] Visa refusals: [Any previous rejections and reasons if known] Immigration violations: [Any overstays or issues - be honest] Current valid visas: [Other country visas you currently hold] Financial Information: Income source: [Salary, business, family support, scholarships, etc.] Monthly income: [Your regular income in local currency] Bank balance: [Approximate savings amount] Financial sponsor: [If someone else is funding your trip] Employment status: [Full-time, part-time, unemployed, student, etc.] Assets owned: [Property, investments, business ownership] Purpose-Specific Details (Fill relevant section): For Student Visa: University/School: [Name of institution] Program: [Degree program and field of study] Duration: [Length of study program] Tuition fees: [Annual cost] Funding source: [How you're paying for education] Post-graduation plans: [Career plans after graduation] For Work Visa: Company name: [Employing company] Job position: [Your role/title] Salary offered: [Annual compensation] Work experience: [Years of relevant experience] Relationship to company: [How you got the job] Work location: [Where you'll be working] For Tourist/Business Visa: Travel itinerary: [Places you plan to visit] Accommodation: [Where you'll stay] Travel companions: [Who you're traveling with] Trip duration: [Exact dates of travel] Business contacts: [If business visa, who you're meeting] Return travel plans: [Your return ticket details] Ties to Home Country: Family ties: [Parents, spouse, children living in home country] Property ownership: [Real estate, business owned] Job obligations: [Employment requiring your return] Social connections: [Community involvement, responsibilities] Future commitments: [Planned events, obligations at home] Reasons to return: [Why you must/want to come back] Potential Concerns/Weaknesses: Application weak points: [Any aspects of your application that might raise questions] Employment gaps: [Any periods of unemployment] Inconsistencies: [Any discrepancies in your application] Age factors: [If very young or older applicant] Single/unmarried status: [If this might be seen as lacking ties] Previous rejections: [How to address past refusals] Specific Preparation Needs: Difficult questions to practice: [Areas you're most worried about] Document explanations needed: [Complex financial or personal situations] Language barriers: [If English isn't your first language] Nervousness factors: [What makes you most anxious about the interview] Question Generation Instructions: Generate interview questions that cover: Basic Information Questions (5-8 questions) Personal background and current situation Purpose of Visit Questions (8-12 questions) Specific to my visa type and travel purpose Financial Questions (6-10 questions) Income, expenses, funding sources, financial stability Ties to Home Country Questions (5-8 questions) Reasons to return, obligations, connections Travel History Questions (4-6 questions) Previous travel, visa history, compliance Specific Concern Questions (5-8 questions) Based on potential weaknesses in my application Tricky/Complex Questions (4-6 questions) Challenging scenarios and hypothetical situations For each question, provide: The question as typically asked by visa officers A concise and ideal answer for the question What NOT to say or avoid Additional Requirements: Include both straightforward and challenging questions Cover questions about [specific concerns you mentioned above] Provide questions in order from basic to more complex Include follow-up questions that officers might ask Add cultural/country-specific questions relevant to ${country} Include questions that test consistency with your application documents Make the questions realistic and reflect actual visa interview experiences, focusing on the most critical areas that determine visa approval for my specific situation.`;
-          break;
-        default:
-          basePrompt += "";
+      let basePrompt = "";
+      if (type === "Visa Interview Questions") {
+        if (!additionalData) {
+          setGenerateContentError(
+            "Required visa application details are missing."
+          );
+          setIsGeneratingContent(false);
+          setShowGeneratedContentDialog(false);
+          return;
+        }
+        fullPrompt = `As a seasoned Embassy Visa Officer with nearly 10 years of experience conducting thousands of visa interviews across multiple visa categories, I will conduct a comprehensive and challenging interview that mirrors real embassy conditions. My role is to thoroughly assess your genuine intentions, financial stability, ties to your home country, and overall credibility as a visa applicant.
+
+Required Documentation/Information from Applicant:
+1. Complete Resume/CV:
+${JSON.stringify(resumeData, null, 2)}
+
+2. Visa Application Details:
+- Type of Visa: Student Visa
+- Destination Country: ${additionalData.country}
+- Purpose of Travel: To pursue higher education.
+
+3. Academic Information (if applicable):
+- University/Institution Name: ${additionalData.universityName}
+- Course/Program Name: ${additionalData.courseName}
+
+4. Financial Sponsor Details:
+- Sponsor Name: ${additionalData.sponsorName}
+- Relationship to Applicant: Sponsor
+- Sponsor's Designation/Job Title: ${additionalData.sponsorDesignation}
+- Annual Salary/Income: ${additionalData.sponsorSalary}
+
+Interview Methodology:
+Pre-Interview Assessment
+I will first analyze your documentation to identify potential red flags, inconsistencies, or areas requiring deeper investigation before conducting the interview.
+Interview Structure: Multi-Layered Questioning
+
+ROUND 1: BASIC ELIBILITY & INTENT
+Opening Questions:
+- What is the specific purpose of your visit to ${additionalData.country}?
+- How long do you intend to stay?
+- Have you ever been denied a visa to any country? If yes, explain why.
+Probing Questions:
+- Why did you choose this particular country over others?
+- What specific research did you do before deciding on this destination?
+- How does this program align with your long-term goals?
+
+ROUND 2: FINANCIAL SCRUTINY (Most Critical)
+Direct Financial Questions:
+- What is the total cost of your studies?
+- Provide a detailed breakdown of your expected expenses.
+- How exactly will you fund this amount?
+Sponsor Investigation (if applicable):
+- How long has your sponsor been employed in their current position?
+- What is their exact monthly take-home salary after taxes?
+- Why is your sponsor willing to fund this significant expense for you?
+- What is your sponsor's annual income for the last 3 years?
+- Does your sponsor have other financial dependents?
+Deep Financial Probing:
+- If your sponsor earns ${
+          additionalData.sponsorSalary
+        }, how can they afford your expenses while maintaining their lifestyle?
+- Show me evidence of your sponsor's savings specifically allocated for your education.
+- What happens if your sponsor loses their job during your stay abroad?
+- Have you or your sponsor taken any loans for this purpose?
+
+ROUND 3: TIES TO HOME COUNTRY (Critical for Assessment)
+Employment/Career Ties:
+- What is your current employment status?
+- If employed: Will your job be held for you during your absence?
+- If unemployed: What are your immediate job prospects upon return?
+- How will this experience benefit your career in your home country?
+Family & Social Ties:
+- Describe your immediate family members and their dependence on you.
+- What significant responsibilities do you have in your home country?
+- Why wouldn't you want to remain in ${additionalData.country} permanently?
+Property & Asset Ties:
+- Do you own any property, business, or significant assets in your home country?
+- What valuable possessions would you be leaving behind?
+
+ROUND 4: ACADEMIC/PROFESSIONAL SCRUTINY (if applicable)
+Educational Background:
+- Explain the gap(s) in your education/career, if any.
+- Why didn't you pursue this course in your home country?
+- How is this program different from what's available locally?
+Institution-Specific Questions:
+- Why this specific university, ${additionalData.universityName}?
+- What other institutions did you apply to? What were the results?
+- How did you learn about this institution?
+- Who influenced your decision to choose this particular program?
+Post-Study/Program Plans:
+- What exactly will you do immediately after completing this program?
+- How will you use this qualification/experience in your home country?
+- What is your 5-year career plan?
+
+ROUND 5: CHALLENGING SCENARIO-BASED QUESTIONS
+Hypothetical Situations:
+- If you were offered a job in ${
+          additionalData.country
+        } during your stay, what would you do?
+What if your family faced a financial emergency while you're abroad?
+If your sponsor died or became unable to support you, how would you manage?
+What if you fail your course or your program is terminated?
+Pressure Questions:
+- You seem nervous. Is there something you're not telling me?
+- Your financial situation doesn't seem adequate for this trip. Convince me otherwise.
+- I'm not convinced about your intention to return. Change my mind.
+- This appears to be an attempt to immigrate permanently. Respond to this concern.
+
+ROUND 6: DETAILED VERIFICATION
+Cross-Reference Questions:
+- Repeat some earlier questions to check for consistency
+- Ask for specific details about dates, amounts, timelines
+- Request clarification on any contradictory information
+Document Verification:
+- Can you explain this discrepancy in your financial documents?
+- This letter from your sponsor seems generic. Can you provide more personalized proof?
+- Your academic transcripts show inconsistent performance. Explain.
+
+Now, based on all the provided information, conduct the interview by generating a series of realistic and challenging questions based on the outlined methodology. The questions should be tough and directly challenge the applicant's profile.
+`;
+      } else {
+        basePrompt = `Based on the following resume data, please generate a ${type}. `;
+        switch (type) {
+          case "Interview Questions":
+            basePrompt +=
+              "Focus on questions that would assess the candidate's skills, experience, personality, and suitability for roles related to their profile. **For each question, also provide a concise and ideal answer.** Format the output as a numbered list of 'Question: [question]\\nAnswer: [answer]'.";
+            break;
+          case "Cover Letter":
+            basePrompt +=
+              "Write a professional and compelling cover letter for my job application. Here are my details: Job Application Information: Position title: [Exact job title from posting] Company name: [Company name] Department/Team: [If specified in job posting] Job posting source: [Where you found the job - LinkedIn, company website, etc.] Application deadline: [If mentioned] Company Research: Company mission/values: [What the company stands for] Recent company news: [Recent achievements, expansions, products, or initiatives] Company culture: [What you know about their work environment] Industry position: [Their role in the industry, competitors, market position] Why you want to work there: [Specific reasons beyond just the job] Job Requirements Analysis: Key qualifications required: [Top 5-6 requirements from job posting] Preferred qualifications: [Additional skills/experience they want] Specific skills mentioned: [Technical skills, software, methodologies listed] Experience level required: [Years of experience, seniority level] Education requirements: [Degree requirements, certifications needed] Your Background: Current position/status: [Your current job title and company] Years of relevant experience: [Total experience in this field/role] Education: [Highest degree, relevant certifications, graduation year] Industry experience: [Industries you've worked in] Career progression: [Brief overview of your career growth] Relevant Experience: Most relevant role: [Job title, company, duration, key responsibilities] Relevant project 1: [Specific project that matches job requirements] Relevant project 2: [Another project showcasing required skills] Leadership experience: [Any management, team lead, or project lead roles] Cross-functional collaboration: [Experience working with different teams] Key Achievements: Quantifiable achievement 1: [Specific result with numbers/percentages] Quantifiable achievement 2: [Another measurable accomplishment] Award or recognition: [Any awards, recognition, or special acknowledgments] Problem-solving example: [A challenge you solved and the impact] Innovation/improvement: [Process improvements or innovations you've made] Skills Match: Technical skills: [Skills that directly match job requirements] Soft skills: [Communication, leadership, analytical skills, etc.] Industry knowledge: [Specific industry expertise relevant to role] Tools/software: [Specific tools mentioned in job posting that you know] Certifications: [Relevant certifications you hold] Personal Motivation: Why this role interests you: [Specific aspects of the job that excite you] Career goals alignment: [How this role fits your career trajectory] What you hope to contribute: [How you plan to add value to the team] Growth opportunities: [What you hope to learn/develop in this role] Connection/Referral: Referral source: [If someone referred you, mention their name and role] Networking connection: [If you met someone from the company] Previous interaction: [Any prior contact with the company] Mutual connections: [LinkedIn connections or professional relationships] Availability and Logistics: Start date availability: [When you can begin] Location preference: [Remote, hybrid, on-site flexibility] Salary expectations: [If you want to mention this] Relocation willingness: [If job requires relocation] Additional Information: Cover letter length: [Typically 3-4 paragraphs, 250-400 words] Tone preference: [Professional, enthusiastic, confident, etc.] Industry style: [Conservative for finance, creative for marketing, etc.] Special circumstances: [Career change, gap in employment, etc.] Writing Instructions: Write a cover letter that: Opens with a strong hook that shows knowledge of the company and enthusiasm for the role Clearly connects my experience and skills to the specific job requirements Highlights 2-3 specific achievements that demonstrate my ability to excel in this role Shows genuine interest in the company and explains why I want to work there Demonstrates cultural fit and alignment with company values Includes a confident call to action for next steps Maintains professional tone while showing personality and enthusiasm Uses specific examples and quantifiable results where possible Avoids generic language and clearly differentiates me from other candidates Follows standard business letter format with proper salutation and closing Make sure the letter tells a compelling story of why I'm the ideal candidate for this specific role at this specific company, focusing on mutual benefit and value creation.";
+            break;
+          default:
+            basePrompt += "";
+        }
+        fullPrompt = `${basePrompt}\n\nResume Data:\n${JSON.stringify(
+          resumeData,
+          null,
+          2
+        )}\n\n${type}:`;
       }
-      fullPrompt = `${basePrompt}\n\nResume Data:\n${JSON.stringify(
-        resumeData,
-        null,
-        2
-      )}\n\n${type}:`;
     }
 
     try {
@@ -626,9 +734,15 @@ function ResumeBuilderPage() {
       }
 
       const result = await response.json();
-      const message = result.choices?.[0]?.message?.content;
+      let message = result.choices?.[0]?.message?.content;
 
       if (message) {
+        // MODIFICATION STARTS HERE
+        if (type === "Visa Interview Questions") {
+          const redFlagTips = `\n\n---\n\n RED FLAG INDICATORS I'M WATCHING FOR:\n\n🚩 Financial Red Flags:\n- The sponsor's income doesn't justify the expense\n- Recent large deposits in bank accounts\n- Inconsistent financial documentation\n- Vague explanations about funding sources\n\n🚩 Intent Red Flags:\n- Weak ties to the home country\n- Strong connections in the destination country\n- Evasive answers about return plans\n- Inconsistent story about the purpose of travel\n\n🚩 Credibility Red Flags:**\n- Contradictory statements\n- Nervous behavior beyond normal interview anxiety\n- Rehearsed or coached answers\n- Unable to provide specific details about plans`;
+          message += redFlagTips;
+        }
+        // MODIFICATION ENDS HERE
         setGeneratedContent(message.trim());
       } else {
         setGenerateContentError(`No ${type} generated. Please try again.`);
@@ -644,11 +758,6 @@ function ResumeBuilderPage() {
   const handleGenerateInterviewQuestions = () =>
     generateContent("Interview Questions");
   const handleGenerateCoverLetter = () => generateContent("Cover Letter");
-
-  const handleGenerateVisaQuestionsClick = (country) => {
-    setShowCountrySelection(false);
-    generateContent("Visa Interview Questions", { country });
-  };
 
   if (isLoading) {
     return (
@@ -987,7 +1096,7 @@ function ResumeBuilderPage() {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => setShowCountrySelection(true)}>
+          <ListItemButton onClick={() => setShowVisaFormDialog(true)}>
             <ListItemIcon sx={{ minWidth: 40 }}>
               <GavelIcon />{" "}
             </ListItemIcon>
@@ -1026,7 +1135,7 @@ function ResumeBuilderPage() {
             ? "Saving..."
             : unsavedChanges
             ? "Save Changes"
-            : "All Saved"}
+            : "Save All"}
         </Button>
         {saveError && (
           <Typography
@@ -1261,34 +1370,13 @@ function ResumeBuilderPage() {
           loading={isGeneratingContent}
           error={generateContentError}
         />
-        <Dialog
-          open={showCountrySelection}
-          onClose={() => setShowCountrySelection(false)}
-        >
-          <DialogTitle>Select Country for Visa Questions</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Which country's visa interview questions would you like to
-              generate?
-            </DialogContentText>
-            <Box
-              sx={{ display: "flex", justifyContent: "space-around", mt: 2 }}
-            >
-              <Button
-                variant="contained"
-                onClick={() => handleGenerateVisaQuestionsClick("US")}
-              >
-                US Visa
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => handleGenerateVisaQuestionsClick("UK")}
-              >
-                UK Visa
-              </Button>
-            </Box>
-          </DialogContent>
-        </Dialog>
+        <VisaInterviewFormDialog
+          open={showVisaFormDialog}
+          onClose={() => setShowVisaFormDialog(false)}
+          onGenerate={(visaData) => {
+            generateContent("Visa Interview Questions", visaData);
+          }}
+        />
         <ResumeTipsDialog
           open={showResumeTips}
           onClose={() => setShowResumeTips(false)}

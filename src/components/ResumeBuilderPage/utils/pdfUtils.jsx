@@ -1,12 +1,4 @@
 import html2pdf from "html2pdf.js";
-
-/**
- * Enhanced PDF generation function for better output quality and proper rendering
- *
- * @param {HTMLElement} element - The DOM element to convert to PDF
- * @param {Object} options - Configuration options for filename, etc.
- * @returns {Promise} - Promise that resolves when PDF is generated
- */
 export const generatePDF = (element, options = {}) => {
   return new Promise((resolve, reject) => {
     const filename = options.filename || "Resume.pdf";
@@ -52,14 +44,6 @@ export const generatePDF = (element, options = {}) => {
   });
 };
 
-/**
- * Apply special styles to optimize elements for PDF rendering.
- * This is particularly important for preserving colors, borders, and backgrounds.
- * These styles are applied to a CLONED version of the element.
- *
- * @param {HTMLElement} element - The DOM element (clone) to style
- * @returns {HTMLElement} - The modified element
- */
 export const applyPDFOptimizationStyles = (element) => {
   if (!element) return element;
 
@@ -77,12 +61,6 @@ export const applyPDFOptimizationStyles = (element) => {
   return element;
 };
 
-/**
- * Recursively process all elements in the DOM tree to optimize for PDF rendering.
- * This function directly manipulates the style of the elements in the CLONED tree.
- *
- * @param {HTMLElement} rootElement - The parent element (clone) to process
- */
 const processElementsForPDF = (rootElement) => {
   const allElements = rootElement.querySelectorAll("*");
 
@@ -173,13 +151,6 @@ const processElementsForPDF = (rootElement) => {
   });
 };
 
-/**
- * Generate inline CSS for @media print to be injected into the document.
- * This helps ensure proper rendering when using the browser's native print function.
- * For printing the "visual preview", this CSS should support the scaled element.
- *
- * @returns {string} CSS string for print media
- */
 export const generatePrintCss = () => {
   return `
     @media print {
