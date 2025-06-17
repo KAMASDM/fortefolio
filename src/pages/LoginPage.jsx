@@ -630,105 +630,110 @@ function LoginPage() {
                       {error}
                     </Alert>
                   )}
-                  <Box
-                    component={motion.div}
-                    whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                    whileTap={{ scale: 0.97 }}
-                    sx={{ width: "100%" }}
-                    onHoverStart={() => setHoverButton(true)}
-                    onHoverEnd={() => setHoverButton(false)}
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="large"
+                    onClick={onGoogleSignIn}
+                    disabled={isLoading}
+                    onMouseEnter={() => setHoverButton(true)}
+                    onMouseLeave={() => setHoverButton(false)}
+                    sx={{
+                      py: 1.8,
+                      borderRadius: "16px",
+                      textTransform: "none",
+                      fontSize: { xs: "1rem", sm: "1.1rem" },
+                      fontWeight: 600,
+                      letterSpacing: 0.5,
+                      boxShadow: `0 10px 20px ${lavenderPalette.medium}30`,
+                      background: lavenderPalette.gradient,
+                      color: "white",
+                      position: "relative",
+                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        top: 0,
+                        left: "-100%",
+                        width: "100%",
+                        height: "100%",
+                        background: `linear-gradient(90deg, transparent, ${alpha(
+                          lavenderPalette.light,
+                          0.4
+                        )}, transparent)`,
+                        transition: "all 0.6s ease",
+                      },
+                      "&:hover": {
+                        boxShadow: `0 15px 25px ${lavenderPalette.medium}40`,
+                        "&::before": { left: "100%" },
+                      },
+                    }}
                   >
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      startIcon={
-                        isLoading ? (
-                          <CircularProgress size={24} color="inherit" />
-                        ) : (
-                          <Box
-                            component={motion.div}
-                            animate={
-                              hoverButton ? { rotate: [0, -10, 10, -5, 0] } : {}
-                            }
-                            transition={{ duration: 0.5 }}
-                          >
-                            <GoogleIcon />
-                          </Box>
-                        )
-                      }
-                      onClick={onGoogleSignIn}
-                      disabled={isLoading}
+                    <Box
                       sx={{
-                        py: 1.8,
-                        borderRadius: "16px",
-                        textTransform: "none",
-                        fontSize: { xs: "1rem", sm: "1.1rem" },
-                        fontWeight: 600,
-                        letterSpacing: 0.5,
-                        boxShadow: `0 10px 20px ${lavenderPalette.medium}30`,
-                        background: lavenderPalette.gradient,
-                        color: "white",
-                        position: "relative",
-                        overflow: "hidden",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          top: 0,
-                          left: "-100%",
-                          width: "100%",
-                          height: "100%",
-                          background: `linear-gradient(90deg, transparent, ${alpha(
-                            lavenderPalette.light,
-                            0.4
-                          )}, transparent)`,
-                          transition: "all 0.6s ease",
-                        },
-                        "&:hover": {
-                          boxShadow: `0 15px 25px ${lavenderPalette.medium}40`,
-                          "&::before": { left: "100%" },
-                        },
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.2,
                       }}
                     >
-                      {isLoading ? "Signing In..." : "Continue with Google"}
-                      <AnimatePresence>
-                        {hoverButton &&
-                          !isLoading &&
-                          [...Array(5)].map((_, i) => (
-                            <Box
-                              key={`particle-${i}`}
-                              component={motion.div}
-                              initial={{
-                                opacity: 1,
-                                scale: 0,
-                                x: "50%",
-                                y: "50%",
-                              }}
-                              animate={{
-                                opacity: 0,
-                                scale: Math.random() * 0.5 + 0.5,
-                                x: `${(Math.random() - 0.5) * 200}%`,
-                                y: `${(Math.random() - 0.5) * 200}%`,
-                              }}
-                              exit={{ opacity: 0 }}
-                              transition={{
-                                duration: Math.random() * 0.5 + 0.4,
-                              }}
-                              sx={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                width: 8,
-                                height: 8,
-                                borderRadius: "50%",
-                                backgroundColor: "white",
-                                pointerEvents: "none",
-                              }}
-                            />
-                          ))}
-                      </AnimatePresence>
-                    </Button>
-                  </Box>
+                      {isLoading ? (
+                        <CircularProgress size={24} color="inherit" />
+                      ) : (
+                        <Box
+                          component={motion.div}
+                          animate={
+                            hoverButton ? { rotate: [0, -10, 10, -5, 0] } : {}
+                          }
+                          transition={{ duration: 0.5 }}
+                          sx={{ display: "flex", alignItems: "center" }} // ensures icon is centered
+                        >
+                          <GoogleIcon />
+                        </Box>
+                      )}
+                      <Box component="span">
+                        {isLoading ? "Signing In..." : "Continue with Google"}
+                      </Box>
+                    </Box>
+                    <AnimatePresence>
+                      {hoverButton &&
+                        !isLoading &&
+                        [...Array(5)].map((_, i) => (
+                          <Box
+                            key={`particle-${i}`}
+                            component={motion.div}
+                            initial={{
+                              opacity: 1,
+                              scale: 0,
+                              x: "50%",
+                              y: "50%",
+                            }}
+                            animate={{
+                              opacity: 0,
+                              scale: Math.random() * 0.5 + 0.5,
+                              x: `${(Math.random() - 0.5) * 200}%`,
+                              y: `${(Math.random() - 0.5) * 200}%`,
+                            }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                              duration: Math.random() * 0.5 + 0.4,
+                            }}
+                            sx={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              backgroundColor: "white",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        ))}
+                    </AnimatePresence>
+                  </Button>
                   <Box
                     component={motion.div}
                     initial={{ opacity: 0, y: 10 }}
