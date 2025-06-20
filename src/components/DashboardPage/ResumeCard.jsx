@@ -222,11 +222,10 @@ const ResumeCard = ({ resume, onEdit, onContextMenu }) => {
                 {" "}
                 {resume.completionPercentage === 100
                   ? "✓ Complete"
-                  : `${
-                      5 -
-                      Object.values(resume.sections || {}).filter(Boolean)
-                        .length
-                    } sections left`}{" "}
+                  : `${5 -
+                  Object.values(resume.sections || {}).filter(Boolean)
+                    .length
+                  } sections left`}{" "}
               </Typography>
             </Box>
             <LinearProgress

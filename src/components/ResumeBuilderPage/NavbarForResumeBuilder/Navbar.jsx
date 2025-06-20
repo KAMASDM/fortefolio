@@ -11,6 +11,7 @@ import {
   Slide,
   useScrollTrigger,
   Grow,
+
 } from "@mui/material";
 import { styled, alpha } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -61,151 +62,145 @@ const Navbar = ({
   previewStepId,
   handleDrawerToggle,
   onOpenResumeTips,
+  currentStep,
 }) => {
   return (
     <HideOnScroll>
       <AppBar
         position="sticky"
         sx={{
-          width: { md: "calc(100% - 280px)" },
-          ml: { md: "280px" },
-          bgcolor: darkMode ? "grey.900" : "grey.100",
+          // bgcolor: darkMode ? "grey.900" : "grey.100",
           color: darkMode ? "grey.100" : "grey.900",
+          boxShadow: 1,
         }}
         className="no-print"
       >
-        <Toolbar sx={{ minHeight: { xs: 64, sm: 70 } }}>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 1.5, display: { md: "none" } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box sx={{ flexGrow: 1 }} />
-          {unsavedChanges && !isSaving && (
-            <Grow in={unsavedChanges}>
-              <Chip
-                label="Unsaved Changes"
-                color="warning"
-                size="small"
-                variant="filled"
-                sx={{ mx: 1.5, display: { xs: "none", sm: "flex" } }}
-              />
-            </Grow>
-          )}
-          {isSaving && (
+        <Toolbar
+          sx={{
+            minHeight: { xs: 64, sm: 70 },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: "transparent"
+          }}
+        >
+          {/* Left Section */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 1.5, display: { md: "none" } }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            {/* <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "22px" }}>
+            {currentStep == 1 && "Personal Info"}
+            {currentStep == 2 && "Education"}
+            {currentStep == 3 && "Experience"}
+            {currentStep == 4 && "Skills"}
+            {currentStep == 5 && "Projects"}
+            {currentStep == 6 && "References"}
+            {isPreviewMode && "Resume Preview"}
+          </Typography> */}
+
+            {unsavedChanges && !isSaving && (
+              <Grow in={unsavedChanges}>
+                <Chip
+                  label="Unsaved Changes"
+                  color="warning"
+                  size="small"
+                  variant="filled"
+                  sx={{ mx: 1.5, display: { xs: "none", sm: "flex" } }}
+                />
+              </Grow>
+            )}
+
+            {isSaving && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mr: 1.5,
+                  color: "text.secondary",
+                }}
+              >
+                <CircularProgress size={18} sx={{ mr: 1 }} color="inherit" />
+                <Typography
+                  variant="caption"
+                  sx={{ display: { xs: "none", sm: "inline" } }}
+                >
+                  Saving...
+                </Typography>
+              </Box>
+            )}
+
+
+          </Box>
+
+          {/* Right Section */}
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {/* Progress Bar */}
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
+                width: { xs: 60, sm: 80 },
                 mr: 1.5,
-                color: "text.secondary",
+                display: { xs: "none", sm: "block" },
               }}
             >
-              <CircularProgress size={18} sx={{ mr: 1 }} color="inherit" />
-              <Typography
-                variant="caption"
-                sx={{ display: { xs: "none", sm: "inline" } }}
-              >
-                Saving...
-              </Typography>
-            </Box>
-          )}
-          <Box
-            sx={{
-              width: { xs: 60, sm: 80 },
-              mr: 1.5,
-              display: { xs: "none", sm: "block" },
-            }}
-          >
-            <Tooltip title={`${Math.round(completionProgress)}% Complete`}>
-              <ProgressContainer>
-                <ProgressBar value={completionProgress} />
-              </ProgressContainer>
-            </Tooltip>
-          </Box>
-          <Tooltip title="Resume Building Tips">
-            <IconButton
-              onClick={onOpenResumeTips}
-              color="inherit"
-              sx={{ mr: 0.5 }}
-            >
-              <Typography>Tips</Typography>
-              <LightbulbIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            <IconButton
-              onClick={toggleDarkMode}
-              color="inherit"
-              sx={{ mr: 0.5 }}
-            >
-              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
-            </IconButton>
-          </Tooltip>
-          {!isPreviewMode && (
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => handleNavItemClick(previewStepId)}
-              startIcon={<VisibilityIcon />}
-              sx={{ display: { xs: "none", md: "inline-flex" }, mr: 1 }}
-            >
-              Preview
-            </Button>
-          )}
-          {/* <Button
-            variant={unsavedChanges ? "contained" : "outlined"}
-            color={unsavedChanges ? "warning" : "primary"}
-            onClick={handleManualSave}
-            startIcon={
-              isSaving ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : (
-                <SaveIcon />
-              )
-            }
-            disabled={isSaving || !unsavedChanges}
-            sx={{
-              display: { xs: "none", md: "inline-flex" },
-              minWidth: 100,
-              ...(unsavedChanges && {
-                animation: "pulse 1.5s infinite ease-in-out",
-              }),
-              "@keyframes pulse": {
-                "0%, 100%": { transform: "scale(1)" },
-                "50%": { transform: "scale(1.05)" },
-              },
-            }}
-          >
-            {isSaving ? "Saving" : unsavedChanges ? "Save" : "Saved"}
-          </Button> */}
-          <Box sx={{ display: { xs: "flex", md: "none" }, ml: 1 }}>
-            {unsavedChanges && !isSaving && (
-              <Tooltip title="Save Changes">
-                <IconButton
-                  color="warning"
-                  onClick={handleManualSave}
-                  disabled={isSaving}
-                >
-                  <SaveIcon />
-                </IconButton>
+              <Tooltip title={`${Math.round(completionProgress)}% Complete`}>
+                <ProgressContainer>
+                  <ProgressBar value={completionProgress}
+                    sx={{
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: '#9D88D9', // background track color
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: '#9D88D9', // progress color
+                      },
+                    }}
+                  />
+                </ProgressContainer>
               </Tooltip>
-            )}
-            {isSaving && (
-              <IconButton disabled color="inherit">
-                <CircularProgress size={24} color="inherit" />
+            </Box>
+
+            {/* Tips */}
+            <Tooltip title="Resume Building Tips">
+              <IconButton onClick={onOpenResumeTips} color="inherit" sx={{ mr: 0.5 }}>
+                <Typography variant="body2" sx={{ mr: 0.5 }}>
+                  Tips
+                </Typography>
+                <LightbulbIcon />
               </IconButton>
+            </Tooltip>
+
+            {/* Theme Toggle */}
+            <Tooltip title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+              <IconButton onClick={toggleDarkMode} color="inherit" sx={{ mr: 0.5 }}>
+                {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
+            </Tooltip>
+
+            {/* Preview Button */}
+            {!isPreviewMode && (
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => handleNavItemClick(previewStepId)}
+                startIcon={<VisibilityIcon />}
+                sx={{ display: { xs: "none", md: "inline-flex" }, mr: 1 }}
+              >
+                Preview
+              </Button>
             )}
+
+            
           </Box>
         </Toolbar>
       </AppBar>
-    </HideOnScroll>
+    </HideOnScroll >
   );
 };
 

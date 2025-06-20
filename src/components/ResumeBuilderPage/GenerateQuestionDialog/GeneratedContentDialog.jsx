@@ -20,66 +20,76 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import jsPDF from "jspdf";
 
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+};
+
 const resumeLoadingTips = [
   {
     id: 1,
     title: "The 7-Second Scan",
     description:
-      "Believe it or not, the average recruiter or hiring manager initially spends only about 7 seconds scanning your resume. This means your resume needs to make an immediate, powerful impression with clear, concise information.",
+      "Believe it or not, the average recruiter or hiring manager initially spends only about 7 seconds scanning your resume...",
   },
   {
     id: 2,
     title: "Keyword Is King (Thanks to Robots)",
     description:
-      "Up to 90% of large companies use Applicant Tracking Systems (ATS) to filter resumes. If your resume isn't optimized with keywords from the job description, a human might never even see it.",
+      "Up to 90% of large companies use Applicant Tracking Systems (ATS)...",
   },
   {
     id: 3,
     title: "The 'Objective' is (Mostly) Obsolete",
     description:
-      "Generic objective statements like 'Seeking a challenging role...' are outdated. Most recruiters prefer a concise professional summary that highlights your key skills and experience relevant to the specific job.",
+      "Generic objective statements like 'Seeking a challenging role...' are outdated...",
   },
   {
     id: 4,
     title: "Quantify, Quantify, Quantify",
     description:
-      "Instead of just listing duties, showcase your achievements with numbers. For example, instead of 'Managed social media,' try 'Increased social media engagement by 30% over 6 months.' Statistics show a large percentage of resumes (around 81%) fail to do this effectively.",
+      "Instead of just listing duties, showcase your achievements with numbers...",
   },
   {
     id: 5,
     title: "The Power of Action Verbs",
     description:
-      "Starting your bullet points with strong action verbs (e.g., 'Orchestrated,' 'Implemented,' 'Streamlined' instead of 'Responsible for') makes your accomplishments sound more dynamic and impactful.",
+      "Starting your bullet points with strong action verbs makes your accomplishments more dynamic...",
   },
   {
     id: 6,
     title: "Length Matters (But It's Debatable)",
     description:
-      "While the 'one-page rule' is a common belief, especially for entry-level candidates, many hiring managers (around 70%) actually prefer or expect two-page resumes for more experienced professionals. The ideal length is generally considered to be between 475 and 600 words.",
+      "While the 'one-page rule' is a common belief, many hiring managers prefer two-page resumes...",
   },
   {
     id: 7,
     title: "The Cost of a Typo",
     description:
-      "A startling 77% of hiring managers will immediately reject a resume with typos or bad grammar. Proofreading isn't just a suggestion; it's crucial.",
+      "A startling 77% of hiring managers will immediately reject a resume with typos...",
   },
   {
     id: 8,
     title: "'References Available Upon Request' is Redundant",
     description:
-      "This phrase takes up valuable space and is largely assumed. Employers will ask for references when they need them.",
+      "This phrase takes up valuable space and is largely assumed...",
   },
   {
     id: 9,
     title: "Unprofessional Email Addresses Get Trashed",
     description:
-      "An email like 'partyanimal2000@email.com' can get your resume instantly dismissed by around 35% of employers. Stick to a professional-sounding email, usually a variation of your name.",
+      "Stick to a professional-sounding email, usually a variation of your name...",
   },
   {
     id: 10,
     title: "Tailoring Trumps 'One-Size-Fits-All'",
     description:
-      "Submitting the same generic resume for every job is a major mistake. Over 60% of recruiters prefer resumes personalized to the specific job position, significantly increasing your chances of landing an interview.",
+      "Over 60% of recruiters prefer resumes personalized to the specific job...",
   },
 ];
 
@@ -98,7 +108,7 @@ const GeneratedContentDialog = ({
   useEffect(() => {
     let tipInterval;
     if (loading && open) {
-      setCurrentTipIndex(0);
+      setCurrentTipIndex(Math.floor(Math.random() * resumeLoadingTips.length));
       setShowTip(true);
       tipInterval = setInterval(() => {
         setShowTip(false);
@@ -109,63 +119,26 @@ const GeneratedContentDialog = ({
           setShowTip(true);
         }, 500);
       }, 5000);
-    } else {
-      clearInterval(tipInterval);
     }
     return () => clearInterval(tipInterval);
   }, [loading, open]);
 
   const handleExportPdf = () => {
-    if (!content) {
-      alert("No content to export!");
-      return;
-    }
-
     const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 15;
-    let y = margin;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(title, margin, y);
-    y += 15;
-
-    doc.setFont("helvetica", "normal");
+    doc.setFont("helvetica");
     doc.setFontSize(12);
-
-    const lines = doc.splitTextToSize(content, pageWidth - 2 * margin);
-
-    lines.forEach((line) => {
-      if (y > doc.internal.pageSize.getHeight() - margin) {
-        doc.addPage();
-        y = margin;
-      }
-      doc.text(line, margin, y);
-      y += 7;
-    });
-
-    const filename = `${title.toLowerCase().replace(/\s+/g, "_")}.pdf`;
-    doc.save(filename);
+    const lines = doc.splitTextToSize(content, 180);
+    doc.text(lines, 15, 20);
+    doc.save(`${title || "document"}.pdf`);
   };
 
   const handleCopyContent = () => {
-    if (content) {
-      navigator.clipboard.writeText(content).then(
-        () => {
-          setSnackbarOpen(true);
-        },
-        (err) => {
-          console.error("Failed to copy content: ", err);
-        }
-      );
-    }
+    navigator.clipboard.writeText(content || "");
+    setSnackbarOpen(true);
   };
 
   const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
+    if (reason === "clickaway") return;
     setSnackbarOpen(false);
   };
 
@@ -177,14 +150,21 @@ const GeneratedContentDialog = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3 } }}
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          border: `1px solid ${lavenderPalette.soft}`,
+          bgcolor: '#FBFAFF',
+        },
+      }}
     >
       <DialogTitle
         sx={{
           m: 0,
           p: 2,
           fontWeight: 600,
-          borderBottom: `1px solid ${(theme) => theme.palette.divider}`,
+          color: lavenderPalette.darkText,
+          borderBottom: `1px solid ${lavenderPalette.soft}`,
         }}
       >
         {title}
@@ -195,20 +175,17 @@ const GeneratedContentDialog = ({
             position: "absolute",
             right: 8,
             top: 8,
-            color: (theme) => theme.palette.grey[500],
+            color: lavenderPalette.text,
+            "&:hover": { color: lavenderPalette.deep },
           }}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
+
       <DialogContent
         dividers
-        sx={{
-          minHeight: 250,
-          maxHeight: "70vh",
-          overflowY: "auto",
-          p: 3,
-        }}
+        sx={{ p: 3, borderColor: lavenderPalette.soft, overflow: "hidden" }}
       >
         {loading && (
           <Box
@@ -217,19 +194,18 @@ const GeneratedContentDialog = ({
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              height: "100%",
-              minHeight: 200,
+              minHeight: 300,
               textAlign: "center",
             }}
           >
             <CircularProgress
-              sx={{ mb: 3, color: "primary.main" }}
+              sx={{ mb: 3, color: lavenderPalette.primary }}
               size={50}
               thickness={4}
             />
             <Typography
               variant="h6"
-              color="text.secondary"
+              color={lavenderPalette.text}
               sx={{ mb: 3, fontWeight: 500 }}
             >
               Generating {title.toLowerCase()}...
@@ -238,25 +214,26 @@ const GeneratedContentDialog = ({
               <Box sx={{ minHeight: 120, width: "100%", maxWidth: 450 }}>
                 {currentTip && (
                   <Paper
-                    elevation={2}
+                    elevation={0}
                     sx={{
                       p: 2,
                       borderRadius: 2,
-                      backgroundColor: "action.hover",
+                      backgroundColor: lavenderPalette.light,
+                      border: `1px solid ${lavenderPalette.soft}`,
                     }}
                   >
                     <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                       <LightbulbIcon sx={{ color: "warning.main", mr: 1 }} />
                       <Typography
                         variant="subtitle1"
-                        sx={{ fontWeight: "bold", color: "text.primary" }}
+                        sx={{ fontWeight: "bold", color: lavenderPalette.darkText }}
                       >
                         Tip: {currentTip.title}
                       </Typography>
                     </Box>
                     <Typography
                       variant="body2"
-                      color="text.secondary"
+                      color={lavenderPalette.text}
                       sx={{ textAlign: "left" }}
                     >
                       {currentTip.description}
@@ -267,11 +244,13 @@ const GeneratedContentDialog = ({
             </Fade>
           </Box>
         )}
+
         {error && (
           <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
             {error}
           </Alert>
         )}
+
         {content && !loading && !error && (
           <Typography
             variant="body1"
@@ -281,51 +260,60 @@ const GeneratedContentDialog = ({
               fontFamily: "inherit",
               fontSize: "0.95rem",
               lineHeight: 1.7,
-              color: "text.primary",
+              color: lavenderPalette.darkText,
             }}
           >
             {content}
           </Typography>
         )}
-        {!content && !loading && !error && (
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ textAlign: "center", py: 4 }}
-          >
-            Click a "Generate" option from the sidebar to get AI-powered{" "}
-            {title.toLowerCase()} based on your resume!
-          </Typography>
-        )}
       </DialogContent>
-      <DialogActions
-        sx={{
-          p: 2,
-          borderTop: `1px solid ${(theme) => theme.palette.divider}`,
-        }}
-      >
+
+      <DialogActions sx={{ p: 2, borderTop: `1px solid ${lavenderPalette.soft}` }}>
         <Button
           onClick={handleCopyContent}
-          color="primary"
           startIcon={<ContentCopyIcon />}
           disabled={!content || loading}
           variant="outlined"
+          sx={{
+            color: lavenderPalette.primary,
+            borderColor: lavenderPalette.primary,
+            "&:hover": {
+              backgroundColor: lavenderPalette.light,
+              borderColor: lavenderPalette.deep,
+            },
+          }}
         >
           Copy
         </Button>
         <Button
           onClick={handleExportPdf}
-          color="primary"
           startIcon={<DownloadIcon />}
           disabled={!content || loading}
           variant="outlined"
+          sx={{
+            color: lavenderPalette.primary,
+            borderColor: lavenderPalette.primary,
+            "&:hover": {
+              backgroundColor: lavenderPalette.light,
+              borderColor: lavenderPalette.deep,
+            },
+          }}
         >
           Export PDF
         </Button>
-        <Button onClick={onClose} color="primary" variant="contained">
+        <Box sx={{ flexGrow: 1 }} />
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            bgcolor: lavenderPalette.primary,
+            "&:hover": { bgcolor: lavenderPalette.deep },
+          }}
+        >
           Close
         </Button>
       </DialogActions>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={2000}

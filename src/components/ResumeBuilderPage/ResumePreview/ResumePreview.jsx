@@ -23,7 +23,7 @@ import {
   TextFormat,
   Print,
 } from "@mui/icons-material";
-import IndiaTemplate from '../Templates/IndiaTemplate'
+import IndiaTemplate from '../Templates/IndiaTemplate';
 import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
 import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
 import { ExportMenu } from "../ExportMenu/ExportMenu";
@@ -46,6 +46,16 @@ import { useNavigate } from "react-router-dom";
 import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
+
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+};
 
 const ResumePreview = ({ resumeData, onBack }) => {
   const theme = useTheme();
@@ -313,6 +323,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         }}
         className="no-print"
       />
+
       <Container
         disableGutters={isExtraSmallMobile || isPrinting}
         maxWidth={isPrinting ? false : "lg"}
@@ -359,7 +370,26 @@ const ResumePreview = ({ resumeData, onBack }) => {
               }}
               className="no-print"
             >
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth size="small"
+                sx={{
+                  "& .MuiInputLabel-root": { color: lavenderPalette.text },
+                  "& .MuiOutlinedInput-root": {
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: lavenderPalette.soft,
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: lavenderPalette.medium,
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: lavenderPalette.primary,
+                      borderWidth: '2px',
+                    },
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: lavenderPalette.primary,
+                  },
+                }}
+              >
                 <InputLabel id="template-select-label">Template</InputLabel>
                 <Select
                   labelId="template-select-label"
@@ -376,9 +406,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   <MenuItem value={TEMPLATES.PROFESSIONAL}>
                     Professional
                   </MenuItem>
-                  {/* <MenuItem value={TEMPLATES.SIDEBAR}>
-                    Sidebar Template
-                    </MenuItem> */}
                   <MenuItem value={TEMPLATES.EUROPASS}>Elegant</MenuItem>
                   <MenuItem value={TEMPLATES.CANADA}>Canada Template</MenuItem>
                   <MenuItem value={TEMPLATES.EUROPE}>
@@ -392,6 +419,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
               </FormControl>
             </Box>
           )}
+
           {!isMobile && !isPrinting && (
             <TemplateSelector
               activeTab={activeTab}
@@ -400,6 +428,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
               sx={{ flexShrink: 0 }}
             />
           )}
+
           <Box
             sx={{
               flexGrow: 1,
@@ -411,7 +440,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
               "&::-webkit-scrollbar-track": {
                 backgroundColor: isPrinting
                   ? "transparent"
-                  : "rgba(0,0,0,0.05)",
+                  : lavenderPalette.light,
               },
               "&::-webkit-scrollbar-thumb": {
                 backgroundColor: isPrinting
@@ -419,7 +448,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   : colorScheme.primary,
                 borderRadius: "4px",
               },
-              // padding: isPrinting ? 0 : { xs: 1, sm: 2, md: 3 },
               display: isPrinting ? "block" : "flex",
               justifyContent: isPrinting ? undefined : "center",
               alignItems: isPrinting ? undefined : "flex-start",
@@ -442,15 +470,13 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   WebkitPrintColorAdjust: "exact",
                   printColorAdjust: "exact",
                   colorAdjust: "exact",
-
                   transform: isPrinting ? "none" : `scale(${scale})`,
-
-                  width: "100%",
+                  width: "794px",
+                  height: "1123px",
                   transformOrigin: isPrinting ? "top left" : "top center",
                   margin: isPrinting ? "0 auto" : "0 auto",
                   boxShadow: isPrinting ? "none" : undefined,
                   transition: isPrinting ? "none" : "transform 0.2s ease",
-                  height: "auto",
                   pageBreakInside: "auto",
                   pageBreakBefore: "auto",
                   pageBreakAfter: "auto",
@@ -463,6 +489,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           </Box>
         </Paper>
       </Container>
+
       <Zoom in={isMobile && !isPrinting}>
         <SpeedDial
           ariaLabel="Resume actions"
@@ -480,8 +507,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
           direction={isExtraSmallMobile ? "up" : "left"}
           FabProps={{
             sx: {
-              bgcolor: theme.palette.primary.main,
-              "&:hover": { bgcolor: theme.palette.primary.dark },
+              bgcolor: lavenderPalette.primary,
+              "&:hover": { bgcolor: lavenderPalette.deep },
             },
           }}
         >
@@ -496,6 +523,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           ))}
         </SpeedDial>
       </Zoom>
+
       {!isPrinting && (
         <>
           <ColorMenu
@@ -532,6 +560,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         onClose={() => setShowEnhanceDialog(false)}
         resumeData={resumeData}
       />
+
       <Snackbar
         open={snackbar.open && !isPrinting}
         autoHideDuration={6000}

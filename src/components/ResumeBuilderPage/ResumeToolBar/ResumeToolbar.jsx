@@ -5,58 +5,78 @@ import {
   Download,
   KeyboardArrowDown,
   AutoFixHigh as EnhanceIcon,
+  TextFormat,
 } from "@mui/icons-material";
+
+
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
+};
 
 export const ResumeToolbar = ({
   onBack,
   isMobile,
   handleColorMenuOpen,
+  handleFontMenuOpen,
   handleExportMenuOpen,
   onEnhanceResume,
-  completionProgress,
 }) => {
-  const isResumeComplete = completionProgress === 100;
-
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", md: "row" },
+        flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: { xs: "stretch", md: "center" },
-        mb: 3,
+        alignItems: "center",
+        p: { xs: 1.5, sm: 2 },
+        borderColor: "divider",
         gap: 2,
-        p: { xs: 1, sm: 2 },
-        borderBottom: { xs: "1px solid divider", md: "none" },
       }}
       className="no-print"
     >
-      <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         <Button
           variant="outlined"
           startIcon={<ArrowBack />}
           onClick={onBack}
-          sx={{ mr: { xs: 1, sm: 2 } }}
           size={isMobile ? "small" : "medium"}
+          sx={{
+            color: lavenderPalette.primary,
+            borderColor: lavenderPalette.primary,
+            "&:hover": {
+              backgroundColor: lavenderPalette.light,
+              borderColor: lavenderPalette.deep,
+            },
+          }}
         >
-          Edit Resume
+          {isMobile ? "Back" : "Edit Resume"}
         </Button>
-        <Typography
+        {/* <Typography
           variant={isMobile ? "h6" : "h5"}
-          component="h2"
-          sx={{ display: { xs: "none", sm: "block" }, fontWeight: 600 }}
+          component="h1"
+          sx={{
+            fontWeight: 600,
+            color: lavenderPalette.darkText,
+            display: { xs: "none", md: "block" },
+          }}
         >
           Resume Preview
-        </Typography>
+        </Typography> */}
       </Box>
 
       <Box
         sx={{
           display: "flex",
-          gap: 1,
-          flexWrap: "wrap",
-          justifyContent: { xs: "space-between", sm: "flex-end" },
+          gap: 1.5,
           alignItems: "center",
+          flexWrap: "nowrap",
         }}
       >
         {!isMobile && (
@@ -65,34 +85,71 @@ export const ResumeToolbar = ({
               variant="outlined"
               startIcon={<FormatColorFill />}
               onClick={handleColorMenuOpen}
-              size="small"
+              size="medium"
+              sx={{
+                color: lavenderPalette.text,
+                borderColor: lavenderPalette.soft,
+                "&:hover": {
+                  backgroundColor: lavenderPalette.light,
+                  borderColor: lavenderPalette.primary,
+                  color: lavenderPalette.deep,
+                },
+              }}
             >
               Color
             </Button>
+            {/* <Button
+              variant="outlined"
+              startIcon={<TextFormat />}
+              onClick={handleFontMenuOpen}
+              size="medium"
+              sx={{
+                color: lavenderPalette.text,
+                borderColor: lavenderPalette.soft,
+                "&:hover": {
+                  backgroundColor: lavenderPalette.light,
+                  borderColor: lavenderPalette.primary,
+                  color: lavenderPalette.deep,
+                },
+              }}
+            >
+              Font
+            </Button> */}
           </>
         )}
-        {!isResumeComplete && (
-          <Tooltip title="Get AI suggestions to improve your resume">
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<EnhanceIcon />}
-              onClick={onEnhanceResume}
-              size="small"
-            >
-              Enhance Resume With AI
-            </Button>
-          </Tooltip>
-        )}{" "}
+        <Tooltip title="Get AI suggestions to improve your resume">
+          <Button
+            variant="contained"
+            startIcon={<EnhanceIcon />}
+            onClick={onEnhanceResume}
+            size={isMobile ? "small" : "medium"}
+            sx={{
+              color: "#fff",
+              background: lavenderPalette.accentGradient,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              "&:hover": {
+                opacity: 0.9,
+                boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+              },
+            }}
+          >
+            {isMobile ? "Enhance" : "Enhance with AI"}
+          </Button>
+        </Tooltip>
         <Button
           variant="contained"
-          color="primary"
           onClick={handleExportMenuOpen}
           endIcon={<KeyboardArrowDown />}
           startIcon={<Download />}
           size={isMobile ? "small" : "medium"}
+          sx={{
+            bgcolor: lavenderPalette.primary,
+            "&:hover": {
+              bgcolor: lavenderPalette.deep,
+            },
+          }}
         >
-          Export / Print
+          {isMobile ? "Export" : "Export / Print"}
         </Button>
       </Box>
     </Box>

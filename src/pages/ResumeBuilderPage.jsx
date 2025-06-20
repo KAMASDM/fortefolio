@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { database } from "../firebaseConfig";
 import { ref, onValue, off, serverTimestamp, update } from "firebase/database";
 import { ThemeProvider } from "@mui/material/styles";
+import AnimatedBackground from "../components/DashboardPage/AnimatedBackground";
 import {
   CssBaseline,
   Container,
@@ -36,6 +37,7 @@ import {
   alpha,
   useMediaQuery,
   Snackbar,
+  Fab,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -55,6 +57,7 @@ import {
   QuestionAnswerOutlined as QuestionAnswerIcon,
   ArticleOutlined as ArticleIcon,
   GavelOutlined as GavelIcon,
+  LightbulbOutlined as LightbulbIcon,
 } from "@mui/icons-material";
 
 import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
@@ -69,7 +72,7 @@ import Navbar from "../components/ResumeBuilderPage/NavbarForResumeBuilder/Navba
 import GeneratedContentDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/GeneratedContentDialog";
 import ResumeTipsDialog from "../components/ResumeBuilderPage/ResumeTipsDialog/ResumeTipsDialog";
 import VisaInterviewFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/VisaInterviewFormDialog";
-
+import FloatingElements from "../components/DashboardPage/FloatingElements";
 import { getCustomTheme } from "../theme/customTheme";
 import SOPFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/SOPFormDialog";
 
@@ -153,6 +156,19 @@ const sections = [
   },
 ];
 
+
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+  gradient: "linear-gradient(135deg, #B9A5E3 0%, #7F68C9 100%)",
+  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
+};
+
 const totalSteps = sections.length;
 const previewStepId = totalSteps + 1;
 
@@ -192,28 +208,6 @@ const isSectionComplete = (sectionKey, data) => {
   }
 };
 
-/**
- * ULTRA-HUMANIZED SOP GENERATION SYSTEM
- *
- * This enhanced system uses multiple layers of humanization:
- * 1. Randomized writing personalities and quirks
- * 2. Natural conversation patterns and imperfections
- * 3. Aggressive formal-to-casual language conversion
- * 4. Multiple post-processing layers for authentic voice
- * 5. Maximum API creativity settings (temperature: 1.0)
- * 6. Heavy repetition penalties and presence bonuses
- *
- * Expected AI Detection: <10% (down from 44%)
- *
- * The system creates content that includes:
- * - Natural hesitations and self-corrections
- * - Conversational elements and contractions
- * - Realistic thought patterns and digressions
- * - Personal quirks and imperfections
- * - Authentic voice and personality
- */
-
-// Ultra-Enhanced Anti-AI Detection SOP Generation
 const getRandomSystemMessage = () => {
   const systemMessages = [
     "You are a real person writing about your own experiences. Write naturally, like you're talking to someone you trust.",
@@ -253,7 +247,7 @@ const generateHumanizedSOPPrompt = (resumeData, additionalData) => {
 
   const randomPersonality =
     writingPersonalities[
-      Math.floor(Math.random() * writingPersonalities.length)
+    Math.floor(Math.random() * writingPersonalities.length)
     ];
   const randomQuirk =
     personalQuirks[Math.floor(Math.random() * personalQuirks.length)];
@@ -311,9 +305,8 @@ Application Specifics:
 - Unique Experiences: ${personalContext.uniqueExperiences}
 - Personal Challenges: ${personalContext.specificChallenges}
 
-Additional Achievements: ${
-    additionalData.additionalAccomplishments || "None specified."
-  }
+Additional Achievements: ${additionalData.additionalAccomplishments || "None specified."
+    }
 
 WRITING APPROACH - NATURAL STORYTELLING:
 
@@ -385,7 +378,6 @@ Now write the Statement of Purpose following these guidelines, ensuring every se
 const postProcessSOP = (sopContent) => {
   let processedContent = sopContent;
 
-  // AGGRESSIVE formal-to-casual replacements
   const formalToNatural = {
     "endeavor to": "plan to",
     "in order to": "to",
@@ -446,7 +438,6 @@ const postProcessSOP = (sopContent) => {
     processedContent = processedContent.replace(regex, casual);
   });
 
-  // Add human imperfections and natural flow
   processedContent = addHumanImperfections(processedContent);
   processedContent = addNaturalVariations(processedContent);
   processedContent = addConversationalElements(processedContent);
@@ -460,7 +451,6 @@ const addHumanImperfections = (text) => {
   sentences = sentences.map((sentence, index) => {
     const random = Math.random();
 
-    // Add conversational starters (20% chance)
     if (random < 0.2 && index > 0) {
       const starters = [
         "Actually, ",
@@ -477,7 +467,6 @@ const addHumanImperfections = (text) => {
       sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
     }
 
-    // Add qualifiers (15% chance)
     if (random < 0.15) {
       const qualifiers = [
         " I think",
@@ -491,7 +480,6 @@ const addHumanImperfections = (text) => {
       ];
       const qualifier =
         qualifiers[Math.floor(Math.random() * qualifiers.length)];
-      // Insert after first few words
       const words = sentence.split(" ");
       if (words.length > 3) {
         words.splice(2, 0, qualifier + ",");
@@ -499,7 +487,6 @@ const addHumanImperfections = (text) => {
       }
     }
 
-    // Add contractions more aggressively
     sentence = sentence.replace(/\bI am\b/g, "I'm");
     sentence = sentence.replace(/\bI have\b/g, "I've");
     sentence = sentence.replace(/\bI will\b/g, "I'll");
@@ -521,9 +508,8 @@ const addHumanImperfections = (text) => {
 const addFinalHumanTouches = (text) => {
   let finalText = text;
 
-  // Add more natural sentence starters
   finalText = finalText.replace(/^([A-Z])/gm, (match, firstChar, offset) => {
-    if (offset === 0) return match; // Don't change the very first character
+    if (offset === 0) return match;
 
     const naturalStarters = [
       "So, " + firstChar.toLowerCase(),
@@ -542,7 +528,6 @@ const addFinalHumanTouches = (text) => {
     return match;
   });
 
-  // Add more contractions and casual language
   const casualReplacements = {
     " a lot of ": " lots of ",
     " many ": " tons of ",
@@ -583,12 +568,9 @@ const addFinalHumanTouches = (text) => {
   Object.entries(casualReplacements).forEach(([formal, casual]) => {
     const regex = new RegExp(formal, "gi");
     if (Math.random() < 0.7) {
-      // Apply most changes
       finalText = finalText.replace(regex, casual);
     }
   });
-
-  // Add occasional fragments (like humans write)
   finalText = finalText.replace(
     /\. (Which|That|Something that|This|It)/g,
     (match, word) => {
@@ -599,13 +581,11 @@ const addFinalHumanTouches = (text) => {
     }
   );
 
-  // Add more realistic transitions
   finalText = finalText.replace(
     /\. (I think|I believe|I feel|I know)/g,
     ". I mean, $1"
   );
 
-  // Occasionally add emphasis dashes
   finalText = finalText.replace(
     /(\w+) was (very|really|extremely) (\w+)/g,
     (match, subject, intensity, adjective) => {
@@ -622,7 +602,6 @@ const addFinalHumanTouches = (text) => {
 const addConversationalElements = (text) => {
   let processedText = text;
 
-  // Add parenthetical asides (human quirk)
   const asidesPattern = /\b(which was|this was|it was)\s+([^.!?]+)/g;
   processedText = processedText.replace(
     asidesPattern,
@@ -634,7 +613,6 @@ const addConversationalElements = (text) => {
     }
   );
 
-  // Add self-corrections
   const corrections = [
     {
       find: /\bvery important\b/g,
@@ -661,7 +639,6 @@ const addNaturalVariations = (text) => {
   let sentences = text.match(/[^\.!?]+[\.!?]+/g) || [];
 
   sentences = sentences.map((sentence, index) => {
-    // Randomly add natural connectors (but less formal ones)
     if (index > 0 && Math.random() < 0.25) {
       const naturalConnectors = [
         "Anyway, ",
@@ -687,7 +664,6 @@ const addNaturalVariations = (text) => {
       }
     }
 
-    // Occasionally start with "And" or "But" (like humans do)
     if (index > 0 && Math.random() < 0.15) {
       if (!sentence.trim().match(/^(And|But|So|Well)/)) {
         const starters = ["And ", "But "];
@@ -923,7 +899,7 @@ function ResumeBuilderPage() {
       ...prevData,
       [sectionKey]: data,
     }));
-    setUnsavedChanges(true);
+    // setUnsavedChanges(true);
   }, []);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -1007,7 +983,6 @@ function ResumeBuilderPage() {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  // Enhanced generateContent function with humanization for SOP
   const generateContent = async (type, additionalData = null) => {
     if (!currentUser || !resumeId) {
       setGenerateContentError("User not authenticated or resume ID missing.");
@@ -1028,17 +1003,15 @@ function ResumeBuilderPage() {
     };
 
     if (type === "Statement of Purpose" && additionalData) {
-      // Use enhanced humanized prompt for SOP
       fullPrompt = generateHumanizedSOPPrompt(resumeData, additionalData);
 
-      // ULTRA-Enhanced API parameters for maximum human-like content
       apiPayload = {
         model: "gpt-4",
-        temperature: 1.0, // Maximum creativity and randomness
+        temperature: 1.0,
         max_tokens: 1500,
-        top_p: 0.9, // More focused but still creative
-        frequency_penalty: 0.8, // Heavily reduce repetition
-        presence_penalty: 0.7, // Strongly encourage new ideas and topics
+        top_p: 0.9,
+        frequency_penalty: 0.8,
+        presence_penalty: 0.7,
       };
     } else if (type === "Visa Interview Questions") {
       if (!additionalData) {
@@ -1097,9 +1070,8 @@ Sponsor Investigation (if applicable):
 - What is your sponsor's annual income for the last 3 years?
 - Does your sponsor have other financial dependents?
 Deep Financial Probing:
-- If your sponsor earns ${
-        additionalData.sponsorSalary
-      }, how can they afford your expenses while maintaining their lifestyle?
+- If your sponsor earns ${additionalData.sponsorSalary
+        }, how can they afford your expenses while maintaining their lifestyle?
 - Show me evidence of your sponsor's savings specifically allocated for your education.
 - What happens if your sponsor loses their job during your stay abroad?
 - Have you or your sponsor taken any loans for this purpose?
@@ -1135,9 +1107,8 @@ Post-Study/Program Plans:
 
 ROUND 5: CHALLENGING SCENARIO-BASED QUESTIONS
 Hypothetical Situations:
-- If you were offered a job in ${
-        additionalData.country
-      } during your stay, what would you do?
+- If you were offered a job in ${additionalData.country
+        } during your stay, what would you do?
 What if your family faced a financial emergency while you're abroad?
 If your sponsor died or became unable to support you, how would you manage?
 What if you fail your course or your program is terminated?
@@ -1216,8 +1187,7 @@ Now, based on all the provided information, conduct the interview by generating 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          `OpenAI API error: ${response.status} ${
-            errorData.error?.message || response.statusText
+          `OpenAI API error: ${response.status} ${errorData.error?.message || response.statusText
           }`
         );
       }
@@ -1226,13 +1196,11 @@ Now, based on all the provided information, conduct the interview by generating 
       let message = result.choices?.[0]?.message?.content;
 
       if (message) {
-        // Ultra-aggressive post-processing for maximum humanization
         if (type === "Statement of Purpose") {
           message = postProcessSOP(message);
           message = addFinalHumanTouches(message);
         }
 
-        // Add visa interview red flags if applicable
         if (type === "Visa Interview Questions") {
           const redFlagTips = `\n\n---\n\n RED FLAG INDICATORS I'M WATCHING FOR:\n\n🚩 Financial Red Flags:\n- The sponsor's income doesn't justify the expense\n- Recent large deposits in bank accounts\n- Inconsistent financial documentation\n- Vague explanations about funding sources\n\n🚩 Intent Red Flags:\n- Weak ties to the home country\n- Strong connections in the destination country\n- Evasive answers about return plans\n- Inconsistent story about the purpose of travel\n\n🚩 Credibility Red Flags:**\n- Contradictory statements\n- Nervous behavior beyond normal interview anxiety\n- Rehearsed or coached answers\n- Unable to provide specific details about plans`;
           message += redFlagTips;
@@ -1265,7 +1233,7 @@ Now, based on all the provided information, conduct the interview by generating 
             justifyContent: "center",
             alignItems: "center",
             height: "100vh",
-            bgcolor: "background.default",
+            bgcolor: "transparent",
           }}
         >
           <Paper
@@ -1370,7 +1338,6 @@ Now, based on all the provided information, conduct the interview by generating 
       <Box key={currentSection.id}>
         <Grow in={true} timeout={350}>
           <div>
-            {" "}
             <FormComponent
               data={resumeData[sectionKey]}
               updateData={(data) => updateResumeData(sectionKey, data)}
@@ -1385,7 +1352,7 @@ Now, based on all the provided information, conduct the interview by generating 
             justifyContent: "space-between",
             mt: 4,
             pt: 3,
-            borderTop: `1px solid ${theme.palette.divider}`,
+            borderTop: `1px solid #9D88D9`,
           }}
         >
           <Button
@@ -1393,6 +1360,14 @@ Now, based on all the provided information, conduct the interview by generating 
             onClick={prevStep}
             disabled={currentStep === 1}
             startIcon={<ArrowBackIcon />}
+            sx={{
+              borderColor: "#9D88D9",
+              color: "#9D88D9",
+              "&:hover": {
+                borderColor: "#8c74cc",
+                backgroundColor: "rgba(157, 136, 217, 0.08)",
+              },
+            }}
           >
             Previous
           </Button>
@@ -1406,6 +1381,12 @@ Now, based on all the provided information, conduct the interview by generating 
                 <VisibilityIcon />
               )
             }
+            sx={{
+              backgroundColor: "#9D88D9",
+              "&:hover": {
+                backgroundColor: "#8c74cc",
+              },
+            }}
           >
             {currentStep === totalSteps ? "Preview Resume" : "Next Section"}
           </Button>
@@ -1421,7 +1402,7 @@ Now, based on all the provided information, conduct the interview by generating 
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        bgcolor: "background.paper",
+        bgcolor: "transparent",
       }}
     >
       <Box
@@ -1429,7 +1410,7 @@ Now, based on all the provided information, conduct the interview by generating 
           py: 2,
           px: 2.5,
           bgcolor: "primary.main",
-          backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+          backgroundImage: lavenderPalette.gradient,
           color: theme.palette.primary.contrastText,
         }}
       >
@@ -1466,7 +1447,7 @@ Now, based on all the provided information, conduct the interview by generating 
         </Box>
       </Box>
 
-      <List sx={{ pt: 1, pb: 0, flexGrow: 1, overflowY: "auto" }}>
+      <List sx={{ pt: 1, pb: 0, flexGrow: 1, overflowY: "auto", bgcolor: "transparent" }}>
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => navigateWithConfirmation("/dashboard")}
@@ -1481,6 +1462,19 @@ Now, based on all the provided information, conduct the interview by generating 
             />
           </ListItemButton>
         </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => setShowResumeTips(true)}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <LightbulbIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Resume Tips"
+              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
+            />
+          </ListItemButton>
+        </ListItem>
+
         <Divider sx={{ mx: 2, my: 1 }} />
 
         <Typography
@@ -1495,6 +1489,14 @@ Now, based on all the provided information, conduct the interview by generating 
             <ListItemButton
               selected={!isPreviewMode && currentStep === section.id}
               onClick={() => handleNavItemClick(section.id)}
+              sx={{
+                '&.Mui-selected': {
+                  color: '#9D88D9',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: '#f3f0fa',
+                },
+              }}
             >
               <ListItemIcon sx={{ minWidth: 40 }}>
                 {completedSections[section.key] ? (
@@ -1502,20 +1504,29 @@ Now, based on all the provided information, conduct the interview by generating 
                     overlap="circular"
                     variant="dot"
                     anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    sx={{
+                      '& .MuiBadge-dot': {
+                        backgroundColor: '#9D88D9',
+                      },
+                    }}
                   >
                     {React.cloneElement(section.icon, {
-                      color:
-                        !isPreviewMode && currentStep === section.id
-                          ? "primary"
-                          : "inherit",
+                      sx: {
+                        color:
+                          !isPreviewMode && currentStep === section.id
+                            ? '#9D88D9'
+                            : 'rgba(0, 0, 0, 0.6)',
+                      },
                     })}
                   </StyledBadge>
                 ) : (
                   React.cloneElement(section.icon, {
-                    color:
-                      !isPreviewMode && currentStep === section.id
-                        ? "primary"
-                        : "inherit",
+                    sx: {
+                      color:
+                        !isPreviewMode && currentStep === section.id
+                          ? '#9D88D9'
+                          : 'rgba(0, 0, 0, 0.6)',
+                    },
                   })
                 )}
               </ListItemIcon>
@@ -1529,13 +1540,18 @@ Now, based on all the provided information, conduct the interview by generating 
               />
               {completedSections[section.key] && (
                 <CheckCircleIcon
-                  color="success"
-                  sx={{ fontSize: 18, opacity: 0.8, ml: 1 }}
+                  sx={{
+                    fontSize: 18,
+                    opacity: 0.8,
+                    ml: 1,
+                    color: "#9D88D9",
+                  }}
                 />
               )}
             </ListItemButton>
           </ListItem>
         ))}
+
 
         <Divider sx={{ mx: 2, my: 1 }} />
 
@@ -1543,61 +1559,96 @@ Now, based on all the provided information, conduct the interview by generating 
           <ListItemButton
             selected={isPreviewMode}
             onClick={() => handleNavItemClick(previewStepId)}
+            sx={{
+              '&.Mui-selected': {
+                color: '#9D88D9',
+              },
+              '&.Mui-selected:hover': {
+                backgroundColor: '#f3f0fa',
+              },
+            }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              {" "}
-              <VisibilityIcon />{" "}
+              <VisibilityIcon
+                sx={{
+                  color: isPreviewMode ? '#9D88D9' : 'rgba(0, 0, 0, 0.6)',
+                }}
+              />
             </ListItemIcon>
             <ListItemText
               primary="Preview"
               primaryTypographyProps={{
                 fontWeight: isPreviewMode ? 600 : 500,
-                variant: "body2",
+                variant: 'body2',
               }}
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem disablePadding>
-          <ListItemButton onClick={handleGenerateInterviewQuestions}>
+          <ListItemButton
+            onClick={handleGenerateInterviewQuestions}
+            sx={{
+              '&:hover': { backgroundColor: '#f3f0fa' },
+            }}
+          >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <QuestionAnswerIcon />{" "}
+              <QuestionAnswerIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Interview Questions"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem disablePadding>
-          <ListItemButton onClick={handleGenerateCoverLetter}>
+          <ListItemButton
+            onClick={handleGenerateCoverLetter}
+            sx={{
+              '&:hover': { backgroundColor: '#f3f0fa' },
+            }}
+          >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <ArticleIcon />{" "}
+              <ArticleIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Cover Letter"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem disablePadding>
-          <ListItemButton onClick={() => setShowSOPFormDialog(true)}>
+          <ListItemButton
+            onClick={() => setShowSOPFormDialog(true)}
+            sx={{
+              '&:hover': { backgroundColor: '#f3f0fa' },
+            }}
+          >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <ArticleIcon />{" "}
+              <ArticleIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Statement of Purpose"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
             />
           </ListItemButton>
         </ListItem>
+
         <ListItem disablePadding>
-          <ListItemButton onClick={() => setShowVisaFormDialog(true)}>
+          <ListItemButton
+            onClick={() => setShowVisaFormDialog(true)}
+            sx={{
+              '&:hover': { backgroundColor: '#f3f0fa' },
+            }}
+          >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <GavelIcon />{" "}
+              <GavelIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Visa Interview Questions"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
+              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
             />
           </ListItemButton>
         </ListItem>
@@ -1614,9 +1665,9 @@ Now, based on all the provided information, conduct the interview by generating 
         <Button
           fullWidth
           variant={unsavedChanges ? "contained" : "outlined"}
-          color={unsavedChanges ? "warning" : "primary"}
           onClick={handleManualSave}
           disabled={isSaving}
+
           startIcon={
             isSaving ? (
               <CircularProgress size={20} color="inherit" />
@@ -1624,13 +1675,13 @@ Now, based on all the provided information, conduct the interview by generating 
               <SaveIcon />
             )
           }
-          sx={{ mb: 1 }}
+          sx={{ mb: 1, color: "#9D88D9", borderColor: "#9D88D9" }}
         >
           {isSaving
             ? "Saving..."
             : unsavedChanges
-            ? "Save Changes"
-            : "Save All"}
+              ? "Save Changes"
+              : "Save All"}
         </Button>
         {saveError && (
           <Typography
@@ -1657,251 +1708,318 @@ Now, based on all the provided information, conduct the interview by generating 
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box
-        sx={{
-          display: "flex",
-          minHeight: "100vh",
-          bgcolor: "background.default",
-        }}
-      >
-        <Box component="nav" sx={{ width: { md: 280 }, flexShrink: { md: 0 } }}>
-          <SwipeableDrawer
-            variant="temporary"
-            open={mobileOpen}
-            onOpen={() => setMobileOpen(true)}
-            onClose={handleDrawerToggle}
-            ModalProps={{ keepMounted: true }}
-            sx={{
-              display: { xs: "block", md: "none" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: 280,
-                borderRight: "none",
-              },
-            }}
-          >
-            {drawerContent}
-          </SwipeableDrawer>
-
-          <Drawer
-            variant="permanent"
-            sx={{
-              display: { xs: "none", md: "block" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: 280,
-                bgcolor: "background.paper",
-                borderRight: `1px solid ${theme.palette.divider}`,
-              },
-            }}
-            open
-          >
-            {drawerContent}
-          </Drawer>
-        </Box>
+    <>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
         <Box
-          component="main"
           sx={{
-            flexGrow: 1,
-            width: { md: "calc(100% - 280px)" },
             display: "flex",
-            flexDirection: "column",
+            minHeight: "100vh",
           }}
         >
-          <span
-            id="back-to-top-anchor"
-            style={{ position: "absolute", top: "-100px" }}
-          ></span>
+          <Box component="nav" sx={{ width: { md: 280 }, flexShrink: { md: 0 } }}>
+            <SwipeableDrawer
+              variant="temporary"
+              open={mobileOpen}
+              onOpen={() => setMobileOpen(true)}
+              onClose={handleDrawerToggle}
+              ModalProps={{ keepMounted: true }}
+              sx={{
+                display: { xs: "block", md: "none" },
+                "& .MuiDrawer-paper": {
+                  boxSizing: "border-box",
+                  width: 280,
+                  borderRight: "none",
+                },
+              }}
+            >
+              {drawerContent}
+            </SwipeableDrawer>
 
-          <Navbar
-            darkMode={darkMode}
-            toggleDarkMode={toggleDarkMode}
-            unsavedChanges={unsavedChanges}
-            isSaving={isSaving}
-            completionProgress={completionProgress}
-            isPreviewMode={isPreviewMode}
-            handleManualSave={handleManualSave}
-            handleNavItemClick={handleNavItemClick}
-            previewStepId={previewStepId}
-            handleDrawerToggle={handleDrawerToggle}
-            onOpenResumeTips={() => setShowResumeTips(true)}
-          />
-
-          <Container
-            maxWidth="lg"
-            sx={{ flexGrow: 1, py: { xs: 2, sm: 3 }, mb: { xs: 8, md: 3 } }}
-          >
-            <Collapse in={unsavedChanges && !isSaving}>
-              <Alert
-                severity="info"
-                variant="standard"
-                sx={{ mb: 2, display: { xs: "none", sm: "flex" } }}
-                icon={<SaveIcon fontSize="inherit" />}
-                action={
-                  <Button
-                    color="inherit"
-                    size="small"
-                    onClick={handleManualSave}
-                    disabled={isSaving}
-                  >
-                    Save Now
-                  </Button>
-                }
-              >
-                {" "}
-                You have unsaved changes.{" "}
-              </Alert>
-            </Collapse>
-
-            {!isPreviewMode && !isSmall && (
-              <Paper elevation={0} sx={{ mb: 3, p: 1, bgcolor: "transparent" }}>
-                <Stepper activeStep={currentStep - 1} alternativeLabel>
-                  {sections.map((section) => (
-                    <Step
-                      key={section.id}
-                      completed={completedSections[section.key]}
-                    >
-                      <StepLabel
-                        onClick={() => handleNavItemClick(section.id)}
-                        sx={{ cursor: "pointer" }}
-                      >
-                        {section.label}
-                      </StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </Paper>
-            )}
-
-            {!isPreviewMode ? (
-              <AnimatedCard elevation={1}>{renderForm()}</AnimatedCard>
-            ) : (
-              <Box sx={{ mt: { xs: 0, sm: -2 } }}>
-                {" "}
-                <ResumePreview resumeData={resumeData} onBack={prevStep} />
-              </Box>
-            )}
-          </Container>
-        </Box>{" "}
-        {isMobile && (
-          <Paper
-            elevation={3}
+            <Drawer
+              variant="permanent"
+              sx={{
+                display: { xs: "none", md: "block" },
+                "& .MuiDrawer-paper": {
+                  boxSizing: "border-box",
+                  width: 280,
+                  bgcolor: "background.paper",
+                  borderRight: `1px solid ${theme.palette.divider}`,
+                },
+              }}
+              open
+            >
+              {drawerContent}
+            </Drawer>
+          </Box>
+          <Box
+            component="main"
             sx={{
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: (theme) => theme.zIndex.appBar,
-              display: { md: "none" },
+              flexGrow: 1,
+              width: { md: "calc(100% - 280px)" },
+              display: "flex",
+              flexDirection: "column",
+              bgcolor: "transparent"
             }}
           >
-            <BottomNavigation
-              value={isPreviewMode ? previewStepId : currentStep}
-              onChange={handleBottomNavChange}
-              showLabels
+            <span
+              id="back-to-top-anchor"
+              style={{ position: "absolute", top: "-100px" }}
+            ></span>
+
+            {/* <Navbar
+              darkMode={darkMode}
+              toggleDarkMode={toggleDarkMode}
+              unsavedChanges={unsavedChanges}
+              isSaving={isSaving}
+              completionProgress={completionProgress}
+              isPreviewMode={isPreviewMode}
+              currentStep={currentStep}
+              handleManualSave={handleManualSave}
+              handleNavItemClick={handleNavItemClick}
+              previewStepId={previewStepId}
+              handleDrawerToggle={handleDrawerToggle}
+              onOpenResumeTips={() => setShowResumeTips(true)}
+            /> */}
+
+            <Container
+              maxWidth="lg"
+              sx={{ flexGrow: 1, py: { xs: 2, sm: 3 }, mb: { xs: 8, md: 3 } }}
             >
-              {sections.map((section) => (
-                <BottomNavigationAction
-                  key={section.id}
-                  label={
-                    isSmall ? section.label.substring(0, 4) : section.label
+              <Collapse in={unsavedChanges && !isSaving}>
+                <Alert
+                  severity="info"
+                  variant="standard"
+                  sx={{ mb: 2, display: { xs: "none", sm: "flex" } }}
+                  icon={<SaveIcon fontSize="inherit" />}
+                  action={
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={handleManualSave}
+                      disabled={isSaving}
+                    >
+                      Save Now
+                    </Button>
                   }
-                  value={section.id}
-                  icon={
-                    completedSections[section.key] ? (
-                      <StyledBadge
-                        overlap="circular"
-                        variant="dot"
-                        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  {" "}
+                  You have unsaved changes.{" "}
+                </Alert>
+              </Collapse>
+
+              {!isPreviewMode && !isSmall && (
+                <Paper elevation={0} sx={{
+                  mb: 3,
+                  p: 2,
+                  bgcolor: "transparent",
+                  border: `1px solid ${lavenderPalette.primary}`,
+                  borderRadius: 2,
+                }}>
+                  <Stepper
+                    activeStep={currentStep - 1}
+                    alternativeLabel
+                    sx={{
+
+                      "& .MuiStepIcon-root": {
+                        color: lavenderPalette.soft,
+                        "&.Mui-active": {
+                          color: lavenderPalette.primary,
+                          transform: "scale(1.1)",
+                          boxShadow: `0 0 12px ${lavenderPalette.medium}`,
+                          borderRadius: "50%",
+                        },
+                        "&.Mui-completed": {
+                          color: lavenderPalette.deep,
+                        },
+                      },
+
+                      "& .MuiStepLabel-label": {
+                        color: lavenderPalette.text,
+                        "&.Mui-active": {
+                          fontWeight: "bold",
+                          color: lavenderPalette.darkText,
+                        },
+                        "&.Mui-completed": {
+                          color: lavenderPalette.text,
+                        },
+                      },
+
+                      "& .MuiStepConnector-line": {
+                        borderColor: lavenderPalette.soft,
+                        borderTopWidth: "2px",
+                      },
+
+                      "& .Mui-active > .MuiStepConnector-line, & .Mui-completed > .MuiStepConnector-line": {
+                        borderColor: lavenderPalette.primary,
+                      },
+                    }}
+                  >
+                    {sections.map((section) => (
+                      <Step
+                        key={section.id}
+                        completed={completedSections[section.key]}
                       >
-                        {section.icon}
-                      </StyledBadge>
-                    ) : (
-                      section.icon
-                    )
-                  }
+                        <StepLabel
+                          onClick={() => handleNavItemClick(section.id)}
+                          sx={{ cursor: "pointer", "&:hover .MuiStepLabel-label": { color: lavenderPalette.deep } }}
+                        >
+                          {section.label}
+                        </StepLabel>
+                      </Step>
+                    ))}
+                  </Stepper>
+                </Paper>
+              )}
+
+              {!isPreviewMode ? (
+                <AnimatedCard elevation={1}>{renderForm()}</AnimatedCard>
+              ) : (
+                <Box sx={{ mt: { xs: 0, sm: -2 } }}>
+                  {" "}
+                  <ResumePreview resumeData={resumeData} onBack={prevStep} />
+                </Box>
+              )}
+            </Container>
+          </Box>{" "}
+          {isMobile && (
+            <Paper
+              elevation={3}
+              sx={{
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: (theme) => theme.zIndex.appBar,
+                display: { md: "none" },
+              }}
+            >
+              <BottomNavigation
+                value={isPreviewMode ? previewStepId : currentStep}
+                onChange={handleBottomNavChange}
+                showLabels
+              >
+                {sections.map((section) => (
+                  <BottomNavigationAction
+                    key={section.id}
+                    label={
+                      isSmall ? section.label.substring(0, 4) : section.label
+                    }
+                    value={section.id}
+                    icon={
+                      completedSections[section.key] ? (
+                        <StyledBadge
+                          overlap="circular"
+                          variant="dot"
+
+                          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                        >
+                          {section.icon}
+                        </StyledBadge>
+                      ) : (
+                        section.icon
+                      )
+                    }
+                    sx={{ minWidth: "auto", px: 1 }}
+                  />
+                ))}
+                <BottomNavigationAction
+                  label={isSmall ? "View" : "Preview"}
+                  value={previewStepId}
+                  icon={<VisibilityIcon />}
                   sx={{ minWidth: "auto", px: 1 }}
                 />
-              ))}
-              <BottomNavigationAction
-                label={isSmall ? "View" : "Preview"}
-                value={previewStepId}
-                icon={<VisibilityIcon />}
-                sx={{ minWidth: "auto", px: 1 }}
-              />
-            </BottomNavigation>
-          </Paper>
-        )}
-        <UpdateResumeName
-          open={showTitleDialog}
-          onClose={handleCloseTitleDialog}
-          currentTitle={currentTitle}
-          setCurrentTitle={setCurrentTitle}
-          resumeTitle={resumeMetadata.title}
-          setResumeMetadata={setResumeMetadata}
-          setUnsavedChanges={setUnsavedChanges}
-          setNotification={setNotification}
-          notification={notification}
-          handleCloseNotification={handleCloseNotification}
-          isMobile={isMobile}
-          showLeaveConfirmation={showLeaveConfirmation}
-          setShowLeaveConfirmation={setShowLeaveConfirmation}
-          handleConfirmedNavigation={handleConfirmedNavigation}
-        />
-        <SOPFormDialog
-          open={showSOPFormDialog}
-          onClose={() => setShowSOPFormDialog(false)}
-          onGenerate={(sopData) => {
-            generateContent("Statement of Purpose", sopData);
-          }}
-        />
-        <GeneratedContentDialog
-          open={showGeneratedContentDialog}
-          onClose={() => setShowGeneratedContentDialog(false)}
-          title={generatedContentTitle}
-          content={generatedContent}
-          loading={isGeneratingContent}
-          error={generateContentError}
-        />
-        <VisaInterviewFormDialog
-          open={showVisaFormDialog}
-          onClose={() => setShowVisaFormDialog(false)}
-          onGenerate={(visaData) => {
-            generateContent("Visa Interview Questions", visaData);
-          }}
-        />
-        <ResumeTipsDialog
-          open={showResumeTips}
-          onClose={() => setShowResumeTips(false)}
-        />
-        <Snackbar
-          open={notification.open}
-          autoHideDuration={6000}
-          onClose={handleCloseNotification}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        >
-          <Alert
+              </BottomNavigation>
+            </Paper>
+          )}
+          <UpdateResumeName
+            open={showTitleDialog}
+            onClose={handleCloseTitleDialog}
+            currentTitle={currentTitle}
+            setCurrentTitle={setCurrentTitle}
+            resumeTitle={resumeMetadata.title}
+            setResumeMetadata={setResumeMetadata}
+            setUnsavedChanges={setUnsavedChanges}
+            setNotification={setNotification}
+            notification={notification}
+            handleCloseNotification={handleCloseNotification}
+            isMobile={isMobile}
+            showLeaveConfirmation={showLeaveConfirmation}
+            setShowLeaveConfirmation={setShowLeaveConfirmation}
+            handleConfirmedNavigation={handleConfirmedNavigation}
+          />
+          <SOPFormDialog
+            open={showSOPFormDialog}
+            onClose={() => setShowSOPFormDialog(false)}
+            onGenerate={(sopData) => {
+              generateContent("Statement of Purpose", sopData);
+            }}
+          />
+          <GeneratedContentDialog
+            open={showGeneratedContentDialog}
+            onClose={() => setShowGeneratedContentDialog(false)}
+            title={generatedContentTitle}
+            content={generatedContent}
+            loading={isGeneratingContent}
+            error={generateContentError}
+          />
+          <VisaInterviewFormDialog
+            open={showVisaFormDialog}
+            onClose={() => setShowVisaFormDialog(false)}
+            onGenerate={(visaData) => {
+              generateContent("Visa Interview Questions", visaData);
+            }}
+          />
+          <ResumeTipsDialog
+            open={showResumeTips}
+            onClose={() => setShowResumeTips(false)}
+          />
+          <Snackbar
+            open={notification.open}
+            autoHideDuration={6000}
             onClose={handleCloseNotification}
-            severity={notification.severity}
-            sx={{ width: "100%" }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           >
-            {notification.message}
-          </Alert>
-        </Snackbar>
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            zIndex: 1300,
-            boxShadow: 3,
-            minWidth: 160,
-          }}
-        ></Box>
-      </Box>
-    </ThemeProvider>
+            <Alert
+              onClose={handleCloseNotification}
+              severity={notification.severity}
+              sx={{ width: "100%" }}
+            >
+              {notification.message}
+            </Alert>
+          </Snackbar>
+
+          <Collapse in={!isPreviewMode}>
+            <Tooltip title="Preview Resume" placement="left">
+              <Fab
+                variant="extended"
+                onClick={() => handleNavItemClick(previewStepId)}
+                sx={{
+                  position: 'fixed',
+                  bottom: { xs: isMobile ? 80 : 32, md: 32 },
+                  right: 32,
+                  height: "50px",
+                  width: "50px",
+                  borderRadius: "50%",
+                  color: 'white',
+                  backgroundImage: lavenderPalette.gradient,
+                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: theme.shadows[8],
+                  },
+                }}
+              >
+                <VisibilityIcon sx={{ mr: 0 }} />
+                {/* <VisibilityIcon sx={{ mr: 1 }} /> */}
+                {/* Preview */}
+              </Fab>
+            </Tooltip>
+          </Collapse>
+
+        </Box>
+      </ThemeProvider>
+    </>
   );
 }
 

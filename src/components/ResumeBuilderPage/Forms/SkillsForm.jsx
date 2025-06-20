@@ -8,157 +8,142 @@ import {
   Paper,
   Avatar,
   InputAdornment,
+  Grid,
+  Chip,
+  Alert,
+  Zoom,
+  Tooltip,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   Psychology as PsychologyIcon,
   Category as CategoryIcon,
-  CheckCircleOutline as SkillIcon,
+  CheckCircle as CheckCircleIcon,
+  Info as InfoIcon,
 } from "@mui/icons-material";
-import { Zoom, Tooltip } from "@mui/material";
+
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+};
 
 const defaultSkillCategories = [
-  {
-    id: 1,
-    name: "Technical Skills",
-    skills: [""],
-  },
-  {
-    id: 2,
-    name: "Soft Skills",
-    skills: [""],
-  },
+  { id: 1, name: "Technical Skills", skills: [""] },
+  { id: 2, name: "Soft Skills", skills: [""] },
 ];
 
+const sectionStyle = {
+  p: 3,
+  mb: 4,
+  borderRadius: 2,
+  border: "1px solid",
+  borderColor: lavenderPalette.primary,
+  position: "relative",
+};
+
 const SkillsForm = ({ data, updateData, nextStep }) => {
-  const [skillCategories, setSkillCategories] = useState([
-    defaultSkillCategories,
-  ]);
-  const [lastSavedskillCategories, setLastSavedskillCategories] =
-    useState(skillCategories);
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setSkillCategories(data);
-    } else if (data && data.length === 0) {
-      setSkillCategories([defaultSkillCategories]);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanged =
-      JSON.stringify(skillCategories) !==
-      JSON.stringify(lastSavedskillCategories);
-
-    if (hasChanged) {
-      const debounce = setTimeout(() => {
-        updateData(skillCategories);
-        setLastSavedskillCategories(skillCategories);
-      }, 1000);
-
-      return () => clearTimeout(debounce);
-    }
-  }, [skillCategories, lastSavedskillCategories, updateData]);
+  const [skillCategories, setSkillCategories] = useState(defaultSkillCategories);
+  const [lastSavedSkillCategories, setLastSavedSkillCategories] = useState(skillCategories);
+  const [formComplete, setFormComplete] = useState(0);
 
   useEffect(() => {
     if (data && data.length > 0) {
       const sanitizedData = data.map((cat) => ({
         ...cat,
-        skills: Array.isArray(cat.skills) ? cat.skills : [""],
+        skills: Array.isArray(cat.skills) && cat.skills.length > 0 ? cat.skills : [""],
       }));
       setSkillCategories(sanitizedData);
-    } else if (data && data.length === 0) {
+    } else {
       setSkillCategories(defaultSkillCategories);
     }
   }, [data]);
 
+  useEffect(() => {
+    const hasChanged = JSON.stringify(skillCategories) !== JSON.stringify(lastSavedSkillCategories);
+    if (hasChanged) {
+      const debounce = setTimeout(() => {
+        updateData(skillCategories);
+        setLastSavedSkillCategories(skillCategories);
+      }, 1000);
+      return () => clearTimeout(debounce);
+    }
+  }, [skillCategories, lastSavedSkillCategories, updateData]);
+
+  useEffect(() => {
+    let completed = 0;
+    const total = skillCategories.length;
+
+    if (Array.isArray(skillCategories)) {
+      skillCategories.forEach((cat) => {
+        const hasName = cat.name && cat.name.trim() !== "";
+        const hasSkills = Array.isArray(cat.skills) && cat.skills.some(s => s && s.trim() !== "");
+        if (hasName && hasSkills) {
+          completed++;
+        }
+      });
+    }
+    setFormComplete(total > 0 ? Math.round((completed / total) * 100) : 0);
+  }, [skillCategories]);
+
   const handleCategoryNameChange = (id, name) => {
-    setSkillCategories((prevCategories) =>
-      prevCategories.map((category) =>
-        category.id === id ? { ...category, name: name } : category
-      )
+    setSkillCategories((prev) =>
+      prev.map((cat) => (cat.id === id ? { ...cat, name } : cat))
     );
   };
 
   const handleSkillChange = (categoryId, index, value) => {
-    setSkillCategories((prevCategories) =>
-      prevCategories.map((category) => {
-        if (category.id === categoryId) {
-          const currentSkills = Array.isArray(category.skills)
-            ? category.skills
-            : [];
-          const updatedSkills = [...currentSkills];
+    setSkillCategories((prev) =>
+      prev.map((cat) => {
+        if (cat.id === categoryId) {
+          const updatedSkills = [...cat.skills];
           updatedSkills[index] = value;
-          return { ...category, skills: updatedSkills };
+          return { ...cat, skills: updatedSkills };
         }
-        return category;
+        return cat;
       })
     );
   };
 
   const addSkill = (categoryId) => {
-    setSkillCategories((prevCategories) =>
-      prevCategories.map((category) => {
-        if (category.id === categoryId) {
-          const currentSkills = Array.isArray(category.skills)
-            ? category.skills
-            : [];
-          return {
-            ...category,
-            skills: [...currentSkills, ""],
-          };
-        }
-        return category;
-      })
+    setSkillCategories((prev) =>
+      prev.map((cat) =>
+        cat.id === categoryId ? { ...cat, skills: [...cat.skills, ""] } : cat
+      )
     );
   };
 
   const removeSkill = (categoryId, index) => {
-    setSkillCategories((prevCategories) =>
-      prevCategories.map((category) => {
-        if (category.id === categoryId) {
-          const currentSkills = Array.isArray(category.skills)
-            ? category.skills
-            : [];
-          if (currentSkills.length > 1) {
-            const updatedSkills = [...currentSkills];
-            updatedSkills.splice(index, 1);
-            return { ...category, skills: updatedSkills };
-          } else {
-            return { ...category, skills: [""] };
+    setSkillCategories((prev) =>
+      prev.map((cat) => {
+        if (cat.id === categoryId) {
+          if (cat.skills.length > 1) {
+            const updatedSkills = cat.skills.filter((_, i) => i !== index);
+            return { ...cat, skills: updatedSkills };
           }
+          return { ...cat, skills: [""] }; 
         }
-        return category;
+        return cat;
       })
     );
   };
 
   const addCategory = () => {
-    const newId =
-      skillCategories.length > 0
-        ? Math.max(0, ...skillCategories.map((category) => category.id)) + 1
-        : 1;
-
-    setSkillCategories((prevCategories) => [
-      ...prevCategories,
-      {
-        id: newId,
-        name: `New Category ${newId}`,
-        skills: [""],
-      },
+    const newId = skillCategories.length > 0 ? Math.max(0, ...skillCategories.map((c) => c.id)) + 1 : 1;
+    setSkillCategories((prev) => [
+      ...prev,
+      { id: newId, name: "", skills: [""] },
     ]);
   };
 
   const removeCategory = (id) => {
-    setSkillCategories((prevCategories) => {
-      if (prevCategories.length <= 1) return prevCategories;
-
-      const updatedCategories = prevCategories.filter(
-        (category) => category.id !== id
-      );
-      return updatedCategories;
-    });
+    if (skillCategories.length <= 1) return; 
+    setSkillCategories((prev) => prev.filter((cat) => cat.id !== id));
   };
 
   const handleSubmit = (e) => {
@@ -166,73 +151,63 @@ const SkillsForm = ({ data, updateData, nextStep }) => {
     const filteredData = skillCategories
       .map((category) => ({
         ...category,
-        name:
-          category.name && category.name.trim()
-            ? category.name.trim()
-            : `Category ${category.id}`,
-        skills: Array.isArray(category.skills)
-          ? category.skills.map((s) => s.trim()).filter((skill) => skill !== "")
-          : [],
+        name: category.name?.trim() || "",
+        skills: category.skills.map((s) => s.trim()).filter((s) => s !== ""),
       }))
       .filter((category) => category.name && category.skills.length > 0);
-
     updateData(filteredData);
     nextStep();
   };
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-        <Avatar sx={{ bgcolor: "primary.light", color: "primary.main", mr: 2 }}>
-          <PsychologyIcon />
-        </Avatar>
-        <Typography variant="h5" component="h2">
-          Skills
-        </Typography>
+      <Box
+        sx={{
+          mb: 4,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Avatar sx={{ bgcolor: lavenderPalette.light, color: lavenderPalette.primary, mr: 2 }}>
+            <PsychologyIcon />
+          </Avatar>
+          <Typography variant="h5" component="h2" sx={{ color: lavenderPalette.text }}>
+            Skills
+          </Typography>
+        </Box>
+        <Chip
+          label={`${formComplete}% Complete`}
+          icon={formComplete === 100 ? <CheckCircleIcon /> : undefined}
+          variant="outlined"
+          sx={{
+            borderColor: lavenderPalette.primary,
+            color: lavenderPalette.primary,
+            "& .MuiChip-icon": { color: lavenderPalette.primary },
+          }}
+        />
       </Box>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        List your relevant skills, grouping them into categories (e.g.,
-        Programming Languages, Tools, Soft Skills).
-      </Typography>
+      {formComplete < 10 && (
+        <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 3, borderRadius: 2, background: lavenderPalette.light }}>
+          List your skills in categories like "Programming Languages" or "Design Tools".
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit}>
-        {Array.isArray(skillCategories) &&
-          skillCategories.map((category, categoryIndex) => (
-            <Zoom
-              in
-              key={category.id || categoryIndex}
-              style={{ transitionDelay: `${categoryIndex * 50}ms` }}
-            >
-              <Paper
-                elevation={2}
-                sx={{
-                  p: { xs: 2, sm: 3 },
-                  mb: 4,
-                  borderRadius: 3,
-                  position: "relative",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
+        {skillCategories.map((category, index) => (
+          <Zoom in key={category.id} style={{ transitionDelay: `${index * 50}ms` }}>
+            <Paper elevation={2} sx={sectionStyle}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs>
                   <TextField
+                    fullWidth
                     label="Skill Category Name"
                     required
-                    value={category.name || ""}
-                    onChange={(e) =>
-                      handleCategoryNameChange(category.id, e.target.value)
-                    }
+                    value={category.name}
+                    onChange={(e) => handleCategoryNameChange(category.id, e.target.value)}
                     variant="outlined"
-                    size="small"
-                    sx={{ flexGrow: 1, mr: 1 }}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -241,92 +216,83 @@ const SkillsForm = ({ data, updateData, nextStep }) => {
                       ),
                     }}
                   />
+                </Grid>
+                <Grid item xs="auto">
                   <Tooltip title="Remove this category">
                     <span>
                       <IconButton
                         color="error"
                         onClick={() => removeCategory(category.id)}
-                        size="small"
                         disabled={skillCategories.length <= 1}
                       >
-                        <DeleteIcon fontSize="small" />
+                        <DeleteIcon />
                       </IconButton>
                     </span>
                   </Tooltip>
-                </Box>
+                </Grid>
+              </Grid>
 
-                {Array.isArray(category.skills) &&
-                  category.skills.map((skill, skillIndex) => (
-                    <Box
-                      key={skillIndex}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        mb: 1.5,
-                        pl: 1,
+              <Box sx={{ mt: 3, pl: 1 }}>
+                {category.skills.map((skill, skillIndex) => (
+                  <Box key={skillIndex} sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                    <TextField
+                      fullWidth
+                      value={skill}
+                      onChange={(e) => handleSkillChange(category.id, skillIndex, e.target.value)}
+                      placeholder={`Skill #${skillIndex + 1}`}
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <PsychologyIcon sx={{ fontSize: '1.2rem', color: 'action.active' }} />
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      <SkillIcon
-                        color="action"
-                        sx={{ mr: 1.5, fontSize: "1.2rem" }}
-                      />
-                      <TextField
-                        fullWidth
-                        value={skill || ""}
-                        onChange={(e) =>
-                          handleSkillChange(
-                            category.id,
-                            skillIndex,
-                            e.target.value
-                          )
-                        }
-                        placeholder={`Enter skill #${skillIndex + 1}`}
-                        variant="standard"
-                        size="small"
-                        sx={{ mr: 1 }}
-                      />
-                      <Tooltip title="Remove skill">
-                        <span>
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => removeSkill(category.id, skillIndex)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </Box>
-                  ))}
-                <Button
-                  startIcon={<AddIcon />}
-                  onClick={() => addSkill(category.id)}
-                  size="small"
-                  sx={{ mt: 2, ml: 1 }}
-                >
-                  Add Skill to Category
-                </Button>
-              </Paper>
-            </Zoom>
-          ))}
+                    />
+                    <Tooltip title="Remove skill">
+                      <span>
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => removeSkill(category.id, skillIndex)}
+                          disabled={category.skills.length <= 1 && skill === ""}
+                          sx={{ ml: 1 }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </Box>
+                ))}
+              </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 4, mt: 4 }}>
+              <Button
+                startIcon={<AddIcon />}
+                onClick={() => addSkill(category.id)}
+                size="small"
+                sx={{ mt: 1, ml: 1, color: lavenderPalette.primary }}
+              >
+                Add Skill
+              </Button>
+            </Paper>
+          </Zoom>
+        ))}
+
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
           <Button
             startIcon={<AddIcon />}
             onClick={addCategory}
             variant="outlined"
-            color="primary"
             sx={{
               borderRadius: 30,
               px: 3,
               py: 1,
               borderStyle: "dashed",
               borderWidth: 2,
-              "&:hover": {
-                transform: "none",
-                boxShadow: "none",
-                background: "rgba(147, 112, 219, 0.04)",
-              },
+              borderColor: lavenderPalette.primary,
+              color: lavenderPalette.primary,
+              "&:hover": { backgroundColor: lavenderPalette.light, borderWidth: 2 },
             }}
           >
             Add Skill Category

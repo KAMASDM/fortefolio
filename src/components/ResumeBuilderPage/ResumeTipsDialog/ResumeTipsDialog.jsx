@@ -117,7 +117,7 @@ const ResumeTipsDialog = ({ open, onClose }) => {
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <LightbulbIcon color="primary" />
+            <LightbulbIcon sx={{ color: "#9D88D9" }} />
             <Typography variant="h6" fontWeight={600}>
               Resume Building Tips
             </Typography>
@@ -142,12 +142,12 @@ const ResumeTipsDialog = ({ open, onClose }) => {
                 mb: 2,
                 p: 1.5,
                 borderRadius: 2,
-                bgcolor: alpha(theme.palette.primary.main, 0.05),
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                bgcolor: alpha("#9D88D9", 0.05),
+                border: `1px solid ${alpha("#9D88D9", 0.1)}`,
               }}
             >
               <ListItemIcon sx={{ minWidth: 36, mt: 0.5 }}>
-                <CheckCircleOutlineIcon color="primary" />
+                <CheckCircleOutlineIcon sx={{ color: "#9D88D9" }} /> 
               </ListItemIcon>
               <ListItemText
                 primary={
@@ -176,6 +176,10 @@ const ResumeTipsDialog = ({ open, onClose }) => {
             py: 1,
             textTransform: "none",
             fontWeight: 600,
+            bgcolor: "#9D88D9",
+            "&:hover": {
+              bgcolor: "#8c74cc",
+            },
           }}
         >
           Got it
