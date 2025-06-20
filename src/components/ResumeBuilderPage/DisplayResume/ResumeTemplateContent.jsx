@@ -1,6 +1,7 @@
 import { ModernTemplate } from "../Templates/ModernTemplate";
 import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";
+import IndiaTemplate from "../Templates/IndiaTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
 import { SidebarTemplate } from "../Templates/SidebarTemplate";
 import { CanadaTemplate } from "../Templates/CanadaTemplate";
@@ -23,7 +24,7 @@ export const ResumeTemplateContent = ({
   isMobile,
   isSmallMobile,
   starredSections = [],
-  toggleStarSection = () => {},
+  toggleStarSection = () => { },
 }) => {
   const TemplateComponent =
     {
@@ -37,6 +38,7 @@ export const ResumeTemplateContent = ({
       [TEMPLATES.EUROPE]: EuropenUnionTemplate,
       [TEMPLATES.AUSTRALIA]: AustraliaTemplate,
       [TEMPLATES.USA]: UsaTemplate,
+      [TEMPLATES.INDIA]: IndiaTemplate,
     }[activeTemplate] || ModernTemplate;
 
   const commonProps = {

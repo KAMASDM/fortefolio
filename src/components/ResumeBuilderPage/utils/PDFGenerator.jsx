@@ -69,7 +69,7 @@ export const PDFGenerator = ({
     try {
       await html2pdf()
         .set({
-          margin: [0.5, 0.5],
+          margin: [0, 0],
           filename: filename,
           html2canvas: {
             scale: 2,
