@@ -6,10 +6,11 @@ export const constants = {
     PROFESSIONAL: "professional",
     // SIDEBAR: "sidebar",
     EUROPASS: "europass",
-    CANADA: "canada",
+    // CANADA: "canada",
     EUROPE: "europe",
     AUSTRALIA: "australia",
     USA: "usa",
+    INDIA: "india"
   },
 
   FONTS: {

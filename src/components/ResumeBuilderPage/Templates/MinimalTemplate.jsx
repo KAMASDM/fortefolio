@@ -55,7 +55,7 @@ export const MinimalTemplate = ({
         ...pdfColorStyles,
       }}
     >
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4 ,p: { xs: 4, sm: 6 },}}>
         <Typography
           variant="h3"
           component="h1"

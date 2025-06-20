@@ -184,6 +184,7 @@ const CreateResumeDialog = ({
         </Typography>
         <Grid container spacing={2} sx={{ mt: 1 }}>
           {[
+            { id: "india", name: "India" },
             { id: "modern", name: "Modern" },
             { id: "minimal", name: "Minimal" },
             { id: "creative", name: "Creative" },

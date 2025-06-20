@@ -465,8 +465,8 @@ function ResumeBuilderPage() {
     const nextId = isPreviewMode
       ? previewStepId
       : currentStep < totalSteps
-      ? currentStep + 1
-      : previewStepId;
+        ? currentStep + 1
+        : previewStepId;
     handleNavItemClick(nextId);
   };
 
@@ -474,8 +474,8 @@ function ResumeBuilderPage() {
     const prevId = isPreviewMode
       ? totalSteps
       : currentStep > 1
-      ? currentStep - 1
-      : 1;
+        ? currentStep - 1
+        : 1;
     handleNavItemClick(prevId);
   };
 
@@ -982,8 +982,8 @@ function ResumeBuilderPage() {
           {isSaving
             ? "Saving..."
             : unsavedChanges
-            ? "Save Changes"
-            : "All Saved"}
+              ? "Save Changes"
+              : "All Saved"}
         </Button>
         {saveError && (
           <Typography

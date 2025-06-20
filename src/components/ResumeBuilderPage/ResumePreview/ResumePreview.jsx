@@ -23,7 +23,7 @@ import {
   TextFormat,
   Print,
 } from "@mui/icons-material";
-
+import IndiaTemplate from '../Templates/IndiaTemplate'
 import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
 import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
 import { ExportMenu } from "../ExportMenu/ExportMenu";
@@ -128,6 +128,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         6: TEMPLATES.EUROPE,
         7: TEMPLATES.AUSTRALIA,
         8: TEMPLATES.USA,
+        9: TEMPLATES.INDIA
       }[newValue] || TEMPLATES.MODERN;
     setActiveTemplate(newTemplate);
   };
@@ -267,6 +268,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         [TEMPLATES.EUROPE]: EuropenUnionTemplate,
         [TEMPLATES.AUSTRALIA]: AustraliaTemplate,
         [TEMPLATES.USA]: UsaTemplate,
+        [TEMPLATES.INDIA]: IndiaTemplate
       }[activeTemplate] || ModernTemplate;
     return <TemplateComponent {...commonProps} />;
   };
@@ -336,10 +338,10 @@ const ResumePreview = ({ resumeData, onBack }) => {
             height: isPrinting
               ? "auto"
               : {
-                  xs: "calc(100vh - 136px)",
-                  sm: "calc(100vh - 120px)",
-                  md: "calc(100vh - 120px)",
-                },
+                xs: "calc(100vh - 136px)",
+                sm: "calc(100vh - 120px)",
+                md: "calc(100vh - 120px)",
+              },
             boxShadow: isPrinting ? "none !important" : undefined,
             background: isPrinting ? "transparent !important" : undefined,
             margin: isPrinting ? "0 !important" : undefined,
@@ -367,6 +369,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   label="Template"
                   className="no-print"
                 >
+                  <MenuItem value={TEMPLATES.INDIA}>INDIA</MenuItem>
                   <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem>
                   <MenuItem value={TEMPLATES.MINIMAL}>Minimal</MenuItem>
                   <MenuItem value={TEMPLATES.CREATIVE}>Creative</MenuItem>
@@ -375,7 +378,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   </MenuItem>
                   {/* <MenuItem value={TEMPLATES.SIDEBAR}>
                     Sidebar Template
-                  </MenuItem> */}
+                    </MenuItem> */}
                   <MenuItem value={TEMPLATES.EUROPASS}>Elegant</MenuItem>
                   <MenuItem value={TEMPLATES.CANADA}>Canada Template</MenuItem>
                   <MenuItem value={TEMPLATES.EUROPE}>
@@ -416,7 +419,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   : colorScheme.primary,
                 borderRadius: "4px",
               },
-              padding: isPrinting ? 0 : { xs: 1, sm: 2, md: 3 },
+              // padding: isPrinting ? 0 : { xs: 1, sm: 2, md: 3 },
               display: isPrinting ? "block" : "flex",
               justifyContent: isPrinting ? undefined : "center",
               alignItems: isPrinting ? undefined : "flex-start",
@@ -442,18 +445,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
                   transform: isPrinting ? "none" : `scale(${scale})`,
 
-                  width: isPrinting
-                    ? "830px"
-                    : scale < 1 && !isMobile
-                    ? `${100 / scale}%`
-                    : "100%",
-
-                  maxWidth: isPrinting
-                    ? "830px"
-                    : scale < 1 && !isMobile
-                    ? undefined
-                    : "830px",
-
+                  width: "100%",
                   transformOrigin: isPrinting ? "top left" : "top center",
                   margin: isPrinting ? "0 auto" : "0 auto",
                   boxShadow: isPrinting ? "none" : undefined,

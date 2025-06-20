@@ -61,7 +61,7 @@ export const CreativeTemplate = ({
         fontFamily: fontFamily,
         color: colorScheme.text,
         bgcolor: colorScheme.background,
-        p: 1,
+        px: { xs: 2, sm: 4 },
         maxWidth: "1000px",
         mx: "auto",
         position: "relative",
