@@ -82,7 +82,7 @@ export const AustraliaTemplate = ({
       sx={{
         fontFamily: fontFamily,
         backgroundColor: "#f8fafc", // Tailwind gray-50
-        maxWidth: "800px",
+        maxWidth: "100%",
         margin: "2rem auto",
         padding: "2.5rem",
         background: "white",

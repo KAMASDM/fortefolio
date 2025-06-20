@@ -8,7 +8,7 @@ export const generatePDF = (element, options = {}) => {
     applyPDFOptimizationStyles(clone);
 
     const pdfOptions = {
-      margin: [0.5, 0.5, 0.5, 0.5],
+      margin: [0, 0, 0, 0],
       filename: filename,
       image: { type: "jpeg", quality: 1.0 },
       html2canvas: {

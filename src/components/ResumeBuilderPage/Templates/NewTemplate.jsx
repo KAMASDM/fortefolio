@@ -131,9 +131,7 @@ export const EuropassTemplate = ({
       sx={{
         fontFamily: fontFamily,
         backgroundColor: "#f8f9fa",
-        maxWidth: "840px",
         background: "#ffffff",
-        borderRadius: "0.75rem",
         boxShadow: "0 10px 30px -15px rgba(0, 0, 0, 0.15)",
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "300px 1fr" },
@@ -160,10 +158,7 @@ export const EuropassTemplate = ({
           backgroundImage: "linear-gradient(135deg, #43cea2 0%, #185a9d 100%)",
           color: "#ffffff",
           padding: "2.5rem",
-          borderRadius: {
-            xs: "0.75rem 0.75rem 0 0",
-            md: "0.75rem 0 0 0.75rem",
-          },
+          
           printColorAdjust: "exact",
           WebkitPrintColorAdjust: "exact",
           // Ensure sidebar content doesn't break across pages

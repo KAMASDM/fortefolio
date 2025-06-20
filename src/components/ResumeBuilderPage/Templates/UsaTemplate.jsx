@@ -57,6 +57,7 @@ export const UsaTemplate = ({
       sx={{
         fontSize: { xs: "1rem", md: "1.125rem" }, // Tailwind text-base / text-lg
         fontWeight: 700, // Tailwind font-bold
+        width:'100%',
         color: "#1e3a8a", // Tailwind blue-800
         borderBottom: "1px solid #93c5fd", // Tailwind blue-300
         paddingBottom: "0.375rem", // Tailwind pb-1.5
