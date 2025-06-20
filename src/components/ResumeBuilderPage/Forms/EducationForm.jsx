@@ -12,10 +12,6 @@ import {
   Chip,
   Tooltip,
   Alert,
-  Card,
-  CardContent,
-  Stack,
-  Fade,
   Zoom,
 } from "@mui/material";
 import {
@@ -31,11 +27,17 @@ import {
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
 
-const degreeSuggestions = [];
-
-const fieldSuggestions = [
-  /* ... */
-];
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+  gradient: "linear-gradient(135deg, #B9A5E3 0%, #7F68C9 100%)",
+  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
+};
 
 const defaultEducationEntry = {
   id: 1,
@@ -48,12 +50,43 @@ const defaultEducationEntry = {
   description: "",
 };
 
+const sectionStyle = {
+  p: 3,
+  mb: 4,
+  borderRadius: 2,
+  border: "1px solid",
+  borderColor: lavenderPalette.primary,
+  position: "relative",
+};
+
+const SectionTitle = ({ icon, label }) => (
+  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        mr: 1,
+        width: 28,
+        height: 28,
+        color: lavenderPalette.primary,
+      }}
+    >
+      {icon}
+    </Box>
+    <Typography
+      variant="subtitle1"
+      fontWeight="bold"
+      sx={{ color: lavenderPalette.primary }}
+    >
+      {label}
+    </Typography>
+  </Box>
+);
+
 const EducationForm = ({ data, updateData, nextStep }) => {
   const [educations, setEducations] = useState([defaultEducationEntry]);
   const [lastSavedEducations, setLastSavedEducations] = useState(educations);
-
-  const [showDegreeSuggestions, setShowDegreeSuggestions] = useState(null);
-  const [showFieldSuggestions, setShowFieldSuggestions] = useState(null);
   const [formComplete, setFormComplete] = useState(0);
 
   useEffect(() => {
@@ -120,23 +153,8 @@ const EducationForm = ({ data, updateData, nextStep }) => {
   };
 
   const removeEducation = (id) => {
-    setEducations((prevEducations) => {
-      const updatedEducations = prevEducations.filter((edu) => edu.id !== id);
-      if (updatedEducations.length === 0) {
-        return [defaultEducationEntry];
-      }
-      return updatedEducations;
-    });
-  };
-
-  const selectDegreeSuggestion = (eduId, degree) => {
-    handleChange(eduId, "degree", degree);
-    setShowDegreeSuggestions(null);
-  };
-
-  const selectFieldSuggestion = (eduId, field) => {
-    handleChange(eduId, "field", field);
-    setShowFieldSuggestions(null);
+    const updated = educations.filter((edu) => edu.id !== id);
+    setEducations(updated.length > 0 ? updated : [defaultEducationEntry]);
   };
 
   const handleSubmit = (e) => {
@@ -171,19 +189,33 @@ const EducationForm = ({ data, updateData, nextStep }) => {
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Avatar
-            sx={{ bgcolor: "primary.light", color: "primary.main", mr: 2 }}
+            sx={{
+              bgcolor: lavenderPalette.light,
+              color: lavenderPalette.primary,
+              mr: 2,
+            }}
           >
             <SchoolIcon />
           </Avatar>
-          <Typography variant="h5" component="h2">
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ color: lavenderPalette.text }}
+          >
             Education
           </Typography>
         </Box>
         <Chip
           label={`${formComplete}% Complete`}
-          color={formComplete === 100 ? "success" : "primary"}
-          variant={formComplete === 100 ? "filled" : "outlined"}
           icon={formComplete === 100 ? <CheckCircleIcon /> : undefined}
+          variant="outlined"
+          sx={{
+            borderColor: lavenderPalette.primary,
+            color: lavenderPalette.primary,
+            "& .MuiChip-icon": {
+              color: lavenderPalette.primary,
+            },
+          }}
         />
       </Box>
 
@@ -191,301 +223,198 @@ const EducationForm = ({ data, updateData, nextStep }) => {
         <Alert
           severity="info"
           icon={<InfoIcon />}
-          sx={{ mb: 3, borderRadius: 2 }}
+          sx={{ mb: 3, borderRadius: 2, background: lavenderPalette.light }}
         >
           Add your educational background to showcase your academic
-          qualifications
+          qualifications.
         </Alert>
       )}
 
       <form onSubmit={handleSubmit}>
-        {Array.isArray(educations) &&
-          educations.map((education, index) => (
-            <Zoom
-              in
-              key={education.id || index}
-              style={{ transitionDelay: `${index * 50}ms` }}
-            >
-              <Paper
-                elevation={2}
-                sx={{
-                  p: { xs: 2, sm: 3 },
-                  mb: 4,
-                  borderRadius: 3,
-                  position: "relative",
-                  overflow: "visible",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  transition: "box-shadow 0.3s ease",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    mb: 1,
-                    mt: -1,
-                    mr: -1,
-                  }}
-                >
-                  {educations.length > 1 && (
-                    <Tooltip title="Remove this education entry">
-                      <IconButton
-                        color="error"
-                        onClick={() => removeEducation(education.id)}
-                        size="small"
-                        sx={{}}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
+        {educations.map((education, index) => (
+          <Zoom
+            in
+            key={education.id}
+            style={{ transitionDelay: `${index * 50}ms` }}
+          >
+            <Paper elevation={2} sx={sectionStyle}>
+              {educations.length > 1 && (
+                <Tooltip title="Remove this education entry">
+                  <IconButton
+                    color="error"
+                    onClick={() => removeEducation(education.id)}
+                    size="small"
+                    sx={{ position: "absolute", top: 8, right: 8 }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
 
-                <Grid container spacing={3}>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      required
-                      id={`institution-${education.id}`}
-                      label="Institution"
-                      value={education.institution || ""}
-                      onChange={(e) =>
-                        handleChange(
-                          education.id,
-                          "institution",
-                          e.target.value
-                        )
-                      }
-                      placeholder="University or School Name"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SchoolIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      required
-                      id={`degree-${education.id}`}
-                      label="Degree"
-                      value={education.degree || ""}
-                      onChange={(e) =>
-                        handleChange(education.id, "degree", e.target.value)
-                      }
-                      placeholder="e.g. Bachelor of Science"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <DegreeIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    {showDegreeSuggestions === education.id && (
-                      <Fade in>
-                        <Card
-                          variant="outlined"
-                          sx={{ mt: 1, maxHeight: 200, overflow: "auto" }}
-                        >
-                          <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              flexWrap="wrap"
-                              useFlexGap
-                            >
-                              {degreeSuggestions.map((degree, i) => (
-                                <Chip
-                                  key={i}
-                                  label={degree}
-                                  onClick={() =>
-                                    selectDegreeSuggestion(education.id, degree)
-                                  }
-                                  color="primary"
-                                  variant="outlined"
-                                  clickable
-                                  size="small"
-                                  sx={{ mb: 0.5, mr: 0.5 }}
-                                />
-                              ))}
-                            </Stack>
-                          </CardContent>
-                        </Card>
-                      </Fade>
-                    )}
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      id={`field-${education.id}`}
-                      label="Field of Study"
-                      value={education.field || ""}
-                      onChange={(e) =>
-                        handleChange(education.id, "field", e.target.value)
-                      }
-                      placeholder="e.g. Computer Science"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <FieldIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    {showFieldSuggestions === education.id && (
-                      <Fade in>
-                        <Card
-                          variant="outlined"
-                          sx={{ mt: 1, maxHeight: 200, overflow: "auto" }}
-                        >
-                          <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              flexWrap="wrap"
-                              useFlexGap
-                            >
-                              {fieldSuggestions.map((field, i) => (
-                                <Chip
-                                  key={i}
-                                  label={field}
-                                  onClick={() =>
-                                    selectFieldSuggestion(education.id, field)
-                                  }
-                                  color="primary"
-                                  variant="outlined"
-                                  clickable
-                                  size="small"
-                                  sx={{ mb: 0.5, mr: 0.5 }}
-                                />
-                              ))}
-                            </Stack>
-                          </CardContent>
-                        </Card>
-                      </Fade>
-                    )}
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      id={`location-${education.id}`}
-                      label="Location"
-                      value={education.location || ""}
-                      onChange={(e) =>
-                        handleChange(education.id, "location", e.target.value)
-                      }
-                      placeholder="City, State/Country"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <LocationIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      required
-                      id={`startDate-${education.id}`}
-                      label="Start Date"
-                      type="month"
-                      value={education.startDate || ""}
-                      onChange={(e) =>
-                        handleChange(education.id, "startDate", e.target.value)
-                      }
-                      InputLabelProps={{ shrink: true }}
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CalendarIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      id={`endDate-${education.id}`}
-                      label="End Date (or Expected)"
-                      type="month"
-                      value={education.endDate || ""}
-                      onChange={(e) =>
-                        handleChange(education.id, "endDate", e.target.value)
-                      }
-                      InputLabelProps={{ shrink: true }}
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CalendarIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      id={`description-${education.id}`}
-                      label="Description (Optional)"
-                      value={education.description || ""}
-                      onChange={(e) =>
-                        handleChange(
-                          education.id,
-                          "description",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Notable accomplishments, relevant coursework, thesis, GPA (if high), etc."
-                      variant="outlined"
-                      multiline
-                      rows={3}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment
-                            position="start"
-                            sx={{ mt: -2, mr: 1, alignSelf: "flex-start" }}
-                          >
-                            <DescriptionIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
+              <SectionTitle icon={<SchoolIcon />} label="Education Entry" />
+
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    required
+                    label="Institution"
+                    value={education.institution}
+                    onChange={(e) =>
+                      handleChange(education.id, "institution", e.target.value)
+                    }
+                    placeholder="University or School Name"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SchoolIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
                 </Grid>
-              </Paper>
-            </Zoom>
-          ))}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    required
+                    label="Degree"
+                    value={education.degree}
+                    onChange={(e) =>
+                      handleChange(education.id, "degree", e.target.value)
+                    }
+                    placeholder="e.g. Bachelor of Science"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DegreeIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Field of Study"
+                    value={education.field}
+                    onChange={(e) =>
+                      handleChange(education.id, "field", e.target.value)
+                    }
+                    placeholder="e.g. Computer Science"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <FieldIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Location"
+                    value={education.location}
+                    onChange={(e) =>
+                      handleChange(education.id, "location", e.target.value)
+                    }
+                    placeholder="City, State/Country"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LocationIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    required
+                    type="month"
+                    label="Start Date"
+                    value={education.startDate}
+                    onChange={(e) =>
+                      handleChange(education.id, "startDate", e.target.value)
+                    }
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    type="month"
+                    label="End Date (or Expected)"
+                    value={education.endDate}
+                    onChange={(e) =>
+                      handleChange(education.id, "endDate", e.target.value)
+                    }
+                    InputLabelProps={{ shrink: true }}
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Description (Optional)"
+                    value={education.description}
+                    onChange={(e) =>
+                      handleChange(education.id, "description", e.target.value)
+                    }
+                    placeholder="Notable accomplishments, coursework, GPA, etc."
+                    variant="outlined"
+                    multiline
+                    rows={3}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DescriptionIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+          </Zoom>
+        ))}
 
         <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
           <Button
             startIcon={<AddIcon />}
             onClick={addEducation}
             variant="outlined"
-            color="primary"
             sx={{
               borderRadius: 30,
               px: 3,
               py: 1,
               borderStyle: "dashed",
               borderWidth: 2,
+              borderColor: lavenderPalette.primary,
+              color: lavenderPalette.primary,
               "&:hover": {
-                transform: "none",
-                boxShadow: "none",
-                background: "rgba(147, 112, 219, 0.04)",
+                backgroundColor: lavenderPalette.light,
+                borderWidth: 2,
               },
             }}
           >

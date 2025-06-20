@@ -9,8 +9,6 @@ import {
   Avatar,
   InputAdornment,
   Chip,
-  IconButton,
-  Tooltip,
   Paper,
   Alert,
   Stack,
@@ -29,12 +27,22 @@ import {
   PermIdentity as PermIdentityIcon,
   CheckCircle as CheckCircleIcon,
   Info as InfoIcon,
-  Help as HelpIcon,
   Contacts as ContactIcon,
 } from "@mui/icons-material";
 
-const titleSuggestions = [];
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+  gradient: "linear-gradient(135deg, #B9A5E3 0%, #7F68C9 100%)",
+  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
+};
 
+const titleSuggestions = [];
 const summaryExamples = [];
 
 const defaultPersonalInfo = {
@@ -62,11 +70,7 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
   useEffect(() => {
     if (data && typeof data === "object" && Object.keys(data).length > 0) {
       setFormData(() => ({ ...defaultPersonalInfo, ...data }));
-    } else if (
-      data &&
-      typeof data === "object" &&
-      Object.keys(data).length === 0
-    ) {
+    } else if (data && typeof data === "object") {
       setFormData(defaultPersonalInfo);
     }
   }, [data]);
@@ -109,12 +113,6 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
     }
   }, [formData]);
 
-  useEffect(() => {
-    if (data) {
-      setFormData(data);
-    }
-  }, [data]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updated = { ...formData, [name]: value };
@@ -142,12 +140,12 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
     let formErrors = {};
     let isValid = true;
 
-    if (!formData || !formData.fullName || !formData.fullName.trim()) {
+    if (!formData.fullName?.trim()) {
       formErrors.fullName = "Full name is required";
       isValid = false;
     }
 
-    if (!formData || !formData.email || !formData.email.trim()) {
+    if (!formData.email?.trim()) {
       formErrors.email = "Email is required";
       isValid = false;
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -180,19 +178,29 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Avatar
-            sx={{ bgcolor: "primary.light", color: "primary.main", mr: 2 }}
+            sx={{
+              bgcolor: lavenderPalette.light,
+              color: lavenderPalette.primary,
+              mr: 2,
+            }}
           >
             <PersonIcon />
           </Avatar>
-          <Typography variant="h5" component="h2">
+          <Typography variant="h5" component="h2" sx={{ color: lavenderPalette.text }}>
             Personal Information
           </Typography>
         </Box>
         <Chip
           label={`${formComplete}% Complete`}
-          color={formComplete === 100 ? "success" : "primary"}
-          variant={formComplete === 100 ? "filled" : "outlined"}
           icon={formComplete === 100 ? <CheckCircleIcon /> : undefined}
+          variant="outlined"
+          sx={{
+            borderColor: lavenderPalette.primary,
+            color: lavenderPalette.primary,
+            "& .MuiChip-icon": {
+              color: lavenderPalette.primary,
+            },
+          }}
         />
       </Box>
       {formComplete < 30 && (
@@ -205,33 +213,16 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
         </Alert>
       )}
       <form onSubmit={handleSubmit}>
-        <Paper
-          elevation={2}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight="bold"
-            sx={{ mb: 2, display: "flex", alignItems: "center" }}
-          >
-            <PermIdentityIcon sx={{ mr: 1, color: "primary.main" }} />
-            Basic Information
-          </Typography>
+        <Paper elevation={2} sx={sectionStyle}>
+          <SectionTitle icon={<PermIdentityIcon />} label="Basic Information" />
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 required
-                id="fullName"
                 name="fullName"
                 label="Full Name"
-                value={formData.fullName || ""}
+                value={formData.fullName}
                 onChange={handleChange}
                 error={!!errors.fullName}
                 helperText={errors.fullName}
@@ -249,10 +240,9 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                id="jobTitle"
                 name="jobTitle"
                 label="Professional Title (Optional)"
-                value={formData.jobTitle || ""}
+                value={formData.jobTitle}
                 onChange={handleChange}
                 placeholder="e.g. Software Engineer"
                 variant="outlined"
@@ -270,13 +260,8 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
                     variant="outlined"
                     sx={{ mt: 1, maxHeight: 150, overflow: "auto" }}
                   >
-                    <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        flexWrap="wrap"
-                        useFlexGap
-                      >
+                    <CardContent sx={{ p: 1 }}>
+                      <Stack direction="row" spacing={1} flexWrap="wrap">
                         {titleSuggestions.map((title, index) => (
                           <Chip
                             key={index}
@@ -286,7 +271,10 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
                             variant="outlined"
                             clickable
                             size="small"
-                            sx={{ mb: 0.5, mr: 0.5 }}
+                            sx={{
+                              color: lavenderPalette.primary,
+                              borderColor: lavenderPalette.primary,
+                            }}
                           />
                         ))}
                       </Stack>
@@ -297,34 +285,18 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             </Grid>
           </Grid>
         </Paper>
-        <Paper
-          elevation={2}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight="bold"
-            sx={{ mb: 2, display: "flex", alignItems: "center" }}
-          >
-            <ContactIcon sx={{ mr: 1, color: "primary.main" }} />
-            Contact Information
-          </Typography>
+
+        <Paper elevation={2} sx={sectionStyle}>
+          <SectionTitle icon={<ContactIcon />} label="Contact Information" />
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 required
-                id="email"
                 name="email"
                 label="Email"
                 type="email"
-                value={formData.email || ""}
+                value={formData.email}
                 onChange={handleChange}
                 error={!!errors.email}
                 helperText={errors.email}
@@ -342,10 +314,9 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                id="phone"
                 name="phone"
                 label="Phone (Optional)"
-                value={formData.phone || ""}
+                value={formData.phone}
                 onChange={handleChange}
                 placeholder="(123) 456-7890"
                 variant="outlined"
@@ -361,10 +332,9 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                id="location"
                 name="location"
                 label="Location (Optional)"
-                value={formData.location || ""}
+                value={formData.location}
                 onChange={handleChange}
                 placeholder="City, State/Country"
                 variant="outlined"
@@ -380,32 +350,15 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
           </Grid>
         </Paper>
 
-        <Paper
-          elevation={2}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            fontWeight="bold"
-            sx={{ mb: 2, display: "flex", alignItems: "center" }}
-          >
-            <LanguageIcon sx={{ mr: 1, color: "primary.main" }} />
-            Online Presence (Optional)
-          </Typography>
+        <Paper elevation={2} sx={sectionStyle}>
+          <SectionTitle icon={<LanguageIcon />} label="Online Presence (Optional)" />
           <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                id="linkedin"
                 name="linkedin"
                 label="LinkedIn URL"
-                value={formData.linkedin || ""}
+                value={formData.linkedin}
                 onChange={handleChange}
                 placeholder="https://linkedin.com/in/..."
                 variant="outlined"
@@ -421,10 +374,9 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                id="github"
                 name="github"
                 label="GitHub URL"
-                value={formData.github || ""}
+                value={formData.github}
                 onChange={handleChange}
                 placeholder="https://github.com/..."
                 variant="outlined"
@@ -440,10 +392,9 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                id="portfolio"
                 name="portfolio"
                 label="Portfolio/Website URL"
-                value={formData.portfolio || ""}
+                value={formData.portfolio}
                 onChange={handleChange}
                 placeholder="https://yourportfolio.com"
                 variant="outlined"
@@ -459,64 +410,76 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
           </Grid>
         </Paper>
 
-        <Paper
-          elevation={2}
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            border: "1px solid",
-            borderColor: "divider",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              fontWeight="bold"
-              sx={{ display: "flex", alignItems: "center" }}
-            >
-              <DescriptionIcon sx={{ mr: 1, color: "primary.main" }} />
-              Professional Summary (Optional)
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Chip
-                size="small"
-                label={`${summaryWordCount} words`}
-                color={summaryOptimal ? "success" : "default"}
-                variant={summaryWordCount > 0 ? "outlined" : "filled"}
-              />
-            </Box>
+        <Paper elevation={2} sx={sectionStyle}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <SectionTitle icon={<DescriptionIcon />} label="Professional Summary (Optional)" />
+            <Chip
+              size="small"
+              label={`${summaryWordCount} words`}
+              variant={summaryWordCount > 0 ? "outlined" : "filled"}
+              sx={{
+                borderColor: lavenderPalette.primary,
+                color: lavenderPalette.primary,
+                "& .MuiChip-icon": { color: lavenderPalette.primary },
+              }}
+            />
           </Box>
           <TextField
             fullWidth
-            id="summary"
             name="summary"
-            value={formData.summary || ""}
+            value={formData.summary}
             onChange={handleChange}
-            placeholder="Write a brief 2-4 sentence summary highlighting your key skills, experience, and career objective..."
+            placeholder="Write a brief 2–4 sentence summary..."
             variant="outlined"
             multiline
             rows={5}
           />
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 1, display: "block" }}
-          >
-            Tip: Tailor this summary to the specific job you're applying for.
-            (Aim for 50-200 words)
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+            Tip: Tailor this summary to the job you're applying for. (50–200 words)
           </Typography>
         </Paper>
       </form>
     </Box>
   );
 };
+
+const sectionStyle = {
+  p: 3,
+  mb: 4,
+  borderRadius: 2,
+  border: "1px solid",
+  borderColor: lavenderPalette.primary,
+  backgroundColor: "#fff",
+  transition: "border-color 0.3s ease",
+  "&:hover": {
+    borderColor: lavenderPalette.deep,
+  },
+};
+
+const SectionTitle = ({ icon, label }) => (
+  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        mr: 1,
+        width: 28,
+        height: 28,
+        color: lavenderPalette.primary,
+      }}
+    >
+      {icon}
+    </Box>
+    <Typography
+      variant="subtitle1"
+      fontWeight="bold"
+      sx={{ color: lavenderPalette.primary }}
+    >
+      {label}
+    </Typography>
+  </Box>
+);
+
 
 export default PersonalInfoForm;

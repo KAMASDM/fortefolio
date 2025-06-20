@@ -12,16 +12,32 @@ import {
   FormControlLabel,
   Avatar,
   InputAdornment,
+  Chip,
+  Alert,
+  Zoom,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
-  WorkOutline as WorkIcon,
+  Work as WorkIcon,
   LocationOn as LocationIcon,
   CalendarMonth as CalendarIcon,
   Notes as NotesIcon,
+  Info as InfoIcon,
+  CheckCircle as CheckCircleIcon,
+  Business as CompanyIcon,
+  Badge as PositionIcon,
 } from "@mui/icons-material";
-import { Zoom } from "@mui/material";
+
+const lavenderPalette = {
+  light: "#EAE4F7",
+  soft: "#D8CCF0",
+  medium: "#B9A5E3",
+  primary: "#9D88D9",
+  deep: "#7F68C9",
+  text: "#4A3B77",
+  darkText: "#2E2152",
+};
 
 const defaultExperienceEntry = {
   id: 1,
@@ -34,62 +50,111 @@ const defaultExperienceEntry = {
   responsibilities: [""],
 };
 
+const sectionStyle = {
+  p: 3,
+  mb: 4,
+  borderRadius: 2,
+  border: "1px solid",
+  borderColor: lavenderPalette.primary,
+  position: "relative",
+};
+
+const SectionTitle = ({ icon, label }) => (
+  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        mr: 1,
+        width: 28,
+        height: 28,
+        color: lavenderPalette.primary,
+      }}
+    >
+      {icon}
+    </Box>
+    <Typography
+      variant="subtitle1"
+      fontWeight="bold"
+      sx={{ color: lavenderPalette.primary }}
+    >
+      {label}
+    </Typography>
+  </Box>
+);
+
 const ExperienceForm = ({ data, updateData, nextStep }) => {
   const [experiences, setExperiences] = useState([defaultExperienceEntry]);
-  const [lastSavedexperiences, setLastSavedexperiences] = useState(experiences);
+  const [lastSavedExperiences, setLastSavedExperiences] = useState(experiences);
+  const [formComplete, setFormComplete] = useState(0);
 
   useEffect(() => {
     if (data && data.length > 0) {
-      setExperiences(data);
-    } else if (data && data.length === 0) {
+      const sanitizedData = data.map((exp) => ({
+        ...defaultExperienceEntry,
+        ...exp,
+        responsibilities:
+          Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0
+            ? exp.responsibilities
+            : [""],
+      }));
+      setExperiences(sanitizedData);
+    } else {
       setExperiences([defaultExperienceEntry]);
     }
   }, [data]);
 
   useEffect(() => {
     const hasChanged =
-      JSON.stringify(experiences) !== JSON.stringify(lastSavedexperiences);
-
+      JSON.stringify(experiences) !== JSON.stringify(lastSavedExperiences);
     if (hasChanged) {
       const debounce = setTimeout(() => {
         updateData(experiences);
-        setLastSavedexperiences(experiences);
+        setLastSavedExperiences(experiences);
       }, 1000);
-
       return () => clearTimeout(debounce);
     }
-  }, [experiences, lastSavedexperiences, updateData]);
+  }, [experiences, lastSavedExperiences, updateData]);
 
   useEffect(() => {
-    if (data && data.length > 0) {
-      const sanitizedData = data.map((exp) => ({
-        ...exp,
-        responsibilities: Array.isArray(exp.responsibilities)
-          ? exp.responsibilities
-          : [""],
-      }));
-      setExperiences(sanitizedData);
-    } else if (data && data.length === 0) {
-      setExperiences([defaultExperienceEntry]);
+    const requiredFields = ["company", "position", "startDate"];
+    let completed = 0;
+    let total = 0;
+    if (Array.isArray(experiences)) {
+      experiences.forEach((exp) => {
+        if (typeof exp === "object" && exp !== null) {
+          total += requiredFields.length;
+          requiredFields.forEach((field) => {
+            if (exp[field] && String(exp[field]).trim() !== "") {
+              completed++;
+            }
+          });
+        }
+      });
     }
-  }, [data]);
+    setFormComplete(total > 0 ? Math.round((completed / total) * 100) : 0);
+  }, [experiences]);
 
   const handleChange = (id, field, value) => {
-    setExperiences((prevExperiences) =>
-      prevExperiences.map((exp) =>
-        exp.id === id ? { ...exp, [field]: value } : exp
+    setExperiences((prev) =>
+      prev.map((exp) =>
+        exp.id === id
+          ? {
+            ...exp,
+            [field]: value,
+            ...(field === "current" && value && { endDate: "" }),
+          }
+          : exp
       )
     );
   };
 
   const handleResponsibilityChange = (expId, index, value) => {
-    setExperiences((prevExperiences) =>
-      prevExperiences.map((exp) => {
+    setExperiences((prev) =>
+      prev.map((exp) => {
         if (exp.id === expId) {
-          const currentResponsibilities = Array.isArray(exp.responsibilities)
-            ? exp.responsibilities
-            : [];
-          const updatedResponsibilities = [...currentResponsibilities];
+          const updatedResponsibilities = [...exp.responsibilities];
           updatedResponsibilities[index] = value;
           return { ...exp, responsibilities: updatedResponsibilities };
         }
@@ -99,34 +164,23 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
   };
 
   const addResponsibility = (expId) => {
-    setExperiences((prevExperiences) =>
-      prevExperiences.map((exp) => {
-        if (exp.id === expId) {
-          const currentResponsibilities = Array.isArray(exp.responsibilities)
-            ? exp.responsibilities
-            : [];
-          return {
-            ...exp,
-            responsibilities: [...currentResponsibilities, ""],
-          };
-        }
-        return exp;
-      })
+    setExperiences((prev) =>
+      prev.map((exp) =>
+        exp.id === expId
+          ? { ...exp, responsibilities: [...exp.responsibilities, ""] }
+          : exp
+      )
     );
   };
 
   const removeResponsibility = (expId, index) => {
-    setExperiences((prevExperiences) =>
-      prevExperiences.map((exp) => {
-        if (exp.id === expId) {
-          const currentResponsibilities = Array.isArray(exp.responsibilities)
-            ? exp.responsibilities
-            : [];
-          if (currentResponsibilities.length > 1) {
-            const updatedResponsibilities = [...currentResponsibilities];
-            updatedResponsibilities.splice(index, 1);
-            return { ...exp, responsibilities: updatedResponsibilities };
-          }
+    setExperiences((prev) =>
+      prev.map((exp) => {
+        if (exp.id === expId && exp.responsibilities.length > 1) {
+          const updatedResponsibilities = exp.responsibilities.filter(
+            (_, i) => i !== index
+          );
+          return { ...exp, responsibilities: updatedResponsibilities };
         }
         return exp;
       })
@@ -138,51 +192,19 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
       experiences.length > 0
         ? Math.max(0, ...experiences.map((exp) => exp.id)) + 1
         : 1;
-    setExperiences((prevExperiences) => [
-      ...prevExperiences,
-      {
-        ...defaultExperienceEntry,
-        id: newId,
-        responsibilities: [""],
-      },
-    ]);
+    setExperiences((prev) => [...prev, { ...defaultExperienceEntry, id: newId }]);
   };
 
   const removeExperience = (id) => {
-    setExperiences((prevExperiences) => {
-      const updatedExperiences = prevExperiences.filter((exp) => exp.id !== id);
-      if (updatedExperiences.length === 0) {
-        return [defaultExperienceEntry];
-      }
-      return updatedExperiences;
-    });
-  };
-
-  const handleCurrentJobChange = (id, checked) => {
-    setExperiences((prevExperiences) =>
-      prevExperiences.map((exp) =>
-        exp.id === id
-          ? { ...exp, current: checked, endDate: checked ? "" : exp.endDate }
-          : exp
-      )
-    );
+    const updated = experiences.filter((exp) => exp.id !== id);
+    setExperiences(updated.length > 0 ? updated : [defaultExperienceEntry]);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const dataToSave = experiences.filter(
       (exp) =>
-        !(
-          exp.id === 1 &&
-          !exp.company &&
-          !exp.position &&
-          !exp.location &&
-          !exp.startDate &&
-          !exp.endDate &&
-          !exp.current &&
-          exp.responsibilities.length === 1 &&
-          !exp.responsibilities[0]
-        )
+        exp.company && exp.position && exp.startDate
     );
     updateData(dataToSave);
     nextStep();
@@ -190,274 +212,245 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: "flex", alignItems: "center" }}>
-        <Avatar sx={{ bgcolor: "primary.light", color: "primary.main", mr: 2 }}>
-          <WorkIcon />
-        </Avatar>
-        <Typography variant="h5" component="h2">
-          Work Experience
-        </Typography>
+      <Box
+        sx={{
+          mb: 4,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            sx={{
+              bgcolor: lavenderPalette.light,
+              color: lavenderPalette.primary,
+              mr: 2,
+            }}
+          >
+            <WorkIcon />
+          </Avatar>
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ color: lavenderPalette.text }}
+          >
+            Work Experience
+          </Typography>
+        </Box>
+        <Chip
+          label={`${formComplete}% Complete`}
+          icon={formComplete === 100 ? <CheckCircleIcon /> : undefined}
+          variant="outlined"
+          sx={{
+            borderColor: lavenderPalette.primary,
+            color: lavenderPalette.primary,
+            "& .MuiChip-icon": { color: lavenderPalette.primary },
+          }}
+        />
       </Box>
 
+      {experiences.length === 1 && !experiences[0].company && (
+        <Alert
+          severity="info"
+          icon={<InfoIcon />}
+          sx={{ mb: 3, borderRadius: 2, background: lavenderPalette.light }}
+        >
+          Detail your professional history to give employers a clear view of your expertise.
+        </Alert>
+      )}
+
       <form onSubmit={handleSubmit}>
-        {Array.isArray(experiences) &&
-          experiences.map((experience, index) => (
-            <Zoom
-              in
-              key={experience.id || index}
-              style={{ transitionDelay: `${index * 50}ms` }}
-            >
-              <Paper
-                elevation={2}
-                sx={{
-                  p: { xs: 2, sm: 3 },
-                  mb: 4,
-                  borderRadius: 3,
-                  position: "relative",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    mb: 1,
-                    mt: -1,
-                    mr: -1,
-                  }}
-                >
-                  {experiences.length > 1 && (
-                    <Tooltip title="Remove this experience entry">
-                      <IconButton
-                        color="error"
-                        onClick={() => removeExperience(experience.id)}
-                        size="small"
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
+        {experiences.map((experience, index) => (
+          <Zoom
+            in
+            key={experience.id}
+            style={{ transitionDelay: `${index * 50}ms` }}
+          >
+            <Paper elevation={2} sx={sectionStyle}>
+              {experiences.length > 1 && (
+                <Tooltip title="Remove this experience entry">
+                  <IconButton
+                    color="error"
+                    onClick={() => removeExperience(experience.id)}
+                    size="small"
+                    sx={{ position: "absolute", top: 8, right: 8 }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
 
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      required
-                      id={`company-${experience.id}`}
-                      label="Company"
-                      value={experience.company || ""}
-                      onChange={(e) =>
-                        handleChange(experience.id, "company", e.target.value)
-                      }
-                      placeholder="Company Name"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <WorkIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      required
-                      id={`position-${experience.id}`}
-                      label="Position"
-                      value={experience.position || ""}
-                      onChange={(e) =>
-                        handleChange(experience.id, "position", e.target.value)
-                      }
-                      placeholder="Job Title"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <WorkIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      id={`location-${experience.id}`}
-                      label="Location"
-                      value={experience.location || ""}
-                      onChange={(e) =>
-                        handleChange(experience.id, "location", e.target.value)
-                      }
-                      placeholder="City, State/Country"
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <LocationIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      required
-                      id={`startDate-${experience.id}`}
-                      label="Start Date"
-                      type="month"
-                      value={experience.startDate || ""}
-                      onChange={(e) =>
-                        handleChange(experience.id, "startDate", e.target.value)
-                      }
-                      InputLabelProps={{ shrink: true }}
-                      variant="outlined"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CalendarIcon color="action" />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} container spacing={3} alignItems="center">
-                    <Grid item xs={12} sm={6}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={!!experience.current}
-                            onChange={(e) =>
-                              handleCurrentJobChange(
-                                experience.id,
-                                e.target.checked
-                              )
-                            }
-                            name={`current-${experience.id}`}
-                            color="primary"
-                          />
-                        }
-                        label="I currently work here"
-                      />
-                    </Grid>
-                    {!experience.current && (
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          id={`endDate-${experience.id}`}
-                          label="End Date"
-                          type="month"
-                          value={experience.endDate || ""}
-                          onChange={(e) =>
-                            handleChange(
-                              experience.id,
-                              "endDate",
-                              e.target.value
-                            )
-                          }
-                          InputLabelProps={{ shrink: true }}
-                          variant="outlined"
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <CalendarIcon color="action" />
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Grid>
-                    )}
-                  </Grid>
+              <SectionTitle icon={<WorkIcon />} label="Experience Entry" />
 
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="subtitle1"
-                      gutterBottom
-                      sx={{ display: "flex", alignItems: "center" }}
-                    >
-                      <NotesIcon color="action" sx={{ mr: 1 }} />{" "}
-                      Responsibilities & Achievements
-                    </Typography>
-                    {Array.isArray(experience.responsibilities) &&
-                      experience.responsibilities.map((resp, respIndex) => (
-                        <Box
-                          key={respIndex}
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            mb: 1.5,
-                          }}
-                        >
-                          <TextField
-                            fullWidth
-                            value={resp || ""}
-                            onChange={(e) =>
-                              handleResponsibilityChange(
-                                experience.id,
-                                respIndex,
-                                e.target.value
-                              )
-                            }
-                            placeholder={`Responsibility or achievement #${
-                              respIndex + 1
-                            }`}
-                            variant="outlined"
-                            size="small"
-                            multiline
-                          />
-                          <Tooltip title="Remove responsibility">
-                            <span>
-                              <IconButton
-                                color="error"
-                                size="small"
-                                onClick={() =>
-                                  removeResponsibility(experience.id, respIndex)
-                                }
-                                disabled={
-                                  experience.responsibilities.length <= 1
-                                }
-                                sx={{ ml: 1 }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        </Box>
-                      ))}
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={() => addResponsibility(experience.id)}
-                      size="small"
-                      sx={{ mt: 1 }}
-                    >
-                      Add Responsibility
-                    </Button>
-                  </Grid>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    required
+                    label="Company"
+                    value={experience.company}
+                    onChange={(e) => handleChange(experience.id, "company", e.target.value)}
+                    placeholder="Company Name"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CompanyIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
                 </Grid>
-              </Paper>
-            </Zoom>
-          ))}
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    required
+                    label="Position"
+                    value={experience.position}
+                    onChange={(e) => handleChange(experience.id, "position", e.target.value)}
+                    placeholder="Job Title"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PositionIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Location"
+                    value={experience.location}
+                    onChange={(e) => handleChange(experience.id, "location", e.target.value)}
+                    placeholder="City, State/Country"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LocationIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    required
+                    label="Start Date"
+                    type="month"
+                    value={experience.startDate}
+                    onChange={(e) => handleChange(experience.id, "startDate", e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3}>
+                  <TextField
+                    fullWidth
+                    label="End Date"
+                    type="month"
+                    value={experience.endDate}
+                    onChange={(e) => handleChange(experience.id, "endDate", e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    disabled={experience.current}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarIcon color="action" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={experience.current}
+                        onChange={(e) => handleChange(experience.id, "current", e.target.checked)}
+                        sx={{ color: lavenderPalette.primary, '&.Mui-checked': { color: lavenderPalette.deep } }}
+                      />
+                    }
+                    label="I currently work here"
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography
+                    variant="subtitle2"
+                    gutterBottom
+                    sx={{ display: "flex", alignItems: "center", color: lavenderPalette.text, mt: 2 }}
+                  >
+                    <NotesIcon sx={{ mr: 1, color: lavenderPalette.primary }} />
+                    Responsibilities & Achievements
+                  </Typography>
+                  {experience.responsibilities.map((resp, respIndex) => (
+                    <Box
+                      key={respIndex}
+                      sx={{ display: "flex", alignItems: "center", mb: 1.5 }}
+                    >
+                      <TextField
+                        fullWidth
+                        value={resp}
+                        onChange={(e) => handleResponsibilityChange(experience.id, respIndex, e.target.value)}
+                        placeholder={`Responsibility #${respIndex + 1}`}
+                        variant="outlined"
+                        size="small"
+                        multiline
+                      />
+                      <Tooltip title="Remove responsibility">
+                        <span>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => removeResponsibility(experience.id, respIndex)}
+                            disabled={experience.responsibilities.length <= 1}
+                            sx={{ ml: 1 }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </Box>
+                  ))}
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={() => addResponsibility(experience.id)}
+                    size="small"
+                    sx={{ mt: 1, color: lavenderPalette.primary }}
+                  >
+                    Add Responsibility
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+          </Zoom>
+        ))}
 
         <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
           <Button
             startIcon={<AddIcon />}
             onClick={addExperience}
             variant="outlined"
-            color="primary"
             sx={{
               borderRadius: 30,
               px: 3,
               py: 1,
               borderStyle: "dashed",
               borderWidth: 2,
+              borderColor: lavenderPalette.primary,
+              color: lavenderPalette.primary,
               "&:hover": {
-                transform: "none",
-                boxShadow: "none",
-                background: "rgba(147, 112, 219, 0.04)",
+                backgroundColor: lavenderPalette.light,
+                borderWidth: 2,
               },
             }}
           >
