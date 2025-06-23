@@ -684,15 +684,16 @@ function ResumeBuilderPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const systemPrefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  const [darkMode, setDarkMode] = useState(systemPrefersDarkMode);
+  // const systemPrefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  // const [darkMode, setDarkMode] = useState(systemPrefersDarkMode);
+  const [darkMode, setDarkMode] = useState(false);
   const theme = useMemo(() => getCustomTheme(darkMode), [darkMode]);
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
-  useEffect(() => {
-    setDarkMode(systemPrefersDarkMode);
-  }, [systemPrefersDarkMode]);
+  // useEffect(() => {
+  //   setDarkMode(systemPrefersDarkMode);
+  // }, [systemPrefersDarkMode]);
 
   useEffect(() => {
     if (location?.state?.preview === true) {
@@ -1388,7 +1389,7 @@ Now, based on all the provided information, conduct the interview by generating 
               },
             }}
           >
-            {currentStep === totalSteps ? "Preview Resume" : "Next Section"}
+            {currentStep === totalSteps ? "Preview" : "Next Section"}
           </Button>
         </Box>
       </Box>
@@ -1882,23 +1883,21 @@ Now, based on all the provided information, conduct the interview by generating 
               )}
             </Container>
           </Box>{" "}
+
           {isMobile && (
-            <Paper
-              elevation={3}
-              sx={{
-                position: "fixed",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                zIndex: (theme) => theme.zIndex.appBar,
-                display: { md: "none" },
-              }}
-            >
+            <Paper elevation={3} sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: (theme) => theme.zIndex.appBar, display: { md: "none" }, borderTop: `1px solid ${lavenderPalette.primary}`, }}>
               <BottomNavigation
                 value={isPreviewMode ? previewStepId : currentStep}
                 onChange={handleBottomNavChange}
                 showLabels
               >
+                <BottomNavigationAction
+                  label="Dashboard"
+                  icon={<ArrowBackIcon />}
+                  onClick={() => navigateWithConfirmation("/dashboard")}
+                  sx={{ minWidth: "auto", px: 1 }}
+                />
+
                 {sections.map((section) => (
                   <BottomNavigationAction
                     key={section.id}
