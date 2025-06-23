@@ -346,7 +346,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
             overflow: isPrinting ? "visible" : "hidden",
             display: "flex",
             flexDirection: "column",
-            height: "auto",
+            // height: "auto",
             height: isPrinting
               ? "auto"
               : {
@@ -457,7 +457,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
               alignItems: isPrinting ? undefined : "flex-start",
               width: isPrinting ? "auto" : "100%",
               height: isPrinting ? "auto" : undefined,
-              height: "100%",
+              // height: "100%",
             }}
           >
             <Box
