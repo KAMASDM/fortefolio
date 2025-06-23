@@ -1783,7 +1783,7 @@ Now, based on all the provided information, conduct the interview by generating 
             /> */}
 
             <Container
-              maxWidth="lg"
+              // maxWidth="lg"
               sx={{ flexGrow: 1, py: { xs: 2, sm: 3 }, mb: { xs: 8, md: 3 } }}
             >
               <Collapse in={unsavedChanges && !isSaving}>

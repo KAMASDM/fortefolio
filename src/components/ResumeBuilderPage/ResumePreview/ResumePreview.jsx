@@ -346,6 +346,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
             overflow: isPrinting ? "visible" : "hidden",
             display: "flex",
             flexDirection: "column",
+            height: "auto",
             height: isPrinting
               ? "auto"
               : {
@@ -359,6 +360,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
             padding: isPrinting ? "0 !important" : undefined,
           }}
         >
+
+          {/* Template Selector For Mobile*/}
           {isMobile && !isPrinting && (
             <Box
               sx={{
@@ -420,6 +423,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
             </Box>
           )}
 
+
           {!isMobile && !isPrinting && (
             <TemplateSelector
               activeTab={activeTab}
@@ -453,6 +457,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
               alignItems: isPrinting ? undefined : "flex-start",
               width: isPrinting ? "auto" : "100%",
               height: isPrinting ? "auto" : undefined,
+              height: "100%",
             }}
           >
             <Box
@@ -471,8 +476,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   printColorAdjust: "exact",
                   colorAdjust: "exact",
                   transform: isPrinting ? "none" : `scale(${scale})`,
-                  width: "794px",
-                  height: "1123px",
+                  // width: "794px",
+                  // height: "1123px",
                   transformOrigin: isPrinting ? "top left" : "top center",
                   margin: isPrinting ? "0 auto" : "0 auto",
                   boxShadow: isPrinting ? "none" : undefined,
@@ -524,36 +529,38 @@ const ResumePreview = ({ resumeData, onBack }) => {
         </SpeedDial>
       </Zoom>
 
-      {!isPrinting && (
-        <>
-          <ColorMenu
-            colorMenu={colorMenu}
-            handleColorMenuClose={handleColorMenuClose}
-            changeColorScheme={changeColorScheme}
-            COLOR_SCHEMES={COLOR_SCHEMES}
-            isMobile={isMobile}
-            className="no-print"
-          />
-          <FontMenu
-            fontMenu={fontMenu}
-            handleFontMenuClose={handleFontMenuClose}
-            changeFontFamily={changeFontFamily}
-            FONTS={FONTS}
-            isMobile={isMobile}
-            className="no-print"
-          />
-          <ExportMenu
-            exportMenu={exportMenu}
-            handleExportMenuClose={handleExportMenuClose}
-            downloadPDF={downloadPDF}
-            printResume={printResume}
-            loading={loading}
-            isMobile={isMobile}
-            handleDisplayresume={handleDisplayresume}
-            className="no-print"
-          />
-        </>
-      )}
+      {
+        !isPrinting && (
+          <>
+            <ColorMenu
+              colorMenu={colorMenu}
+              handleColorMenuClose={handleColorMenuClose}
+              changeColorScheme={changeColorScheme}
+              COLOR_SCHEMES={COLOR_SCHEMES}
+              isMobile={isMobile}
+              className="no-print"
+            />
+            <FontMenu
+              fontMenu={fontMenu}
+              handleFontMenuClose={handleFontMenuClose}
+              changeFontFamily={changeFontFamily}
+              FONTS={FONTS}
+              isMobile={isMobile}
+              className="no-print"
+            />
+            <ExportMenu
+              exportMenu={exportMenu}
+              handleExportMenuClose={handleExportMenuClose}
+              downloadPDF={downloadPDF}
+              printResume={printResume}
+              loading={loading}
+              isMobile={isMobile}
+              handleDisplayresume={handleDisplayresume}
+              className="no-print"
+            />
+          </>
+        )
+      }
 
       <EnhanceResumeDialog
         open={showEnhanceDialog}
@@ -583,7 +590,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Stack>
+    </Stack >
   );
 };
 
