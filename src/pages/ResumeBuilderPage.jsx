@@ -1922,12 +1922,12 @@ Now, based on all the provided information, conduct the interview by generating 
                     sx={{ minWidth: "auto", px: 1 }}
                   />
                 ))}
-                <BottomNavigationAction
+                {/* <BottomNavigationAction
                   label={isSmall ? "View" : "Preview"}
                   value={previewStepId}
                   icon={<VisibilityIcon />}
                   sx={{ minWidth: "auto", px: 1 }}
-                />
+                /> */}
               </BottomNavigation>
             </Paper>
           )}
