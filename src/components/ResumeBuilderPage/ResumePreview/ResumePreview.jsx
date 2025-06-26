@@ -35,7 +35,7 @@ import { CreativeTemplate } from "../Templates/CreativeTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
 // import { SidebarTemplate } from "../Templates/SidebarTemplate";
 import { CanadaTemplate } from "../Templates/CanadaTemplate";
-import { EuropenUnionTemplate } from "../Templates/EuropenUnionTemplate";
+import EuropenUnionTemplate from "../Templates/EuropenUnionTemplate";
 import { EuropassTemplate } from "../Templates/NewTemplate";
 import { AustraliaTemplate } from "../Templates/AustraliaTemplate";
 import { UsaTemplate } from "../Templates/UsaTemplate";
@@ -65,7 +65,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
   const isExtraSmallMobile = useMediaQuery("(max-width:400px)");
   const resumeRef = useRef(null);
   const [activeTab, setActiveTab] = useState(0);
-  const [activeTemplate, setActiveTemplate] = useState(TEMPLATES.MODERN);
+  const [activeTemplate, setActiveTemplate] = useState(TEMPLATES.EUROPASS);
   const [fontFamily, setFontFamily] = useState(FONTS.POPPINS);
   const [colorScheme, setColorScheme] = useState(COLOR_SCHEMES.BLUE);
   const [loading, setLoading] = useState(false);
@@ -89,11 +89,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
     skills = [],
     projects = [],
   } = resumeData;
-
-  useEffect(() => {
-    const cleanup = injectPrintStyles();
-    return cleanup;
-  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -128,18 +123,18 @@ const ResumePreview = ({ resumeData, onBack }) => {
     setActiveTab(newValue);
     const newTemplate =
       {
-        0: TEMPLATES.MODERN,
-        1: TEMPLATES.MINIMAL,
-        2: TEMPLATES.CREATIVE,
-        3: TEMPLATES.PROFESSIONAL,
+        // 0: TEMPLATES.MODERN,
+        // 1: TEMPLATES.MINIMAL,
+        // 2: TEMPLATES.CREATIVE,
+        // 3: TEMPLATES.PROFESSIONAL,
         // 4: TEMPLATES.SIDEBAR,
-        4: TEMPLATES.EUROPASS,
-        5: TEMPLATES.CANADA,
-        6: TEMPLATES.EUROPE,
-        7: TEMPLATES.AUSTRALIA,
-        8: TEMPLATES.USA,
-        9: TEMPLATES.INDIA
-      }[newValue] || TEMPLATES.MODERN;
+        // 5: TEMPLATES.CANADA,
+        0: TEMPLATES.EUROPASS,
+        1: TEMPLATES.EUROPE,
+        2: TEMPLATES.AUSTRALIA,
+        3: TEMPLATES.USA,
+        4: TEMPLATES.INDIA
+      }[newValue] || TEMPLATES.INDIA;
     setActiveTemplate(newTemplate);
   };
 
@@ -224,24 +219,31 @@ const ResumePreview = ({ resumeData, onBack }) => {
     },
   });
 
-  const downloadPDF = () => pdfGenerator.downloadPDF();
+  const downloadPDF = () => {
+    setScale(1);
+    pdfGenerator.downloadPDF()
+  };
 
   const printResume = () => {
     setIsPrinting(true);
-
+    setScale(1);
     setTimeout(() => {
-      if (resumeRef.current) {
-        resumeRef.current.scrollIntoView({ behavior: "auto", block: "start" });
-        resumeRef.current.focus();
-      }
-
-      setTimeout(() => {
-        window.print();
-        setIsPrinting(false);
-        handleExportMenuClose();
-      }, 250);
-    }, 200);
+      window.print();
+    }, 100);
   };
+
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      console.log("Print dialog closed. Cleaning up.");
+      setIsPrinting(false);
+    };
+
+    window.addEventListener('afterprint', handleAfterPrint);
+
+    return () => {
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, [])
 
   const getInitials = (name) => {
     if (!name) return "?";
@@ -299,9 +301,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
       spacing={0}
       sx={{
         width: "100%",
-        height: isPrinting ? "auto" : "100%",
-        overflowX: isPrinting ? "visible" : "hidden",
-        overflowY: isPrinting ? "visible" : "auto",
+        height: isPrinting ? "auto" : "100%", 
+        overflow: isPrinting ? "visible" : "hidden", 
       }}
       className={isPrinting ? "print-mode" : ""}
     >
@@ -314,7 +315,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         handleExportMenuOpen={handleExportMenuOpen}
         onEnhanceResume={handleOpenEnhanceDialog}
         sx={{
-          display: isPrinting ? "none" : undefined,
+          display: isPrinting ? "none" : "flex",
           width: "100%",
           mb: { xs: 1, sm: 2 },
           flexShrink: 0,
@@ -336,6 +337,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           background: isPrinting ? "#fff" : undefined,
           margin: isPrinting ? "0 !important" : undefined,
           padding: isPrinting ? "0 !important" : undefined,
+          minHeight: 0, 
         }}
       >
         <Paper
@@ -343,24 +345,18 @@ const ResumePreview = ({ resumeData, onBack }) => {
           sx={{
             width: "100%",
             borderRadius: isPrinting ? 0 : { xs: 1, sm: 2 },
-            overflow: isPrinting ? "visible" : "hidden",
             display: "flex",
             flexDirection: "column",
-            // height: "auto",
             height: isPrinting
               ? "auto"
-              : {
-                xs: "calc(100vh - 136px)",
-                sm: "calc(100vh - 120px)",
-                md: "calc(100vh - 120px)",
-              },
+              : "100%", 
             boxShadow: isPrinting ? "none !important" : undefined,
             background: isPrinting ? "transparent !important" : undefined,
             margin: isPrinting ? "0 !important" : undefined,
             padding: isPrinting ? "0 !important" : undefined,
+            minHeight: 0, 
           }}
         >
-
           {/* Template Selector For Mobile*/}
           {isMobile && !isPrinting && (
             <Box
@@ -403,12 +399,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   className="no-print"
                 >
                   <MenuItem value={TEMPLATES.INDIA}>INDIA</MenuItem>
-                  <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem>
-                  <MenuItem value={TEMPLATES.MINIMAL}>Minimal</MenuItem>
-                  <MenuItem value={TEMPLATES.CREATIVE}>Creative</MenuItem>
-                  <MenuItem value={TEMPLATES.PROFESSIONAL}>
+                  {/* <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem> */}
+                  {/* <MenuItem value={TEMPLATES.MINIMAL}>Minimal</MenuItem> */}
+                  {/* <MenuItem value={TEMPLATES.CREATIVE}>Creative</MenuItem> */}
+                  {/* <MenuItem value={TEMPLATES.PROFESSIONAL}>
                     Professional
-                  </MenuItem>
+                  </MenuItem> */}
                   <MenuItem value={TEMPLATES.EUROPASS}>Elegant</MenuItem>
                   <MenuItem value={TEMPLATES.CANADA}>Canada Template</MenuItem>
                   <MenuItem value={TEMPLATES.EUROPE}>
@@ -423,7 +419,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
             </Box>
           )}
 
-
           {!isMobile && !isPrinting && (
             <TemplateSelector
               activeTab={activeTab}
@@ -433,38 +428,49 @@ const ResumePreview = ({ resumeData, onBack }) => {
             />
           )}
 
+          {/* Main scrollable content area */}
           <Box
             sx={{
               flexGrow: 1,
-              overflow: isPrinting ? "visible" : "auto",
+              overflow: isPrinting ? "visible" : "auto", 
+              minHeight: 0, 
               "&::-webkit-scrollbar": {
-                width: isPrinting ? "0px" : "6px",
-                height: isPrinting ? "0px" : "6px",
+                width: isPrinting ? "0px" : "8px",
+                height: isPrinting ? "0px" : "8px",
               },
               "&::-webkit-scrollbar-track": {
                 backgroundColor: isPrinting
                   ? "transparent"
                   : lavenderPalette.light,
+                borderRadius: "4px",
               },
               "&::-webkit-scrollbar-thumb": {
                 backgroundColor: isPrinting
                   ? "transparent"
                   : colorScheme.primary,
                 borderRadius: "4px",
+                "&:hover": {
+                  backgroundColor: isPrinting
+                    ? "transparent"
+                    : lavenderPalette.deep,
+                },
               },
-              display: isPrinting ? "block" : "flex",
-              justifyContent: isPrinting ? undefined : "center",
-              alignItems: isPrinting ? undefined : "flex-start",
-              width: isPrinting ? "auto" : "100%",
-              height: isPrinting ? "auto" : undefined,
-              // height: "100%",
+              
+              scrollbarWidth: isPrinting ? "none" : "thin",
+              scrollbarColor: isPrinting
+                ? "transparent"
+                : `${colorScheme.primary} ${lavenderPalette.light}`,
+              
+              padding: isPrinting ? 0 : { xs: 1, sm: 2 },
             }}
           >
             <Box
               sx={{
-                width: isPrinting ? "auto" : "100%",
-                display: isPrinting ? "block" : "flex",
-                justifyContent: isPrinting ? undefined : "center",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-start",
+                minHeight: isPrinting ? "auto" : "100%",
+                width: "100%",
               }}
             >
               <Box
@@ -476,15 +482,13 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   printColorAdjust: "exact",
                   colorAdjust: "exact",
                   transform: isPrinting ? "none" : `scale(${scale})`,
-                  // width: "794px",
-                  // height: "1123px",
-                  transformOrigin: isPrinting ? "top left" : "top center",
-                  margin: isPrinting ? "0 auto" : "0 auto",
-                  boxShadow: isPrinting ? "none" : undefined,
+                  transformOrigin: "top center",
+                  margin: "0 auto",
+                  boxShadow: isPrinting ? "none" : "0 4px 20px rgba(0,0,0,0.1)",
                   transition: isPrinting ? "none" : "transform 0.2s ease",
-                  pageBreakInside: "auto",
-                  pageBreakBefore: "auto",
-                  pageBreakAfter: "auto",
+                  width: "794px", 
+                  minHeight: isPrinting ? "auto" : "1123px",
+                  marginBottom: isPrinting ? 0 : "2rem",
                 }}
                 data-pdf-container="true"
               >
@@ -529,38 +533,36 @@ const ResumePreview = ({ resumeData, onBack }) => {
         </SpeedDial>
       </Zoom>
 
-      {
-        !isPrinting && (
-          <>
-            <ColorMenu
-              colorMenu={colorMenu}
-              handleColorMenuClose={handleColorMenuClose}
-              changeColorScheme={changeColorScheme}
-              COLOR_SCHEMES={COLOR_SCHEMES}
-              isMobile={isMobile}
-              className="no-print"
-            />
-            <FontMenu
-              fontMenu={fontMenu}
-              handleFontMenuClose={handleFontMenuClose}
-              changeFontFamily={changeFontFamily}
-              FONTS={FONTS}
-              isMobile={isMobile}
-              className="no-print"
-            />
-            <ExportMenu
-              exportMenu={exportMenu}
-              handleExportMenuClose={handleExportMenuClose}
-              downloadPDF={downloadPDF}
-              printResume={printResume}
-              loading={loading}
-              isMobile={isMobile}
-              handleDisplayresume={handleDisplayresume}
-              className="no-print"
-            />
-          </>
-        )
-      }
+      {!isPrinting && (
+        <>
+          <ColorMenu
+            colorMenu={colorMenu}
+            handleColorMenuClose={handleColorMenuClose}
+            changeColorScheme={changeColorScheme}
+            COLOR_SCHEMES={COLOR_SCHEMES}
+            isMobile={isMobile}
+            className="no-print"
+          />
+          <FontMenu
+            fontMenu={fontMenu}
+            handleFontMenuClose={handleFontMenuClose}
+            changeFontFamily={changeFontFamily}
+            FONTS={FONTS}
+            isMobile={isMobile}
+            className="no-print"
+          />
+          <ExportMenu
+            exportMenu={exportMenu}
+            handleExportMenuClose={handleExportMenuClose}
+            downloadPDF={downloadPDF}
+            printResume={printResume}
+            loading={loading}
+            isMobile={isMobile}
+            handleDisplayresume={handleDisplayresume}
+            className="no-print"
+          />
+        </>
+      )}
 
       <EnhanceResumeDialog
         open={showEnhanceDialog}
@@ -590,7 +592,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Stack >
+    </Stack>
   );
 };
 

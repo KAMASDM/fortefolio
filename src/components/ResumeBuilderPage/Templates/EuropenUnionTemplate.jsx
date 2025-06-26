@@ -3,9 +3,11 @@ import {
   Typography,
   Link,
   Stack,
-  IconButton,
   Chip,
   Avatar,
+  Grid,
+  useTheme,
+  Divider,
 } from "@mui/material";
 import {
   Email as EmailIcon,
@@ -14,20 +16,32 @@ import {
   LinkedIn as LinkedInIcon,
   GitHub as GitHubIcon,
   Language as LanguageIcon,
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
   PersonOutline as PersonIcon,
 } from "@mui/icons-material";
+import { useEffect, useRef, useState, useMemo } from 'react';
+import PreviewWrapper from './PreviewWrapper';
 
-export const EuropenUnionTemplate = ({
+const EuropeanUnionTemplate = ({
   resumeData,
-  formatDate,
-  colorScheme,
-  fontFamily,
-  isSectionEmpty,
-  toggleStarSection,
-  starredSections,
+  formatDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+  colorScheme = {
+    primary: '#4f46e5',
+    secondary: '#312e81',
+    background: '#ffffff',
+    text: '#111827',
+    accent: '#e0f2fe',
+    sidebar: '#f8fafc'
+  },
+  fontFamily = '"Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+  isSectionEmpty = (section) => {
+    if (!resumeData[section]) {
+      return true;
+    }
+    return Array.isArray(resumeData[section]) ? resumeData[section].length === 0 : false;
+  },
 }) => {
+  const theme = useTheme();
+
   const {
     personalInfo = {},
     education = [],
@@ -43,632 +57,708 @@ export const EuropenUnionTemplate = ({
     colorAdjust: "exact",
   };
 
-  const SectionTitle = ({ title, sectionName, isSidebar = false }) => (
-    <Box
+  const SectionTitle = ({ title, isSidebar = false }) => (
+    <Typography
+      variant="h6"
       sx={{
+        fontWeight: 700,
         fontSize: isSidebar ? "1rem" : "1.125rem",
-        fontWeight: 600,
-        color: "#312e81",
-        borderBottom: isSidebar ? "none" : "2px solid #a5b4fc",
-        paddingBottom: isSidebar ? "0" : "0.375rem",
-        marginTop: isSidebar ? "1.5rem" : "1.5rem",
-        marginBottom: isSidebar ? "0.75rem" : "1rem",
-        display: "flex",
-        alignItems: "center",
+        color: isSidebar ? colorScheme.secondary : colorScheme.secondary,
+        borderBottom: isSidebar ? "none" : `2px solid ${colorScheme.primary}`,
+        pb: isSidebar ? 0 : 0.5,
+        mb: isSidebar ? "0.75rem" : "1rem",
+        mt: isSidebar ? "1.5rem" : "1.5rem",
         ...pdfColorStyles,
       }}
     >
       {title}
-      <IconButton
-        size="small"
-        onClick={() => toggleStarSection(sectionName)}
-        sx={{ ml: 1 }}
-      >
-        {starredSections.includes(sectionName) ? (
-          <StarIcon
-            fontSize="small"
-            sx={{ color: colorScheme.primary, ...pdfColorStyles }}
-          />
-        ) : (
-          <StarBorderIcon fontSize="small" />
-        )}
-      </IconButton>
-    </Box>
+    </Typography>
   );
 
-  return (
-    <Box
-      sx={{
-        fontFamily: fontFamily,
-        backgroundColor: "#f4f4f5",
-        maxWidth: "100%",
-        borderRadius: "0.5rem",
-        boxShadow:
-          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", md: "250px 1fr" },
-        ...pdfColorStyles,
-      }}
-      className="resume-container"
-    >
-      <Box
-        sx={{
-          backgroundColor: "#e0e7ff",
-          padding: "1rem",
-          borderRadius: { xs: "0.5rem 0.5rem 0 0", md: "0.5rem 0 0 0.5rem" },
-          ...pdfColorStyles,
-        }}
-        className="sidebar"
-      >
-        <Box
-          sx={{
-            width: "120px",
-            height: "120px",
-            borderRadius: "50%",
-            backgroundColor: "#cbd5e1",
-            margin: "0 auto 1rem auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-            ...pdfColorStyles,
-          }}
-          className="profile-photo-container"
-        >
-          <Avatar
-            sx={{
-              width: 120,
-              height: 120,
-              bgcolor: "#cbd5e1",
-              color: "#64748b",
-              fontSize: "3rem",
+  const SidebarItem = ({ icon: Icon, text, href }) => {
+    if (!text) return null;
+    return (
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+        <Icon sx={{ fontSize: 16, color: colorScheme.primary, ...pdfColorStyles }} />
+        {href ? (
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener"
+            sx={{ 
+              fontSize: "0.875rem", 
+              color: colorScheme.text,
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline'
+              }
             }}
           >
-            {personalInfo.fullName ? (
-              personalInfo.fullName.charAt(0)
-            ) : (
-              <PersonIcon sx={{ fontSize: "3rem" }} />
-            )}
-          </Avatar>
-        </Box>
+            {text}
+          </Link>
+        ) : (
+          <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+            {text}
+          </Typography>
+        )}
+      </Stack>
+    );
+  };
 
-        <Typography
-          variant="h5"
-          component="h1"
+  function Page({ isFirst, leftContent, rightContentChildren }) {
+    return (
+      <Box
+        className={`page with-border ${isFirst ? 'first-page' : 'full-page'}`}
+        sx={{
+          fontFamily: fontFamily,
+          bgcolor: 'white',
+          boxSizing: "border-box",
+          margin: "0 auto",
+          overflow: "hidden",
+          display: 'flex',
+          flexDirection: 'row',
+          '@media print': {
+            boxShadow: 'none',
+            margin: 0,
+          },
+          ...(isFirst === false && {
+            flexDirection: 'column',
+            px: 5,
+            py: 6,
+          })
+        }}
+      >
+        {isFirst && (
+          <Grid
+            item
+            xs={12}
+            md={4}
+            sx={{
+              px: 4,
+              py: 6,
+              backgroundColor: colorScheme.sidebar,
+              display: "flex",
+              flexDirection: "column",
+              ...pdfColorStyles,
+              width: '33.33%',
+              boxSizing: "border-box",
+            }}
+          >
+            {leftContent}
+          </Grid>
+        )}
+       
+        <Grid
+          item
+          xs={12}
+          md={isFirst ? 8 : 12}
           sx={{
-            fontSize: { xs: "1.875rem", md: "1.875rem" },
-            fontWeight: 700,
-            color: "#312e81",
-            marginBottom: "0.25rem",
-            textAlign: "left",
-            ...pdfColorStyles,
+            px: isFirst ? 5 : 0,
+            py: isFirst ? 6 : 0,
+            backgroundColor: colorScheme.background,
+            display: "flex",
+            flexDirection: "column",
+            order: 2,
+            width: isFirst ? '66.66%' : '100%',
+            boxSizing: "border-box",
+            ...(isFirst === false && {
+              px: 0,
+              py: 0,
+            })
           }}
-          className="header-name"
         >
-          {personalInfo.fullName || "Hayden Smith"}
+          {rightContentChildren.map((item, idx) => (
+            <div key={idx} className="content-block">{item}</div>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
+
+  const A4_HEIGHT_PX = 1123;
+  const RIGHT_COL_WIDTH_PX = (70*1122)/100;
+
+  const measure70Ref = useRef(null);
+  const measure100Ref = useRef(null);
+
+  const [firstPageItems, setFirstPageItems] = useState([]);
+  const [remainingItems, setRemainingItems] = useState([]);
+  const [overflowPages, setOverflowPages] = useState([]);
+
+  const leftContent = useMemo(() => (
+    <>
+      {/* Profile Section */}
+      <Stack alignItems="center" spacing={1} sx={{ mb: 3 }}>
+        <Avatar
+          src={"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1aiuEE17HaLg6OeR3sPYuTDpqFgCCiXX3kw&s"}
+          alt={personalInfo.fullName}
+          sx={{
+            width: 120,
+            height: 120,
+            fontSize: 48,
+            bgcolor: colorScheme.accent,
+            color: colorScheme.primary,
+            ...pdfColorStyles
+          }}
+        >
+          {(personalInfo.fullName || "A")[0]}
+        </Avatar>
+        <Typography 
+          variant="h6" 
+          fontWeight="bold"
+          sx={{
+            fontSize: "1.125rem",
+            color: colorScheme.text,
+            textAlign: 'center'
+          }}
+        >
+          {personalInfo.fullName || "Professional Name"}
         </Typography>
         {personalInfo.jobTitle && (
-          <Typography
-            variant="body2"
-            sx={{
-              fontSize: "0.875rem",
-              color: "#4f46e5",
-              textAlign: "left",
-              marginBottom: "1.5rem",
-              ...pdfColorStyles,
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: colorScheme.primary,
+              fontSize: "1rem",
+              textAlign: 'center',
+              fontWeight: 500,
+              ...pdfColorStyles
             }}
           >
             {personalInfo.jobTitle}
           </Typography>
         )}
+      </Stack>
 
-        <SectionTitle
-          title="Personal Information"
-          sectionName="personalInfo"
-          isSidebar
+      <Divider sx={{ mb: 2, bgcolor: colorScheme.primary, ...pdfColorStyles }} />
+
+      {/* Contact Information */}
+      <Stack spacing={1} sx={{ mb: 3 }}>
+        <SidebarItem icon={LocationIcon} text={personalInfo.location} />
+        <SidebarItem
+          icon={PhoneIcon}
+          text={personalInfo.phone}
+          href={personalInfo.phone ? `tel:${personalInfo.phone}` : null}
         />
-        <Stack spacing={1}>
-          {personalInfo.fullName && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <PersonIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Typography variant="body2" color="black">
-                {personalInfo.fullName}
-              </Typography>
-            </Box>
-          )}
-          {personalInfo.location && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <LocationIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  textAlign: "center",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Typography variant="body2" color="black">
-                {personalInfo.location}
-              </Typography>
-            </Box>
-          )}
-          {personalInfo.phone && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <PhoneIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  textAlign: "center",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Link
-                href={`tel:${personalInfo.phone}`}
-                target="_blank"
-                sx={{
-                  color: "#374151",
-                  textDecoration: "none",
-                  "&:hover": { textDecoration: "underline", color: "#4f46e5" },
-                }}
-              >
-                {personalInfo.phone}
-              </Link>
-            </Box>
-          )}
-          {personalInfo.email && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <EmailIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  textAlign: "center",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Link
-                href={`mailto:${personalInfo.email}`}
-                target="_blank"
-                sx={{
-                  color: "#374151",
-                  textDecoration: "none",
-                  "&:hover": { textDecoration: "underline", color: "#4f46e5" },
-                }}
-              >
-                {personalInfo.email}
-              </Link>
-            </Box>
-          )}
-          {personalInfo.linkedin && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <LinkedInIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  textAlign: "center",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Link
-                href={personalInfo.linkedin}
-                target="_blank"
-                sx={{
-                  color: "#374151",
-                  textDecoration: "none",
-                  "&:hover": { textDecoration: "underline", color: "#4f46e5" },
-                }}
-              >
-                linkedin.com/in/{personalInfo.linkedin.split("/").pop()}
-              </Link>
-            </Box>
-          )}
-          {personalInfo.github && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <GitHubIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  textAlign: "center",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Link
-                href={personalInfo.github}
-                target="_blank"
-                sx={{
-                  color: "#374151",
-                  textDecoration: "none",
-                  "&:hover": { textDecoration: "underline", color: "#4f46e5" },
-                }}
-              >
-                github.com/{personalInfo.github.split("/").pop()}
-              </Link>
-            </Box>
-          )}
-          {personalInfo.portfolio && (
-            <Box
-              sx={{ display: "flex", alignItems: "center" }}
-              className="contact-item"
-            >
-              <LanguageIcon
-                sx={{
-                  marginRight: "0.75rem",
-                  color: "#4f46e5",
-                  width: "16px",
-                  textAlign: "center",
-                  ...pdfColorStyles,
-                }}
-              />
-              <Link
-                href={personalInfo.portfolio}
-                target="_blank"
-                sx={{
-                  color: "#374151",
-                  textDecoration: "none",
-                  "&:hover": { textDecoration: "underline", color: "#4f46e5" },
-                }}
-              >
-                {personalInfo.portfolio.replace(/^(https?:\/\/)?(www\.)?/, "")}
-              </Link>
-            </Box>
-          )}
-        </Stack>
+        <SidebarItem
+          icon={EmailIcon}
+          text={personalInfo.email}
+          href={personalInfo.email ? `mailto:${personalInfo.email}` : null}
+        />
+        <SidebarItem
+          icon={LinkedInIcon}
+          text={personalInfo.linkedin?.replace(/^https?:\/\/(www\.)?/, "")}
+          href={personalInfo.linkedin}
+        />
+        <SidebarItem
+          icon={GitHubIcon}
+          text={personalInfo.github?.replace(/^https?:\/\/(www\.)?/, "")}
+          href={personalInfo.github}
+        />
+        <SidebarItem
+          icon={LanguageIcon}
+          text={personalInfo.portfolio?.replace(/^https?:\/\/(www\.)?/, "")}
+          href={personalInfo.portfolio}
+        />
+        <SidebarItem
+          icon={LanguageIcon}
+          text={personalInfo.website?.replace(/^https?:\/\/(www\.)?/, "")}
+          href={personalInfo.website}
+        />
+      </Stack>
 
-        {!isSectionEmpty("skills") && (
-          <>
-            <SectionTitle title="Skills" sectionName="skills" isSidebar />
-            <Stack spacing={1}>
-              {skills.map((category, index) => (
-                <Box key={category.id || index}>
-                  {category.name && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 500,
-                        color: "#312e81",
-                        marginBottom: "0.25rem",
-                        ...pdfColorStyles,
-                      }}
-                      className="skill-category"
-                    >
-                      {category.name}
-                    </Typography>
-                  )}
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {Array.isArray(category.skills) &&
-                      category.skills.filter(Boolean).map((skill, idx) => (
-                        <Chip
-                          key={idx}
-                          label={skill.trim()}
-                          size="small"
-                          sx={{
-                            backgroundColor: "#bfdbfe",
-                            color: "#1e40af",
-                            fontWeight: 500,
-                            borderRadius: "0.25rem",
-                            ...pdfColorStyles,
-                          }}
-                        />
-                      ))}
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
-          </>
-        )}
-      </Box>
-
-      <Box
-        sx={{
-          padding: { xs: "1.5rem", md: "2rem 2.5rem" },
-          borderTopRightRadius: { xs: 0, md: "0.5rem" },
-          borderBottomRightRadius: { xs: 0, md: "0.5rem" },
-          ...pdfColorStyles,
-        }}
-        className="main-content"
-      >
-        {personalInfo.summary && (
-          <Box sx={{ marginBottom: "1.5rem" }}>
-            <SectionTitle
-              title="Professional Summary"
-              sectionName="personalInfo"
-            />
-            <Typography
-              variant="body2"
-              sx={{ color: "#4b5563", lineHeight: "1.6" }}
-            >
-              {personalInfo.summary}
-            </Typography>
-          </Box>
-        )}
-
-        {!isSectionEmpty("experience") && (
-          <Box sx={{ marginBottom: "1.5rem" }}>
-            <SectionTitle title="Work Experience" sectionName="experience" />
-            {experience.map((exp, index) => (
-              <Box key={exp.id || index} sx={{ marginBottom: "1.5rem" }}>
+      {/* Skills */}
+      {!isSectionEmpty("skills") && (
+        <Box>
+          <SectionTitle title="Skills" isSidebar={true} />
+          <Stack spacing={2}>
+            {skills.map((group, idx) => (
+              <Box key={idx}>
                 <Typography
                   variant="body2"
-                  sx={{
+                  fontWeight="bold"
+                  sx={{ 
+                    color: colorScheme.secondary, 
+                    mb: 0.5,
                     fontSize: "0.875rem",
-                    color: "#64748b",
-                    marginBottom: "0.25rem",
-                    ...pdfColorStyles,
+                    ...pdfColorStyles
                   }}
-                  className="date-range"
                 >
-                  {formatDate(exp.startDate) || "Start Date"} –{" "}
-                  {exp.current
-                    ? "Present"
-                    : formatDate(exp.endDate) || "End Date"}
+                  {group.name}
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, color: "#1e293b", ...pdfColorStyles }}
-                  className="job-title"
-                >
-                  {exp.position || "Position Title"}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ color: "#475569", marginBottom: "0.25rem" }}
-                  className="company-name"
-                >
-                  {exp.company || "Company Name"}
-                  {exp.location && `, ${exp.location}`}
-                </Typography>
-                {exp.description && (
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    {exp.description}
-                  </Typography>
-                )}
-                {Array.isArray(exp.responsibilities) &&
-                  exp.responsibilities.filter(Boolean).length > 0 && (
-                    <Box
-                      component="ul"
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ gap: 0.5 }}>
+                  {Array.isArray(group.skills) && group.skills.map((skill, i) => (
+                    <Chip
+                      key={i}
+                      label={skill}
+                      size="small"
                       sx={{
-                        listStyleType: "disc",
-                        pl: 2,
-                        mt: 1,
-                        color: "#4b5563",
+                        fontSize: "0.75rem",
+                        backgroundColor: colorScheme.accent,
+                        color: colorScheme.primary,
+                        height: 24,
+                        ...pdfColorStyles
                       }}
-                      className="description-list"
-                    >
-                      {exp.responsibilities
-                        .filter(Boolean)
-                        .map((responsibility, idx) => (
-                          <Typography
-                            component="li"
-                            variant="body2"
-                            key={idx}
-                            sx={{ marginBottom: "0.25rem" }}
-                          >
-                            {responsibility}
-                          </Typography>
-                        ))}
-                    </Box>
-                  )}
-                {typeof exp.responsibilities === "string" &&
-                  exp.responsibilities.trim() && (
-                    <Box
-                      component="ul"
-                      sx={{
-                        listStyleType: "disc",
-                        pl: 2,
-                        mt: 1,
-                        color: "#4b5563",
-                      }}
-                      className="description-list"
-                    >
-                      {exp.responsibilities.split("\n").map(
-                        (responsibility, idx) =>
-                          responsibility.trim() && (
-                            <Typography
-                              component="li"
-                              variant="body2"
-                              key={idx}
-                              sx={{ marginBottom: "0.25rem" }}
-                            >
-                              {responsibility}
-                            </Typography>
-                          )
-                      )}
-                    </Box>
-                  )}
+                    />
+                  ))}
+                </Stack>
               </Box>
             ))}
-          </Box>
-        )}
+          </Stack>
+        </Box>
+      )}
 
-        {!isSectionEmpty("education") && (
-          <Box sx={{ marginBottom: "1.5rem" }}>
-            <SectionTitle
-              title="Education and Training"
-              sectionName="education"
-            />
-            {education.map((edu, index) => (
-              <Box key={edu.id || index} sx={{ marginBottom: "1rem" }}>
+      {/* Education in Sidebar */}
+      {!isSectionEmpty("education") && (
+        <Box>
+          <SectionTitle title="Education" isSidebar={true} />
+          <Stack spacing={2}>
+            {education.map((edu, idx) => (
+              <Box key={idx}>
                 <Typography
-                  variant="body2"
+                  fontWeight="bold"
                   sx={{
                     fontSize: "0.875rem",
-                    color: "#64748b",
-                    marginBottom: "0.25rem",
-                    ...pdfColorStyles,
+                    color: colorScheme.text,
+                    lineHeight: 1.3
                   }}
-                  className="date-range"
                 >
-                  {formatDate(edu.startDate) || "Start Date"} –{" "}
-                  {formatDate(edu.endDate) || "End Date"}
+                  {edu.degree} in {edu.field}
                 </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, color: "#1e293b", ...pdfColorStyles }}
-                  className="job-title"
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontSize: "0.75rem", 
+                    color: colorScheme.text,
+                    opacity: 0.8
+                  }}
                 >
-                  {edu.degree || "Degree"} {edu.field && ` / ${edu.field}`}
+                  {edu.institution}
                 </Typography>
-                <Typography
+                {edu.location && (
+                  <Typography 
+                    variant="body2"
+                    sx={{ 
+                      fontSize: "0.75rem", 
+                      color: colorScheme.text,
+                      opacity: 0.7
+                    }}
+                  >
+                    {edu.location}
+                  </Typography>
+                )}
+                <Typography 
                   variant="body2"
-                  sx={{ color: "#475569", marginBottom: "0.25rem" }}
-                  className="company-name"
+                  sx={{ 
+                    fontSize: "0.7rem", 
+                    color: colorScheme.text,
+                    opacity: 0.6
+                  }}
                 >
-                  {edu.institution || "Institution Name"}
-                  {edu.location && `, ${edu.location}`}
+                  {formatDate(edu.startDate)} – {formatDate(edu.endDate)}
                 </Typography>
                 {edu.description && (
-                  <Typography variant="body2" sx={{ mt: 1, color: "#4b5563" }}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      mt: 0.5,
+                      fontSize: "0.75rem",
+                      color: colorScheme.text,
+                      lineHeight: 1.3
+                    }}
+                  >
                     {edu.description}
                   </Typography>
                 )}
               </Box>
             ))}
-          </Box>
-        )}
+          </Stack>
+        </Box>
+      )}
+    </>
+  ), [personalInfo, skills, education, colorScheme, pdfColorStyles, isSectionEmpty, formatDate]);
 
-        {!isSectionEmpty("projects") && (
-          <Box sx={{ marginBottom: "1.5rem" }}>
-            <SectionTitle title="Projects" sectionName="projects" />
-            {projects.map((project, index) => (
-              <Box key={project.id || index} sx={{ marginBottom: "1rem" }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "0.875rem",
-                    color: "#64748b",
-                    marginBottom: "0.25rem",
-                    ...pdfColorStyles,
-                  }}
-                  className="date-range"
-                >
-                  {formatDate(project.startDate) || "Start Date"} –{" "}
-                  {project.current
-                    ? "Present"
-                    : formatDate(project.endDate) || "End Date"}
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: 600, color: "#1e293b", ...pdfColorStyles }}
-                  className="job-title"
-                >
-                  {project.title || "Project Title"}
-                </Typography>
-                {project.link && (
-                  <Link
-                    href={project.link}
-                    target="_blank"
-                    underline="hover"
-                    variant="body2"
-                    sx={{
-                      color: "#4f46e5",
-                      display: "block",
-                      marginBottom: "0.25rem",
-                    }}
-                  >
-                    {project.link}
-                  </Link>
-                )}
-                {project.technologies && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      color: "#475569",
-                      marginBottom: "0.25rem",
-                    }}
-                  >
-                    Technologies: {project.technologies}
-                  </Typography>
-                )}
-                {project.description && (
-                  <Typography variant="body2" sx={{ color: "#4b5563" }}>
-                    {project.description}
-                  </Typography>
+  // Right main content
+  const rightContent = useMemo(() => ([
+    // Professional Summary
+    personalInfo.summary && (
+      <Box sx={{ mb: 3 }}>
+        <SectionTitle title="Professional Summary" />
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: colorScheme.text,
+            fontSize: "1rem",
+            lineHeight: 1.5,
+            textAlign: "justify"
+          }}
+        >
+          {personalInfo.summary}
+        </Typography>
+      </Box>
+    ),
+
+    // Work Experience
+    !isSectionEmpty("experience") && (
+      <Box>
+        <SectionTitle title="Work Experience" />
+        {experience.map((exp, idx) => (
+          <Box key={idx} sx={{ mb: 3 }}>
+            <Typography 
+              fontWeight="bold"
+              sx={{
+                fontSize: "1.125rem",
+                color: colorScheme.text,
+                mb: 0.5
+              }}
+            >
+              {exp.position} @ {exp.company}
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontSize: "0.875rem", 
+                color: colorScheme.text,
+                opacity: 0.7,
+                mb: 0.5
+              }}
+            >
+              {formatDate(exp.startDate)} – {exp.current ? "Present" : formatDate(exp.endDate)}
+            </Typography>
+            {exp.location && (
+              <Typography 
+                variant="body2"
+                sx={{
+                  fontSize: "0.875rem",
+                  color: colorScheme.text,
+                  opacity: 0.8,
+                  mb: 1
+                }}
+              >
+                {exp.location}
+              </Typography>
+            )}
+            {exp.description && (
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  mt: 1,
+                  fontSize: "1rem",
+                  color: colorScheme.text,
+                  lineHeight: 1.4
+                }}
+              >
+                {exp.description}
+              </Typography>
+            )}
+            {Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0 && (
+              <Box component="ul" sx={{ pl: 2, mt: 1, mb: 0 }}>
+                {exp.responsibilities.map((item, i) => 
+                  item && item.trim() && (
+                    <Typography
+                      component="li"
+                      variant="body2"
+                      key={i}
+                      sx={{
+                        mb: 0.5,
+                        fontSize: "0.875rem",
+                        lineHeight: 1.4,
+                        color: colorScheme.text
+                      }}
+                    >
+                      {item.replace(/\n/g, '')}
+                    </Typography>
+                  )
                 )}
               </Box>
-            ))}
+            )}
           </Box>
-        )}
+        ))}
+      </Box>
+    ),
 
-        {references.length > 0 && (
-          <Box>
-            <SectionTitle title="References" sectionName="references" />
-            {references.length > 0 ? (
-              <Stack spacing={1} sx={{ color: "#4b5563" }}>
-                {references.map((reference, index) => (
-                  <Box key={reference.id || index}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {reference.name}
-                    </Typography>
-                    {reference.position && (
-                      <Typography variant="body2">
-                        {reference.position}
-                      </Typography>
-                    )}
-                    {reference.company && (
-                      <Typography variant="body2">
-                        {reference.company}
-                      </Typography>
-                    )}
-                    {reference.email && (
-                      <Typography variant="body2">
-                        Email: {reference.email}
-                      </Typography>
-                    )}
-                    {reference.contact && (
-                      <Typography variant="body2">
-                        Phone: {reference.contact}
-                      </Typography>
-                    )}
-                    {reference.relationship && (
-                      <Typography variant="body2">
-                        Relationship: {reference.relationship}
-                      </Typography>
-                    )}
-                  </Box>
-                ))}
-              </Stack>
-            ) : (
+    // Projects
+    !isSectionEmpty("projects") && (
+      <Box>
+        <SectionTitle title="Projects" />
+        {projects.map((project, idx) => (
+          <Box key={idx} sx={{ mb: 3 }}>
+            <Typography 
+              fontWeight="bold"
+              sx={{
+                fontSize: "1.125rem",
+                color: colorScheme.text
+              }}
+            >
+              {project.title}
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontSize: "0.875rem", 
+                color: colorScheme.text,
+                opacity: 0.7,
+                mb: 0.5
+              }}
+            >
+              {formatDate(project.startDate)} – {project.current ? "Present" : formatDate(project.endDate)}
+            </Typography>
+            {project.link && (
+              <Link
+                href={project.link}
+                target="_blank"
+                underline="hover"
+                sx={{ 
+                  fontSize: "0.875rem", 
+                  color: colorScheme.primary,
+                  display: "block",
+                  mb: 0.5,
+                  ...pdfColorStyles
+                }}
+              >
+                {project.link}
+              </Link>
+            )}
+            {project.technologies && (
               <Typography
                 variant="body2"
-                sx={{ color: "#4b5563", fontSize: "0.875rem" }}
+                sx={{ 
+                  fontStyle: "italic", 
+                  color: colorScheme.text,
+                  opacity: 0.8,
+                  mb: 0.5,
+                  fontSize: "0.875rem"
+                }}
               >
-                Available upon request.
+                Technologies: {project.technologies}
+              </Typography>
+            )}
+            {project.description && (
+              <Typography 
+                variant="body2"
+                sx={{
+                  fontSize: "1rem",
+                  color: colorScheme.text,
+                  lineHeight: 1.4,
+                  textAlign: "justify"
+                }}
+              >
+                {project.description}
               </Typography>
             )}
           </Box>
-        )}
+        ))}
       </Box>
-    </Box>
+    ),
+
+    // References
+    isSectionEmpty("references") && (
+      <Box>
+        <SectionTitle title="References" />
+        <Grid container spacing={3}>
+          {references.map((ref, idx) => (
+            <Grid item xs={12} sm={6} key={idx}>
+              <Box
+                sx={{
+                  p: 2.5,
+                  border: `1px solid ${colorScheme.accent}`,
+                  borderRadius: 2,
+                  backgroundColor: colorScheme.background,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                  ...pdfColorStyles
+                }}
+              >
+                <Typography 
+                  fontWeight="bold"
+                  sx={{
+                    fontSize: "1rem",
+                    color: colorScheme.text,
+                    mb: 0.5
+                  }}
+                >
+                  {ref.name}
+                </Typography>
+                {ref.position && (
+                  <Typography 
+                    variant="body2"
+                    sx={{
+                      fontSize: "0.875rem",
+                      color: colorScheme.text,
+                      opacity: 0.8
+                    }}
+                  >
+                    {ref.position}
+                  </Typography>
+                )}
+                {ref.company && (
+                  <Typography 
+                    variant="body2"
+                    sx={{
+                      fontSize: "0.875rem",
+                      color: colorScheme.text,
+                      opacity: 0.8
+                    }}
+                  >
+                    {ref.company}
+                  </Typography>
+                )}
+                {ref.email && (
+                  <Typography 
+                    variant="body2"
+                    sx={{
+                      fontSize: "0.8rem",
+                      color: colorScheme.text,
+                      opacity: 0.7
+                    }}
+                  >
+                    Email: {ref.email}
+                  </Typography>
+                )}
+                {ref.contact && (
+                  <Typography 
+                    variant="body2"
+                    sx={{
+                      fontSize: "0.8rem",
+                      color: colorScheme.text,
+                      opacity: 0.7
+                    }}
+                  >
+                    Phone: {ref.contact}
+                  </Typography>
+                )}
+                {ref.relationship && (
+                  <Typography 
+                    variant="body2"
+                    sx={{
+                      fontSize: "0.8rem",
+                      color: colorScheme.text,
+                      opacity: 0.7
+                    }}
+                  >
+                    Relationship: {ref.relationship}
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    ),
+
+  ].filter(Boolean)), [personalInfo, experience, projects, references, colorScheme, pdfColorStyles, isSectionEmpty, formatDate]);
+
+  // Pagination logic (same as India template)
+  const paginateContent = () => {
+    setFirstPageItems([]);
+    setRemainingItems([]);
+    setOverflowPages([]);
+
+    setTimeout(() => {
+      if (!measure70Ref.current || !measure100Ref.current) return;
+
+      const blocks70 = Array.from(measure70Ref.current.children);
+      let usedHeight70 = 0;
+      let firstPageRightContentCount = 0;
+
+      const MAX_FIRST_PAGE_RIGHT_HEIGHT = A4_HEIGHT_PX - (6 * 16 * 2);
+
+      for (let i = 0; i < blocks70.length; i++) {
+        const blockHeight = blocks70[i].offsetHeight;
+        if (usedHeight70 + blockHeight <= MAX_FIRST_PAGE_RIGHT_HEIGHT) {
+          usedHeight70 += blockHeight;
+          firstPageRightContentCount++;
+        } else {
+          break;
+        }
+      }
+
+      const firstPageRight = rightContent.slice(0, firstPageRightContentCount);
+      const remaining = rightContent.slice(firstPageRightContentCount);
+
+      setFirstPageItems(firstPageRight);
+      setRemainingItems(remaining);
+
+      if (remaining.length > 0) {
+        setTimeout(() => {
+          if (!measure100Ref.current) return;
+
+          const blocks100 = Array.from(measure100Ref.current.children);
+          const pages = [];
+          let currentPageItems = [];
+          let currentPageHeight = 0;
+
+          const MAX_FULL_PAGE_HEIGHT = A4_HEIGHT_PX - (6 * 16 * 2);
+
+          for (let i = 0; i < blocks100.length; i++) {
+            const blockHeight = blocks100[i].offsetHeight;
+
+            if (currentPageHeight + blockHeight > MAX_FULL_PAGE_HEIGHT) {
+              if (currentPageItems.length > 0) {
+                pages.push(currentPageItems);
+              }
+              currentPageItems = [remaining[i]];
+              currentPageHeight = blockHeight;
+            } else {
+              currentPageItems.push(remaining[i]);
+              currentPageHeight += blockHeight;
+            }
+          }
+
+          if (currentPageItems.length > 0) {
+            pages.push(currentPageItems);
+          }
+          setOverflowPages(pages);
+        }, 0);
+      }
+    }, 0);
+  };
+
+  useEffect(() => {
+    paginateContent();
+  }, [resumeData, colorScheme]);
+
+  return (
+    <PreviewWrapper>
+      {/* Hidden measuring blocks */}
+      <Box sx={{
+        position: 'absolute',
+        top: -9999,
+        visibility: 'hidden',
+        height: 'auto',
+        width: `${RIGHT_COL_WIDTH_PX}px`,
+        padding: theme.spacing(3, 5, 4, 5),
+        boxSizing: 'border-box',
+      }}>
+        <div className="measure measure-70" ref={measure70Ref}>
+          {rightContent.map((item, i) => (
+            <div key={`measure-70-${i}`} className="content-block">{item}</div>
+          ))}
+        </div>
+      </Box>
+
+      <Box sx={{
+        position: 'absolute',
+        top: -9999,
+        visibility: 'hidden',
+        height: 'auto',
+        width: '21cm',
+        padding: theme.spacing(3, 5, 4, 5),
+        boxSizing: 'border-box',
+      }}>
+        <div className="measure measure-100" ref={measure100Ref}>
+          {remainingItems.map((item, i) => (
+            <div key={`measure-100-${i}`} className="content-block">{item}</div>
+          ))}
+        </div>
+      </Box>
+
+      {/* Render Pages */}
+      <Page isFirst={true} leftContent={leftContent} rightContentChildren={firstPageItems} />
+      {overflowPages.map((pageItems, idx) => (
+        <Page key={`overflow-page-${idx}`} isFirst={false} rightContentChildren={pageItems} />
+      ))}
+    </PreviewWrapper>
   );
 };
 
-export default EuropenUnionTemplate;
+export default EuropeanUnionTemplate;

@@ -5,7 +5,7 @@ import IndiaTemplate from "../Templates/IndiaTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
 import { SidebarTemplate } from "../Templates/SidebarTemplate";
 import { CanadaTemplate } from "../Templates/CanadaTemplate";
-import { EuropenUnionTemplate } from "../Templates/EuropenUnionTemplate";
+import EuropenUnionTemplate from "../Templates/EuropenUnionTemplate";
 import { EuropassTemplate } from "../Templates/NewTemplate";
 import { AustraliaTemplate } from "../Templates/AustraliaTemplate";
 import { UsaTemplate } from "../Templates/UsaTemplate";

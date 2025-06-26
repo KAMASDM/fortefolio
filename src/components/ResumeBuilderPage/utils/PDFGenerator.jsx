@@ -9,51 +9,6 @@ export const PDFGenerator = ({
   onSuccess,
   onError,
 }) => {
-  useEffect(() => {
-    const styleElement = document.createElement("style");
-    styleElement.innerHTML = `
-      @media print {
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-
-        html, body {
-          font-smoothing: antialiased;
-          -webkit-font-smoothing: antialiased;
-          overflow: visible !important;
-        }
-
-        .resume-container {
-          width: 100% !important;
-          max-width: 210mm !important;
-          height: auto !important;
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-        }
-
-        .resume-section {
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-        }
-
-        .page-break {
-          page-break-before: always !important;
-          break-before: page !important;
-        }
-      }
-    `;
-    styleElement.id = "pdf-print-styles";
-    document.head.appendChild(styleElement);
-
-    return () => {
-      const element = document.getElementById("pdf-print-styles");
-      if (element) {
-        document.head.removeChild(element);
-      }
-    };
-  }, []);
-
   const downloadPDF = async () => {
     if (!resumeRef.current) {
       onError("Resume reference not found. Please try again.");
@@ -61,45 +16,60 @@ export const PDFGenerator = ({
     }
 
     setLoading(true);
-    console.log("Starting PDF generation...");
-
     const element = resumeRef.current;
     const filename = `${personalInfo.fullName || "Resume"}.pdf`;
 
+    const borderedPages = element.querySelectorAll('.page.with-border');
+    const pageContainer = element.querySelector('.page-container');
+
     try {
+      borderedPages.forEach(page => {
+        page.style.border = 'none';
+        page.style.boxShadow = 'none';
+      });
+      if (pageContainer) {
+        pageContainer.style.gap = '0px';
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       await html2pdf()
         .set({
           margin: [0, 0],
-          filename: filename,
+          filename,
           html2canvas: {
             scale: 2,
             useCORS: true,
           },
           jsPDF: {
-            unit: "in",
-            format: "letter",
+            unit: "mm",
+            format: "a4",
             orientation: "portrait",
           },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
         })
         .from(element)
         .save();
 
-      setLoading(false);
       onSuccess("Resume downloaded successfully!");
     } catch (error) {
       console.error("PDF generation failed:", error);
-      setLoading(false);
       onError("Could not generate PDF. Try using Print instead.");
       setTimeout(() => {
-        if (
-          window.confirm(
-            "PDF generation failed. Would you like to try printing instead?"
-          )
-        ) {
+        if (window.confirm("PDF failed. Try printing instead?")) {
           window.print();
         }
       }, 500);
+    } finally {
+      setTimeout(() => {
+        borderedPages.forEach(page => {
+          page.style.border = '';
+          page.style.boxShadow = '';
+        });
+        if (pageContainer) {
+          pageContainer.style.gap = '';
+        }
+        setLoading(false);
+      }, 200);
     }
   };
 
@@ -110,3 +80,6 @@ export const PDFGenerator = ({
 };
 
 export default PDFGenerator;
+
+
+
