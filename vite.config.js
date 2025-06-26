@@ -21,25 +21,25 @@ export default defineConfig({
         icons: [
           // Ensure these icon files are present in your 'public' directory
           {
-            src: 'pwa-64x64.png',
+            src: 'pwa-64x64.jpg',
             sizes: '64x64',
-            type: 'image/png',
+            type: 'image/jpg',
           },
           {
-            src: 'pwa-192x192.png',
+            src: 'pwa-192x192.jpg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/jpg',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512.jpg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/jpg',
             purpose: 'any', // Can be used on any background
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512.jpg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/jpg',
             purpose: 'maskable', // Special icon for adaptive icons on Android
           },
         ],

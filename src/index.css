@@ -75,4 +75,128 @@ body {
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease forwards;
+  -webkit-animation: fadeIn 0.5s ease forwards;
+}
+
+
+.page-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.page-container {
+  width: 794px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+.page {
+  min-width: 794px;
+  min-height: 1121px;
+  max-width: 794px;
+  max-height: 1121px;
+  background: white;
+  box-sizing: border-box;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  /* page-break-after: always; */
+  /* soft shadow */
+
+}
+
+.page.with-border {
+  border: 1px solid #ddd !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.first-page .left-col {
+  width: 30%;
+  padding: 16px;
+  background: #f8f8f8;
+  border-right: 1px solid #ccc;
+}
+
+.first-page .right-col {
+  width: 70%;
+  padding: 16px;
+}
+
+.full-page {
+  flex-direction: column;
+}
+
+.page:last-child {
+  page-break-after: auto;
+}
+
+.full-width-col {
+  width: 100%;
+  padding: 16px;
+}
+
+.content-block {
+  margin-bottom: 12px;
+}
+
+.measure {
+  visibility: hidden;
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  overflow: hidden;
+}
+
+.measure-70 {
+  width: 556px;
+  /* 70% of 794px */
+}
+
+.measure-100 {
+  width: 794px;
+}
+
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .resume-container,
+  .resume-container * {
+    visibility: visible !important;
+  }
+
+  .resume-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .page-container {
+    gap: 0 !important;
+  }
+
+  .page {
+    border: none !important;
+    box-shadow: none !important;
+    page-break-after: always;
+
+    width: 100%;
+    min-height: 100vh;
+    page-break-after: always;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }

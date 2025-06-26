@@ -305,7 +305,7 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
                     fullWidth
                     label="Project Description (Optional)"
                     value={project.description}
-                    onChange={(e) => handleChange(project.id, "description", e.taget.value)}
+                    onChange={(e) => handleChange(project.id, "description", e.target.value)}
                     placeholder="Describe the project, its purpose, key features, and your contributions."
                     multiline
                     rows={4}
