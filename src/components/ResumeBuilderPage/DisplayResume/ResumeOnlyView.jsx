@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { getDatabase, ref, get } from "firebase/database";
 import {
   Box,
   Typography,
@@ -10,6 +11,7 @@ import {
   SpeedDialAction,
   Snackbar,
   Alert,
+  CircularProgress, // Added for loading indicator
 } from "@mui/material";
 import {
   Share as ShareIcon,
@@ -19,23 +21,70 @@ import {
 import { ResumeTemplateContent } from "./ResumeTemplateContent";
 import { constants } from "../ResumePreview/constants";
 import { formatDate, isSectionEmpty, getInitials } from "../utils/resumeUtils";
+import app from "../../../firebaseConfig"; // Ensure you have your firebase app instance exported
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
 const ResumeOnlyView = () => {
+  const { userId, resumeId } = useParams();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [resumeData, setResumeData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const {
-    resumeData,
     activeTemplate = TEMPLATES.MODERN,
     fontFamily = FONTS.POPPINS,
     colorScheme = COLOR_SCHEMES.BLUE,
   } = location.state || {};
+
+  useEffect(() => {
+    const fetchResumeData = async () => {
+      if (!userId || !resumeId) {
+        setError("User ID or Resume ID is missing.");
+        setLoading(false);
+        return;
+      }
+      try {
+        const db = getDatabase(app);
+        const resumeRef = ref(db, `users/${userId}/resumes/${resumeId}`);
+        const snapshot = await get(resumeRef);
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const formattedData = {
+            id: resumeId,
+            personalInfo: data.resumeData?.personalInfo || {},
+            education: data.resumeData?.education || [],
+            experience: data.resumeData?.experience || [],
+            skills: data.resumeData?.skills || [],
+            projects: data.resumeData?.projects || [],
+            references: data.resumeData?.references || [],
+            // You can also extract metadata if needed
+            activeTemplate: data.metadata?.template || activeTemplate,
+            fontFamily: data.metadata?.font || fontFamily,
+            colorScheme: data.metadata?.color || colorScheme,
+          };
+          setResumeData(formattedData);
+        } else {
+          setError("Resume not found.");
+        }
+      } catch (err) {
+        console.error("Firebase fetch error:", err);
+        setError("Failed to fetch resume data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResumeData();
+  }, [userId, resumeId, activeTemplate, fontFamily, colorScheme]);
 
   const currentUrl = window.location.href;
 
@@ -85,14 +134,30 @@ const ResumeOnlyView = () => {
     setOpenSnackbar(false);
   };
 
-  if (!resumeData) {
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>Loading Resume...</Typography>
+      </Box>
+    );
+  }
+
+  if (error || !resumeData) {
     return (
       <Box sx={{ p: 4, textAlign: "center" }}>
         <Typography variant="h6" color="error">
-          Resume data not found.
+          {error || "Resume data not found."}
         </Typography>
         <Typography variant="body1">
-          Please generate the resume from the main application.
+          Please check the URL or generate the resume again.
         </Typography>
       </Box>
     );
@@ -105,7 +170,7 @@ const ResumeOnlyView = () => {
         maxWidth: "1100px",
         margin: "auto",
         minHeight: "100vh",
-        fontFamily: fontFamily,
+        fontFamily: resumeData.fontFamily,
         color: theme.palette.text.primary,
         position: "relative",
       }}
@@ -120,9 +185,9 @@ const ResumeOnlyView = () => {
       >
         <ResumeTemplateContent
           resumeData={resumeData}
-          activeTemplate={activeTemplate}
-          fontFamily={fontFamily}
-          colorScheme={colorScheme}
+          activeTemplate={resumeData.activeTemplate}
+          fontFamily={resumeData.fontFamily}
+          colorScheme={resumeData.colorScheme}
           isSectionEmpty={(section) => isSectionEmpty(section, resumeData)}
           getInitials={getInitials}
           formatDate={formatDate}

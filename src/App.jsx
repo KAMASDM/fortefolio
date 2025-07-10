@@ -71,7 +71,10 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/preview-only" element={<ResumeOnlyView />} />
+            <Route
+              path="/preview-only/:userId/:resumeId"
+              element={<ResumeOnlyView />}
+            />
             <Route path="/privacy-policy" element={<Privacy />} />
             <Route path="/terms-and-conditions" element={<Terms />} />
             <Route path="/copyright" element={<Copyright />} />
