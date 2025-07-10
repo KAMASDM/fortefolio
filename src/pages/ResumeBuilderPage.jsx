@@ -156,7 +156,6 @@ const sections = [
   },
 ];
 
-
 const lavenderPalette = {
   light: "#EAE4F7",
   soft: "#D8CCF0",
@@ -247,7 +246,7 @@ const generateHumanizedSOPPrompt = (resumeData, additionalData) => {
 
   const randomPersonality =
     writingPersonalities[
-    Math.floor(Math.random() * writingPersonalities.length)
+      Math.floor(Math.random() * writingPersonalities.length)
     ];
   const randomQuirk =
     personalQuirks[Math.floor(Math.random() * personalQuirks.length)];
@@ -305,8 +304,9 @@ Application Specifics:
 - Unique Experiences: ${personalContext.uniqueExperiences}
 - Personal Challenges: ${personalContext.specificChallenges}
 
-Additional Achievements: ${additionalData.additionalAccomplishments || "None specified."
-    }
+Additional Achievements: ${
+    additionalData.additionalAccomplishments || "None specified."
+  }
 
 WRITING APPROACH - NATURAL STORYTELLING:
 
@@ -761,13 +761,15 @@ function ResumeBuilderPage() {
       database,
       `users/${currentUser.uid}/resumes/${resumeId}`
     );
-
     const listener = onValue(
       resumeRef,
       (snapshot) => {
         const data = snapshot.val();
+        const resumeId = snapshot.key;
+
         if (data) {
           const loadedData = {
+            id: resumeId,
             personalInfo: {
               ...initialResumeState.personalInfo,
               ...(data.resumeData?.personalInfo || {}),
@@ -778,6 +780,7 @@ function ResumeBuilderPage() {
             projects: data.resumeData?.projects || [],
             references: data.resumeData?.references || [],
           };
+
           setResumeData(loadedData);
           setResumeMetadata(
             data.metadata || {
@@ -791,6 +794,7 @@ function ResumeBuilderPage() {
         } else {
           setError(`Resume with ID ${resumeId} not found.`);
         }
+
         setIsLoading(false);
       },
       (err) => {
@@ -953,8 +957,8 @@ function ResumeBuilderPage() {
     const nextId = isPreviewMode
       ? previewStepId
       : currentStep < totalSteps
-        ? currentStep + 1
-        : previewStepId;
+      ? currentStep + 1
+      : previewStepId;
     handleNavItemClick(nextId);
   };
 
@@ -962,8 +966,8 @@ function ResumeBuilderPage() {
     const prevId = isPreviewMode
       ? totalSteps
       : currentStep > 1
-        ? currentStep - 1
-        : 1;
+      ? currentStep - 1
+      : 1;
     handleNavItemClick(prevId);
   };
 
@@ -1071,8 +1075,9 @@ Sponsor Investigation (if applicable):
 - What is your sponsor's annual income for the last 3 years?
 - Does your sponsor have other financial dependents?
 Deep Financial Probing:
-- If your sponsor earns ${additionalData.sponsorSalary
-        }, how can they afford your expenses while maintaining their lifestyle?
+- If your sponsor earns ${
+        additionalData.sponsorSalary
+      }, how can they afford your expenses while maintaining their lifestyle?
 - Show me evidence of your sponsor's savings specifically allocated for your education.
 - What happens if your sponsor loses their job during your stay abroad?
 - Have you or your sponsor taken any loans for this purpose?
@@ -1108,8 +1113,9 @@ Post-Study/Program Plans:
 
 ROUND 5: CHALLENGING SCENARIO-BASED QUESTIONS
 Hypothetical Situations:
-- If you were offered a job in ${additionalData.country
-        } during your stay, what would you do?
+- If you were offered a job in ${
+        additionalData.country
+      } during your stay, what would you do?
 What if your family faced a financial emergency while you're abroad?
 If your sponsor died or became unable to support you, how would you manage?
 What if you fail your course or your program is terminated?
@@ -1188,7 +1194,8 @@ Now, based on all the provided information, conduct the interview by generating 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          `OpenAI API error: ${response.status} ${errorData.error?.message || response.statusText
+          `OpenAI API error: ${response.status} ${
+            errorData.error?.message || response.statusText
           }`
         );
       }
@@ -1448,7 +1455,15 @@ Now, based on all the provided information, conduct the interview by generating 
         </Box>
       </Box>
 
-      <List sx={{ pt: 1, pb: 0, flexGrow: 1, overflowY: "auto", bgcolor: "transparent" }}>
+      <List
+        sx={{
+          pt: 1,
+          pb: 0,
+          flexGrow: 1,
+          overflowY: "auto",
+          bgcolor: "transparent",
+        }}
+      >
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => navigateWithConfirmation("/dashboard")}
@@ -1471,7 +1486,7 @@ Now, based on all the provided information, conduct the interview by generating 
             </ListItemIcon>
             <ListItemText
               primary="Resume Tips"
-              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
@@ -1491,11 +1506,11 @@ Now, based on all the provided information, conduct the interview by generating 
               selected={!isPreviewMode && currentStep === section.id}
               onClick={() => handleNavItemClick(section.id)}
               sx={{
-                '&.Mui-selected': {
-                  color: '#9D88D9',
+                "&.Mui-selected": {
+                  color: "#9D88D9",
                 },
-                '&.Mui-selected:hover': {
-                  backgroundColor: '#f3f0fa',
+                "&.Mui-selected:hover": {
+                  backgroundColor: "#f3f0fa",
                 },
               }}
             >
@@ -1506,8 +1521,8 @@ Now, based on all the provided information, conduct the interview by generating 
                     variant="dot"
                     anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                     sx={{
-                      '& .MuiBadge-dot': {
-                        backgroundColor: '#9D88D9',
+                      "& .MuiBadge-dot": {
+                        backgroundColor: "#9D88D9",
                       },
                     }}
                   >
@@ -1515,8 +1530,8 @@ Now, based on all the provided information, conduct the interview by generating 
                       sx: {
                         color:
                           !isPreviewMode && currentStep === section.id
-                            ? '#9D88D9'
-                            : 'rgba(0, 0, 0, 0.6)',
+                            ? "#9D88D9"
+                            : "rgba(0, 0, 0, 0.6)",
                       },
                     })}
                   </StyledBadge>
@@ -1525,8 +1540,8 @@ Now, based on all the provided information, conduct the interview by generating 
                     sx: {
                       color:
                         !isPreviewMode && currentStep === section.id
-                          ? '#9D88D9'
-                          : 'rgba(0, 0, 0, 0.6)',
+                          ? "#9D88D9"
+                          : "rgba(0, 0, 0, 0.6)",
                     },
                   })
                 )}
@@ -1553,7 +1568,6 @@ Now, based on all the provided information, conduct the interview by generating 
           </ListItem>
         ))}
 
-
         <Divider sx={{ mx: 2, my: 1 }} />
 
         <ListItem disablePadding>
@@ -1561,18 +1575,18 @@ Now, based on all the provided information, conduct the interview by generating 
             selected={isPreviewMode}
             onClick={() => handleNavItemClick(previewStepId)}
             sx={{
-              '&.Mui-selected': {
-                color: '#9D88D9',
+              "&.Mui-selected": {
+                color: "#9D88D9",
               },
-              '&.Mui-selected:hover': {
-                backgroundColor: '#f3f0fa',
+              "&.Mui-selected:hover": {
+                backgroundColor: "#f3f0fa",
               },
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
               <VisibilityIcon
                 sx={{
-                  color: isPreviewMode ? '#9D88D9' : 'rgba(0, 0, 0, 0.6)',
+                  color: isPreviewMode ? "#9D88D9" : "rgba(0, 0, 0, 0.6)",
                 }}
               />
             </ListItemIcon>
@@ -1580,7 +1594,7 @@ Now, based on all the provided information, conduct the interview by generating 
               primary="Preview"
               primaryTypographyProps={{
                 fontWeight: isPreviewMode ? 600 : 500,
-                variant: 'body2',
+                variant: "body2",
               }}
             />
           </ListItemButton>
@@ -1590,15 +1604,15 @@ Now, based on all the provided information, conduct the interview by generating 
           <ListItemButton
             onClick={handleGenerateInterviewQuestions}
             sx={{
-              '&:hover': { backgroundColor: '#f3f0fa' },
+              "&:hover": { backgroundColor: "#f3f0fa" },
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <QuestionAnswerIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
+              <QuestionAnswerIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Interview Questions"
-              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
@@ -1607,15 +1621,15 @@ Now, based on all the provided information, conduct the interview by generating 
           <ListItemButton
             onClick={handleGenerateCoverLetter}
             sx={{
-              '&:hover': { backgroundColor: '#f3f0fa' },
+              "&:hover": { backgroundColor: "#f3f0fa" },
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <ArticleIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
+              <ArticleIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Cover Letter"
-              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
@@ -1624,15 +1638,15 @@ Now, based on all the provided information, conduct the interview by generating 
           <ListItemButton
             onClick={() => setShowSOPFormDialog(true)}
             sx={{
-              '&:hover': { backgroundColor: '#f3f0fa' },
+              "&:hover": { backgroundColor: "#f3f0fa" },
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <ArticleIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
+              <ArticleIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Statement of Purpose"
-              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
@@ -1641,15 +1655,15 @@ Now, based on all the provided information, conduct the interview by generating 
           <ListItemButton
             onClick={() => setShowVisaFormDialog(true)}
             sx={{
-              '&:hover': { backgroundColor: '#f3f0fa' },
+              "&:hover": { backgroundColor: "#f3f0fa" },
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <GavelIcon sx={{ color: 'rgba(0, 0, 0, 0.6)' }} />
+              <GavelIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
             </ListItemIcon>
             <ListItemText
               primary="Generate Visa Interview Questions"
-              primaryTypographyProps={{ fontWeight: 500, variant: 'body2' }}
+              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
@@ -1668,7 +1682,6 @@ Now, based on all the provided information, conduct the interview by generating 
           variant={unsavedChanges ? "contained" : "outlined"}
           onClick={handleManualSave}
           disabled={isSaving}
-
           startIcon={
             isSaving ? (
               <CircularProgress size={20} color="inherit" />
@@ -1681,8 +1694,8 @@ Now, based on all the provided information, conduct the interview by generating 
           {isSaving
             ? "Saving..."
             : unsavedChanges
-              ? "Save Changes"
-              : "Save All"}
+            ? "Save Changes"
+            : "Save All"}
         </Button>
         {saveError && (
           <Typography
@@ -1718,7 +1731,10 @@ Now, based on all the provided information, conduct the interview by generating 
             minHeight: "100vh",
           }}
         >
-          <Box component="nav" sx={{ width: { md: 280 }, flexShrink: { md: 0 } }}>
+          <Box
+            component="nav"
+            sx={{ width: { md: 280 }, flexShrink: { md: 0 } }}
+          >
             <SwipeableDrawer
               variant="temporary"
               open={mobileOpen}
@@ -1760,7 +1776,7 @@ Now, based on all the provided information, conduct the interview by generating 
               width: { md: "calc(100% - 280px)" },
               display: "flex",
               flexDirection: "column",
-              bgcolor: "transparent"
+              bgcolor: "transparent",
             }}
           >
             <span
@@ -1810,18 +1826,20 @@ Now, based on all the provided information, conduct the interview by generating 
               </Collapse>
 
               {!isPreviewMode && !isSmall && (
-                <Paper elevation={0} sx={{
-                  mb: 3,
-                  p: 2,
-                  bgcolor: "transparent",
-                  border: `1px solid ${lavenderPalette.primary}`,
-                  borderRadius: 2,
-                }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    mb: 3,
+                    p: 2,
+                    bgcolor: "transparent",
+                    border: `1px solid ${lavenderPalette.primary}`,
+                    borderRadius: 2,
+                  }}
+                >
                   <Stepper
                     activeStep={currentStep - 1}
                     alternativeLabel
                     sx={{
-
                       "& .MuiStepIcon-root": {
                         color: lavenderPalette.soft,
                         "&.Mui-active": {
@@ -1851,9 +1869,10 @@ Now, based on all the provided information, conduct the interview by generating 
                         borderTopWidth: "2px",
                       },
 
-                      "& .Mui-active > .MuiStepConnector-line, & .Mui-completed > .MuiStepConnector-line": {
-                        borderColor: lavenderPalette.primary,
-                      },
+                      "& .Mui-active > .MuiStepConnector-line, & .Mui-completed > .MuiStepConnector-line":
+                        {
+                          borderColor: lavenderPalette.primary,
+                        },
                     }}
                   >
                     {sections.map((section) => (
@@ -1863,7 +1882,12 @@ Now, based on all the provided information, conduct the interview by generating 
                       >
                         <StepLabel
                           onClick={() => handleNavItemClick(section.id)}
-                          sx={{ cursor: "pointer", "&:hover .MuiStepLabel-label": { color: lavenderPalette.deep } }}
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover .MuiStepLabel-label": {
+                              color: lavenderPalette.deep,
+                            },
+                          }}
                         >
                           {section.label}
                         </StepLabel>
@@ -1883,9 +1907,19 @@ Now, based on all the provided information, conduct the interview by generating 
               )}
             </Container>
           </Box>{" "}
-
           {isMobile && (
-            <Paper elevation={3} sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: (theme) => theme.zIndex.appBar, display: { md: "none" }, borderTop: `1px solid ${lavenderPalette.primary}`, }}>
+            <Paper
+              elevation={3}
+              sx={{
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: (theme) => theme.zIndex.appBar,
+                display: { md: "none" },
+                borderTop: `1px solid ${lavenderPalette.primary}`,
+              }}
+            >
               <BottomNavigation
                 value={isPreviewMode ? previewStepId : currentStep}
                 onChange={handleBottomNavChange}
@@ -1910,8 +1944,10 @@ Now, based on all the provided information, conduct the interview by generating 
                         <StyledBadge
                           overlap="circular"
                           variant="dot"
-
-                          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                          anchorOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                          }}
                         >
                           {section.icon}
                         </StyledBadge>
@@ -1987,24 +2023,23 @@ Now, based on all the provided information, conduct the interview by generating 
               {notification.message}
             </Alert>
           </Snackbar>
-
           <Collapse in={!isPreviewMode}>
             <Tooltip title="Preview Resume" placement="left">
               <Fab
                 variant="extended"
                 onClick={() => handleNavItemClick(previewStepId)}
                 sx={{
-                  position: 'fixed',
+                  position: "fixed",
                   bottom: { xs: isMobile ? 80 : 32, md: 32 },
                   right: 32,
                   height: "50px",
                   width: "50px",
                   borderRadius: "50%",
-                  color: 'white',
+                  color: "white",
                   backgroundImage: lavenderPalette.gradient,
-                  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
+                  transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
+                  "&:hover": {
+                    transform: "scale(1.05)",
                     boxShadow: theme.shadows[8],
                   },
                 }}
@@ -2015,7 +2050,6 @@ Now, based on all the provided information, conduct the interview by generating 
               </Fab>
             </Tooltip>
           </Collapse>
-
         </Box>
       </ThemeProvider>
     </>

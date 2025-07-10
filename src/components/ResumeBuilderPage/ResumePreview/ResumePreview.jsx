@@ -23,7 +23,7 @@ import {
   TextFormat,
   Print,
 } from "@mui/icons-material";
-import IndiaTemplate from '../Templates/IndiaTemplate';
+import IndiaTemplate from "../Templates/IndiaTemplate";
 import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
 import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
 import { ExportMenu } from "../ExportMenu/ExportMenu";
@@ -44,6 +44,7 @@ import { constants } from "./constants";
 import { injectPrintStyles } from "../utils/pdfUtils";
 import { useNavigate } from "react-router-dom";
 import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
+import { useAuth } from "../../../context/AuthContext";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
@@ -90,6 +91,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
     projects = [],
   } = resumeData;
 
+  const { currentUser } = useAuth();
+
   useEffect(() => {
     const handleResize = () => {
       if (isPrinting) return;
@@ -133,7 +136,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         1: TEMPLATES.EUROPE,
         2: TEMPLATES.AUSTRALIA,
         3: TEMPLATES.USA,
-        4: TEMPLATES.INDIA
+        4: TEMPLATES.INDIA,
       }[newValue] || TEMPLATES.INDIA;
     setActiveTemplate(newTemplate);
   };
@@ -162,7 +165,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   const handleDisplayresume = () => {
     handleExportMenuClose();
-    navigate("/preview-only", {
+    console.log("resumeData: ", resumeData);
+    navigate(`/preview-only/${currentUser.uid}/${resumeData.id}`, {
       state: {
         resumeData,
         activeTemplate,
@@ -221,7 +225,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   const downloadPDF = () => {
     setScale(1);
-    pdfGenerator.downloadPDF()
+    pdfGenerator.downloadPDF();
   };
 
   const printResume = () => {
@@ -238,12 +242,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
       setIsPrinting(false);
     };
 
-    window.addEventListener('afterprint', handleAfterPrint);
+    window.addEventListener("afterprint", handleAfterPrint);
 
     return () => {
-      window.removeEventListener('afterprint', handleAfterPrint);
+      window.removeEventListener("afterprint", handleAfterPrint);
     };
-  }, [])
+  }, []);
 
   const getInitials = (name) => {
     if (!name) return "?";
@@ -280,7 +284,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
         [TEMPLATES.EUROPE]: EuropenUnionTemplate,
         [TEMPLATES.AUSTRALIA]: AustraliaTemplate,
         [TEMPLATES.USA]: UsaTemplate,
-        [TEMPLATES.INDIA]: IndiaTemplate
+        [TEMPLATES.INDIA]: IndiaTemplate,
       }[activeTemplate] || ModernTemplate;
     return <TemplateComponent {...commonProps} />;
   };
@@ -301,8 +305,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
       spacing={0}
       sx={{
         width: "100%",
-        height: isPrinting ? "auto" : "100%", 
-        overflow: isPrinting ? "visible" : "hidden", 
+        height: isPrinting ? "auto" : "100%",
+        overflow: isPrinting ? "visible" : "hidden",
       }}
       className={isPrinting ? "print-mode" : ""}
     >
@@ -337,7 +341,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
           background: isPrinting ? "#fff" : undefined,
           margin: isPrinting ? "0 !important" : undefined,
           padding: isPrinting ? "0 !important" : undefined,
-          minHeight: 0, 
+          minHeight: 0,
         }}
       >
         <Paper
@@ -347,14 +351,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
             borderRadius: isPrinting ? 0 : { xs: 1, sm: 2 },
             display: "flex",
             flexDirection: "column",
-            height: isPrinting
-              ? "auto"
-              : "100%", 
+            height: isPrinting ? "auto" : "100%",
             boxShadow: isPrinting ? "none !important" : undefined,
             background: isPrinting ? "transparent !important" : undefined,
             margin: isPrinting ? "0 !important" : undefined,
             padding: isPrinting ? "0 !important" : undefined,
-            minHeight: 0, 
+            minHeight: 0,
           }}
         >
           {/* Template Selector For Mobile*/}
@@ -369,7 +371,9 @@ const ResumePreview = ({ resumeData, onBack }) => {
               }}
               className="no-print"
             >
-              <FormControl fullWidth size="small"
+              <FormControl
+                fullWidth
+                size="small"
                 sx={{
                   "& .MuiInputLabel-root": { color: lavenderPalette.text },
                   "& .MuiOutlinedInput-root": {
@@ -381,7 +385,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                     },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                       borderColor: lavenderPalette.primary,
-                      borderWidth: '2px',
+                      borderWidth: "2px",
                     },
                   },
                   "& .MuiInputLabel-root.Mui-focused": {
@@ -432,8 +436,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
           <Box
             sx={{
               flexGrow: 1,
-              overflow: isPrinting ? "visible" : "auto", 
-              minHeight: 0, 
+              overflow: isPrinting ? "visible" : "auto",
+              minHeight: 0,
               "&::-webkit-scrollbar": {
                 width: isPrinting ? "0px" : "8px",
                 height: isPrinting ? "0px" : "8px",
@@ -455,12 +459,12 @@ const ResumePreview = ({ resumeData, onBack }) => {
                     : lavenderPalette.deep,
                 },
               },
-              
+
               scrollbarWidth: isPrinting ? "none" : "thin",
               scrollbarColor: isPrinting
                 ? "transparent"
                 : `${colorScheme.primary} ${lavenderPalette.light}`,
-              
+
               padding: isPrinting ? 0 : { xs: 1, sm: 2 },
             }}
           >
@@ -486,7 +490,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
                   margin: "0 auto",
                   boxShadow: isPrinting ? "none" : "0 4px 20px rgba(0,0,0,0.1)",
                   transition: isPrinting ? "none" : "transform 0.2s ease",
-                  width: "794px", 
+                  width: "794px",
                   minHeight: isPrinting ? "auto" : "1123px",
                   marginBottom: isPrinting ? 0 : "2rem",
                 }}
