@@ -88,7 +88,6 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const AnimatedCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3, 3, 4, 3),
   borderRadius: theme.shape.borderRadius * 1.5,
   transition: "all 0.3s ease-in-out",
   position: "relative",
@@ -1773,7 +1772,7 @@ Now, based on all the provided information, conduct the interview by generating 
             component="main"
             sx={{
               flexGrow: 1,
-              width: { md: "calc(100% - 280px)" },
+              width: "100%",
               display: "flex",
               flexDirection: "column",
               bgcolor: "transparent",
@@ -1801,7 +1800,12 @@ Now, based on all the provided information, conduct the interview by generating 
 
             <Container
               // maxWidth="lg"
-              sx={{ flexGrow: 1, py: { xs: 2, sm: 3 }, mb: { xs: 8, md: 3 } }}
+              sx={{
+                flexGrow: 1,
+                py: { xs: 2, sm: 3 },
+                px: "0px !important",
+                mb: { xs: 8, md: 3 },
+              }}
             >
               <Collapse in={unsavedChanges && !isSaving}>
                 <Alert

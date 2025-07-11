@@ -19,16 +19,22 @@ export const PDFGenerator = ({
     const element = resumeRef.current;
     const filename = `${personalInfo.fullName || "Resume"}.pdf`;
 
-    const borderedPages = element.querySelectorAll('.page.with-border');
-    const pageContainer = element.querySelector('.page-container');
+    const borderedPages = element.querySelectorAll(".page.with-border");
+    const pageContainer = element.querySelector(".page-container");
+
+    const prevScale = pageContainer.style.transform;
 
     try {
-      borderedPages.forEach(page => {
-        page.style.border = 'none';
-        page.style.boxShadow = 'none';
+      borderedPages.forEach((page) => {
+        page.style.border = "none";
+        page.style.boxShadow = "none";
+        page.style.minWidth = "794px";
+        page.style.minHeight = "1122px";
       });
       if (pageContainer) {
-        pageContainer.style.gap = '0px';
+        pageContainer.style.gap = "0px";
+        pageContainer.style.minWidth = "794px !important";
+        pageContainer.style.transform = "scale(1)";
       }
 
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -61,12 +67,14 @@ export const PDFGenerator = ({
       }, 500);
     } finally {
       setTimeout(() => {
-        borderedPages.forEach(page => {
-          page.style.border = '';
-          page.style.boxShadow = '';
+        borderedPages.forEach((page) => {
+          page.style.border = "";
+          page.style.boxShadow = "";
         });
         if (pageContainer) {
-          pageContainer.style.gap = '';
+          pageContainer.style.gap = "";
+          pageContainer.style.minWidth = "100%";
+          pageContainer.style.transform = prevScale;
         }
         setLoading(false);
       }, 200);
@@ -80,6 +88,3 @@ export const PDFGenerator = ({
 };
 
 export default PDFGenerator;
-
-
-
