@@ -333,9 +333,9 @@ const ResumePreview = ({ resumeData, onBack }) => {
         disableGutters={isExtraSmallMobile || isPrinting}
         maxWidth={isPrinting ? false : "lg"}
         sx={{
-          px: isPrinting ? 0 : { xs: 1, sm: 2, md: 3 },
           pb: isPrinting ? 0 : { xs: 8, md: 4 },
           flexGrow: 1,
+
           display: "flex",
           width: isPrinting ? "100%" : "100%",
           background: isPrinting ? "#fff" : undefined,
@@ -348,7 +348,8 @@ const ResumePreview = ({ resumeData, onBack }) => {
           elevation={isPrinting ? 0 : 2}
           sx={{
             width: "100%",
-            borderRadius: isPrinting ? 0 : { xs: 1, sm: 2 },
+            borderRadius: isPrinting ? 0 : "15px",
+            overflow: "hidden",
             display: "flex",
             flexDirection: "column",
             height: isPrinting ? "auto" : "100%",
@@ -464,8 +465,6 @@ const ResumePreview = ({ resumeData, onBack }) => {
               scrollbarColor: isPrinting
                 ? "transparent"
                 : `${colorScheme.primary} ${lavenderPalette.light}`,
-
-              padding: isPrinting ? 0 : { xs: 1, sm: 2 },
             }}
           >
             <Box
@@ -479,18 +478,17 @@ const ResumePreview = ({ resumeData, onBack }) => {
             >
               <Box
                 ref={resumeRef}
-                className="resume-content resume-container"
+                className="resume-content resume-print-area resume-container"
                 tabIndex={-1}
                 sx={{
+                  width: "100%",
                   WebkitPrintColorAdjust: "exact",
                   printColorAdjust: "exact",
                   colorAdjust: "exact",
-                  transform: isPrinting ? "none" : `scale(${scale})`,
                   transformOrigin: "top center",
-                  margin: "0 auto",
+                  margin: " auto",
                   boxShadow: isPrinting ? "none" : "0 4px 20px rgba(0,0,0,0.1)",
                   transition: isPrinting ? "none" : "transform 0.2s ease",
-                  width: "794px",
                   minHeight: isPrinting ? "auto" : "1123px",
                   marginBottom: isPrinting ? 0 : "2rem",
                 }}

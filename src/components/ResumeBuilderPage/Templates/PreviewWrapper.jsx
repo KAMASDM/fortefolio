@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
@@ -17,18 +17,18 @@ export default function PreviewWrapper({ children }) {
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
-    <div className="page-wrapper" ref={wrapperRef}>
-      <div
-        className="page-container"
-        style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}
-      >
-        {children}
-      </div>
+      <div className="page-wrapper" ref={wrapperRef}>
+        <div
+          className="page-container"
+          style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}
+        >
+          {children}
+        </div>
     </div>
   );
 }

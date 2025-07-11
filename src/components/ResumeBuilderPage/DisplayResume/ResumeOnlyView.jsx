@@ -22,6 +22,7 @@ import { ResumeTemplateContent } from "./ResumeTemplateContent";
 import { constants } from "../ResumePreview/constants";
 import { formatDate, isSectionEmpty, getInitials } from "../utils/resumeUtils";
 import app from "../../../firebaseConfig"; // Ensure you have your firebase app instance exported
+import PreviewWrapper from "../Templates/PreviewWrapper";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
@@ -167,36 +168,30 @@ const ResumeOnlyView = () => {
     <Box
       sx={{
         p: { xs: 2, sm: 3, md: 4 },
-        maxWidth: "1100px",
         margin: "auto",
         minHeight: "100vh",
         fontFamily: resumeData.fontFamily,
         color: theme.palette.text.primary,
         position: "relative",
+        width: "100%", // Instead of minWidth
+        marginInline: "8px",
+        display: "flex",
+        justifyContent: "center",
       }}
     >
-      <Box
-        sx={{
-          backgroundColor: "#fff",
-          boxShadow: 3,
-          p: { xs: 2, sm: 3, md: 4 },
-        }}
-        className="resume-container"
-      >
-        <ResumeTemplateContent
-          resumeData={resumeData}
-          activeTemplate={resumeData.activeTemplate}
-          fontFamily={resumeData.fontFamily}
-          colorScheme={resumeData.colorScheme}
-          isSectionEmpty={(section) => isSectionEmpty(section, resumeData)}
-          getInitials={getInitials}
-          formatDate={formatDate}
-          isMobile={isMobile}
-          isSmallMobile={isSmallMobile}
-          starredSections={[]}
-          toggleStarSection={() => {}}
-        />
-      </Box>
+      <ResumeTemplateContent
+        resumeData={resumeData}
+        activeTemplate={resumeData.activeTemplate}
+        fontFamily={resumeData.fontFamily}
+        colorScheme={resumeData.colorScheme}
+        isSectionEmpty={(section) => isSectionEmpty(section, resumeData)}
+        getInitials={getInitials}
+        formatDate={formatDate}
+        isMobile={isMobile}
+        isSmallMobile={isSmallMobile}
+        starredSections={[]}
+        toggleStarSection={() => {}}
+      />
       <SpeedDial
         ariaLabel="Share Resume"
         sx={{

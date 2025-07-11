@@ -86,10 +86,11 @@ body {
 }
 
 .page-container {
-  width: 794px;
+  width: 100% !important;
   display: flex;
   flex-direction: column;
   gap: 20px;
+
 }
 
 
@@ -100,7 +101,7 @@ body {
   max-height: 1121px;
   background: white;
   box-sizing: border-box;
-  margin: 0 !important;
+  margin: 0 auto !important;
   display: flex;
   flex-direction: column;
   /* page-break-after: always; */
@@ -159,7 +160,6 @@ body {
   width: 794px;
 }
 
-
 @media print {
   body * {
     visibility: hidden !important;
@@ -179,6 +179,9 @@ body {
 
   .page-container {
     gap: 0 !important;
+    min-width: 794px !important;
+    transform: scale(1) !important;
+    transform-origin: top left !important;
   }
 
   .page {
