@@ -21,6 +21,7 @@ import AboutUsPage from "./components/LoginPage/NavMenuPages/AboutUsPage";
 import OurTeamPage from "./components/LoginPage/NavMenuPages/OurTeamPage";
 import ResumeOnlyView from "./components/ResumeBuilderPage/DisplayResume/ResumeOnlyView";
 import ContactUs from "./components/LoginPage/NavMenuPages/ContactUs/ContactUs";
+import PortfolioPage from "./pages/PortfolioPage";
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -75,6 +76,7 @@ function App() {
               path="/preview-only/:userId/:resumeId"
               element={<ResumeOnlyView />}
             />
+            <Route path="/portfolio/:userId/:resumeId" element={<PortfolioPage />} />
             <Route path="/privacy-policy" element={<Privacy />} />
             <Route path="/terms-and-conditions" element={<Terms />} />
             <Route path="/copyright" element={<Copyright />} />

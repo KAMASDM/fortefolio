@@ -22,6 +22,7 @@ import {
   Tooltip,
   Grid,
   Avatar,
+  Drawer,
   Dialog,
   DialogActions,
   DialogContent,
@@ -70,6 +71,7 @@ import StatCard from "../components/DashboardPage/StatCard";
 import FloatingElements from "../components/DashboardPage/FloatingElements";
 import ResumeListItem from "../components/DashboardPage/ResumeListItem";
 import ResumeCard from "../components/DashboardPage/ResumeCard";
+import JobSearch from "../components/JobSearch/JobSearch";
 import EmptyState from "../components/DashboardPage/EmptyState";
 
 const lavenderPalette = {
@@ -128,6 +130,8 @@ function DashboardPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [stats, setStats] = useState({ total: 0, recent: 0, completed: 0 });
   const [viewMode, setViewMode] = useState("list");
+  const [jobPanelOpen, setJobPanelOpen] = useState(false);
+  const [jobQueryTitle, setJobQueryTitle] = useState("");
 
   useEffect(() => {
     if (!currentUser) {
@@ -595,6 +599,10 @@ function DashboardPage() {
                     onEdit={handleEdit}
                     onPreview={handlePreview}
                     onContextMenu={handleContextMenu}
+                    onFindJobs={(title) => {
+                      setJobQueryTitle(title || resume.title || "");
+                      setJobPanelOpen(true);
+                    }}
                   />
                 </Grid>
               ))}
@@ -608,6 +616,10 @@ function DashboardPage() {
                   onEdit={handleEdit}
                   onPreview={handlePreview}
                   onContextMenu={handleContextMenu}
+                  onFindJobs={(title) => {
+                    setJobQueryTitle(title || resume.title || "");
+                    setJobPanelOpen(true);
+                  }}
                 />
               ))}
             </Box>
@@ -616,6 +628,19 @@ function DashboardPage() {
       </AnimatePresence>
     );
   };
+  // Job panel as MUI Drawer
+  const JobPanel = (
+    <Drawer anchor="right" open={jobPanelOpen} onClose={() => setJobPanelOpen(false)}>
+      <Box sx={{ width: { xs: 320, sm: 420 }, p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6">Job Matches</Typography>
+          <IconButton onClick={() => setJobPanelOpen(false)}><CloseIcon /></IconButton>
+        </Box>
+        <Divider sx={{ mb: 1 }} />
+        <JobSearch resumeTitle={jobQueryTitle} />
+      </Box>
+    </Drawer>
+  );
 
   return (
     <>

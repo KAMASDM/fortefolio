@@ -6,7 +6,6 @@ import {
   useMediaQuery,
   SpeedDial,
   SpeedDialAction,
-  SpeedDialIcon,
   Snackbar,
   Alert,
   Container,
@@ -16,107 +15,76 @@ import {
   Select,
   MenuItem,
   Stack,
+  Typography,
+  Grid,
+  Divider,
+  Slider,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import {
   Download,
   FormatColorFill,
   TextFormat,
   Print,
+  DragIndicator,
 } from "@mui/icons-material";
-import IndiaTemplate from "../Templates/IndiaTemplate";
-import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
-import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { ResumeTemplateContent } from "../DisplayResume/ResumeTemplateContent";
+import { constants } from "./constants";
+import { exportToDocx } from "../utils/exportUtils";
+import { PDFGenerator } from "../utils/PDFGenerator";
 import { ExportMenu } from "../ExportMenu/ExportMenu";
 import { ColorMenu } from "../ColorMenu/ColorMenu";
 import { FontMenu } from "../FontMenu/FontMenu";
-import { ModernTemplate } from "../Templates/ModernTemplate";
-import { MinimalTemplate } from "../Templates/MinimalTemplate";
-import { CreativeTemplate } from "../Templates/CreativeTemplate";
-import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
-// import { SidebarTemplate } from "../Templates/SidebarTemplate";
-import { CanadaTemplate } from "../Templates/CanadaTemplate";
-import EuropenUnionTemplate from "../Templates/EuropenUnionTemplate";
-import { EuropassTemplate } from "../Templates/NewTemplate";
-import { AustraliaTemplate } from "../Templates/AustraliaTemplate";
-import { UsaTemplate } from "../Templates/UsaTemplate";
-import { PDFGenerator } from "../utils/PDFGenerator";
-import { constants } from "./constants";
-import { injectPrintStyles } from "../utils/pdfUtils";
-import { useNavigate } from "react-router-dom";
+import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
+import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
 import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
 import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
-
-const ResumePreview = ({ resumeData, onBack }) => {
+const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isExtraSmallMobile = useMediaQuery("(max-width:400px)");
   const resumeRef = useRef(null);
+
   const [activeTab, setActiveTab] = useState(0);
   const [activeTemplate, setActiveTemplate] = useState(TEMPLATES.EUROPASS);
   const [fontFamily, setFontFamily] = useState(FONTS.POPPINS);
   const [colorScheme, setColorScheme] = useState(COLOR_SCHEMES.BLUE);
+  const [fontSize, setFontSize] = useState(10);
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [colorMenu, setColorMenu] = useState(null);
   const [fontMenu, setFontMenu] = useState(null);
   const [exportMenu, setExportMenu] = useState(null);
   const [starredSections, setStarredSections] = useState([]);
   const [speedDialOpen, setSpeedDialOpen] = useState(false);
-  const [scale, setScale] = useState(1);
   const [isPrinting, setIsPrinting] = useState(false);
   const [showEnhanceDialog, setShowEnhanceDialog] = useState(false);
-  const {
-    personalInfo = {},
-    education = [],
-    experience = [],
-    skills = [],
-    projects = [],
-  } = resumeData;
 
+  const { personalInfo = {} } = resumeData;
   const { currentUser } = useAuth();
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (isPrinting) return;
-      const viewportWidth = window.innerWidth;
-      if (viewportWidth < 360) setScale(0.5);
-      else if (viewportWidth < 600) setScale(1.0);
-      else if (viewportWidth < 900) setScale(0.8);
-      else if (viewportWidth < 1200) setScale(0.9);
-      else setScale(1);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isPrinting]);
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const items = Array.from(sectionOrder);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setSectionOrder(items);
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      });
+      return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
     } catch (e) {
       return dateString;
     }
@@ -124,14 +92,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    const newTemplate =
-      {
-        // 0: TEMPLATES.MODERN,
-        // 1: TEMPLATES.MINIMAL,
-        // 2: TEMPLATES.CREATIVE,
-        // 3: TEMPLATES.PROFESSIONAL,
-        // 4: TEMPLATES.SIDEBAR,
-        // 5: TEMPLATES.CANADA,
+    const newTemplate = {
         0: TEMPLATES.EUROPASS,
         1: TEMPLATES.EUROPE,
         2: TEMPLATES.AUSTRALIA,
@@ -165,15 +126,7 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   const handleDisplayresume = () => {
     handleExportMenuClose();
-    console.log("resumeData: ", resumeData);
-    navigate(`/preview-only/${currentUser.uid}/${resumeData.id}`, {
-      state: {
-        resumeData,
-        activeTemplate,
-        fontFamily,
-        colorScheme,
-      },
-    });
+    navigate(`/preview-only/${currentUser.uid}/${resumeData.id}`);
   };
 
   const changeColorScheme = (scheme) => {
@@ -186,29 +139,22 @@ const ResumePreview = ({ resumeData, onBack }) => {
     handleFontMenuClose();
   };
 
-  const handleOpenEnhanceDialog = () => {
-    setShowEnhanceDialog(true);
-  };
-
+  const handleOpenEnhanceDialog = () => setShowEnhanceDialog(true);
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   const isSectionEmpty = (section) => {
-    switch (section) {
-      case "personalInfo":
-        return !personalInfo || Object.keys(personalInfo).length === 0;
-      case "education":
-        return !education || education.length === 0;
-      case "experience":
-        return !experience || experience.length === 0;
-      case "skills":
-        return !skills || skills.length === 0;
-      case "projects":
-        return !projects || projects.length === 0;
-      default:
-        return true;
-    }
+    const data = resumeData[section];
+    if (!data) return true;
+    if (Array.isArray(data)) return data.length === 0;
+    if (typeof data === 'object') return Object.keys(data).length === 0;
+    return false;
   };
-
+  
+  const getInitials = (name) => {
+    if (!name) return "?";
+    return name.split(" ").map((part) => part[0]).join("").toUpperCase().slice(0, 2);
+  };
+  
   const pdfGenerator = PDFGenerator({
     resumeRef,
     loading,
@@ -223,14 +169,15 @@ const ResumePreview = ({ resumeData, onBack }) => {
     },
   });
 
-  const downloadPDF = () => {
-    setScale(1);
-    pdfGenerator.downloadPDF();
+   const downloadDocx = async () => {
+    // This is the only function that needs to be changed in this file
+    const success = await exportToDocx(resumeData, `${resumeData.personalInfo.fullName || 'Resume'}.docx`);
+    setSnackbar({ open: true, message: success ? "DOCX downloaded!" : "Failed to download DOCX.", severity: success ? "success" : "error" });
+    handleExportMenuClose();
   };
 
   const printResume = () => {
     setIsPrinting(true);
-    setScale(1);
     setTimeout(() => {
       window.print();
     }, 100);
@@ -238,26 +185,13 @@ const ResumePreview = ({ resumeData, onBack }) => {
 
   useEffect(() => {
     const handleAfterPrint = () => {
-      console.log("Print dialog closed. Cleaning up.");
       setIsPrinting(false);
     };
-
     window.addEventListener("afterprint", handleAfterPrint);
-
     return () => {
       window.removeEventListener("afterprint", handleAfterPrint);
     };
   }, []);
-
-  const getInitials = (name) => {
-    if (!name) return "?";
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const renderTemplate = () => {
     const commonProps = {
@@ -271,326 +205,108 @@ const ResumePreview = ({ resumeData, onBack }) => {
       getInitials,
       isMobile,
       isSmallMobile,
+      sectionOrder,
+      fontSize
     };
-    const TemplateComponent =
-      {
-        [TEMPLATES.MODERN]: ModernTemplate,
-        [TEMPLATES.MINIMAL]: MinimalTemplate,
-        [TEMPLATES.CREATIVE]: CreativeTemplate,
-        [TEMPLATES.PROFESSIONAL]: ProfessionalTemplate,
-        // [TEMPLATES.SIDEBAR]: SidebarTemplate,
-        [TEMPLATES.EUROPASS]: EuropassTemplate,
-        [TEMPLATES.CANADA]: CanadaTemplate,
-        [TEMPLATES.EUROPE]: EuropenUnionTemplate,
-        [TEMPLATES.AUSTRALIA]: AustraliaTemplate,
-        [TEMPLATES.USA]: UsaTemplate,
-        [TEMPLATES.INDIA]: IndiaTemplate,
-      }[activeTemplate] || ModernTemplate;
-    return <TemplateComponent {...commonProps} />;
+    
+    return <ResumeTemplateContent {...commonProps} activeTemplate={activeTemplate} />;
   };
 
   const speedDialActions = [
-    { icon: <Download />, name: "Download PDF", action: downloadPDF },
+    { icon: <Download />, name: "Download PDF", action: pdfGenerator.downloadPDF },
     { icon: <Print />, name: "Print", action: printResume },
-    {
-      icon: <FormatColorFill />,
-      name: "Change Colors",
-      action: handleColorMenuOpen,
-    },
+    { icon: <FormatColorFill />, name: "Change Colors", action: handleColorMenuOpen },
     { icon: <TextFormat />, name: "Change Font", action: handleFontMenuOpen },
   ];
 
   return (
-    <Stack
-      spacing={0}
-      sx={{
-        width: "100%",
-        height: isPrinting ? "auto" : "100%",
-        overflow: isPrinting ? "visible" : "hidden",
-      }}
-      className={isPrinting ? "print-mode" : ""}
-    >
+    <Stack spacing={0} sx={{ width: "100%", height: "100%", overflow: "hidden" }}>
       <ResumeToolbar
         onBack={onBack}
         isMobile={isMobile}
-        isSmallMobile={isSmallMobile}
         handleColorMenuOpen={handleColorMenuOpen}
         handleFontMenuOpen={handleFontMenuOpen}
         handleExportMenuOpen={handleExportMenuOpen}
         onEnhanceResume={handleOpenEnhanceDialog}
-        sx={{
-          display: isPrinting ? "none" : "flex",
-          width: "100%",
-          mb: { xs: 1, sm: 2 },
-          flexShrink: 0,
-          py: { xs: 1, sm: 1.5 },
-          px: { xs: 1, sm: 2 },
-        }}
-        className="no-print"
       />
-
-      <Container
-        disableGutters={isExtraSmallMobile || isPrinting}
-        maxWidth={isPrinting ? false : "lg"}
-        sx={{
-          pb: isPrinting ? 0 : { xs: 8, md: 4 },
-          flexGrow: 1,
-
-          display: "flex",
-          width: isPrinting ? "100%" : "100%",
-          background: isPrinting ? "#fff" : undefined,
-          margin: isPrinting ? "0 !important" : undefined,
-          padding: isPrinting ? "0 !important" : undefined,
-          minHeight: 0,
-        }}
-      >
-        <Paper
-          elevation={isPrinting ? 0 : 2}
-          sx={{
-            width: "100%",
-            borderRadius: isPrinting ? 0 : "15px",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            height: isPrinting ? "auto" : "100%",
-            boxShadow: isPrinting ? "none !important" : undefined,
-            background: isPrinting ? "transparent !important" : undefined,
-            margin: isPrinting ? "0 !important" : undefined,
-            padding: isPrinting ? "0 !important" : undefined,
-            minHeight: 0,
-          }}
-        >
-          {/* Template Selector For Mobile*/}
-          {isMobile && !isPrinting && (
-            <Box
-              sx={{
-                px: 2,
-                py: 1.5,
-                borderBottom: 1,
-                borderColor: "divider",
-                flexShrink: 0,
-              }}
-              className="no-print"
-            >
-              <FormControl
-                fullWidth
-                size="small"
-                sx={{
-                  "& .MuiInputLabel-root": { color: lavenderPalette.text },
-                  "& .MuiOutlinedInput-root": {
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: lavenderPalette.soft,
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: lavenderPalette.medium,
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: lavenderPalette.primary,
-                      borderWidth: "2px",
-                    },
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: lavenderPalette.primary,
-                  },
-                }}
-              >
-                <InputLabel id="template-select-label">Template</InputLabel>
-                <Select
-                  labelId="template-select-label"
-                  id="template-select"
-                  value={activeTemplate}
-                  onChange={handleDropdownChange}
-                  label="Template"
-                  className="no-print"
-                >
-                  <MenuItem value={TEMPLATES.INDIA}>INDIA</MenuItem>
-                  {/* <MenuItem value={TEMPLATES.MODERN}>Modern</MenuItem> */}
-                  {/* <MenuItem value={TEMPLATES.MINIMAL}>Minimal</MenuItem> */}
-                  {/* <MenuItem value={TEMPLATES.CREATIVE}>Creative</MenuItem> */}
-                  {/* <MenuItem value={TEMPLATES.PROFESSIONAL}>
-                    Professional
-                  </MenuItem> */}
-                  <MenuItem value={TEMPLATES.EUROPASS}>Elegant</MenuItem>
-                  <MenuItem value={TEMPLATES.CANADA}>Canada Template</MenuItem>
-                  <MenuItem value={TEMPLATES.EUROPE}>
-                    Europen Union Template
-                  </MenuItem>
-                  <MenuItem value={TEMPLATES.AUSTRALIA}>
-                    Australia Template
-                  </MenuItem>
-                  <MenuItem value={TEMPLATES.USA}>USA Template</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          )}
-
-          {!isMobile && !isPrinting && (
-            <TemplateSelector
-              activeTab={activeTab}
-              handleTemplateChange={handleTabChange}
-              isMobile={isMobile}
-              sx={{ flexShrink: 0 }}
-            />
-          )}
-
-          {/* Main scrollable content area */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              overflow: isPrinting ? "visible" : "auto",
-              minHeight: 0,
-              "&::-webkit-scrollbar": {
-                width: isPrinting ? "0px" : "8px",
-                height: isPrinting ? "0px" : "8px",
-              },
-              "&::-webkit-scrollbar-track": {
-                backgroundColor: isPrinting
-                  ? "transparent"
-                  : lavenderPalette.light,
-                borderRadius: "4px",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: isPrinting
-                  ? "transparent"
-                  : colorScheme.primary,
-                borderRadius: "4px",
-                "&:hover": {
-                  backgroundColor: isPrinting
-                    ? "transparent"
-                    : lavenderPalette.deep,
-                },
-              },
-
-              scrollbarWidth: isPrinting ? "none" : "thin",
-              scrollbarColor: isPrinting
-                ? "transparent"
-                : `${colorScheme.primary} ${lavenderPalette.light}`,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                minHeight: isPrinting ? "auto" : "100%",
-                width: "100%",
-              }}
-            >
-              <Box
-                ref={resumeRef}
-                className="resume-content resume-print-area resume-container"
-                tabIndex={-1}
-                sx={{
-                  width: "100%",
-                  WebkitPrintColorAdjust: "exact",
-                  printColorAdjust: "exact",
-                  colorAdjust: "exact",
-                  transformOrigin: "top center",
-                  margin: " auto",
-                  boxShadow: isPrinting ? "none" : "0 4px 20px rgba(0,0,0,0.1)",
-                  transition: isPrinting ? "none" : "transform 0.2s ease",
-                  minHeight: isPrinting ? "auto" : "1123px",
-                  marginBottom: isPrinting ? 0 : "2rem",
-                }}
-                data-pdf-container="true"
-              >
-                {renderTemplate()}
-              </Box>
-            </Box>
-          </Box>
-        </Paper>
+      <Container maxWidth="xl" sx={{ flexGrow: 1, display: 'flex' }}>
+        <Grid container spacing={3}>
+            {!isMobile && (
+                <Grid item xs={12} md={3}>
+                    <Paper sx={{ p: 2, position: 'sticky', top: '20px' }}>
+                        <Typography variant="h6" gutterBottom>Customize</Typography>
+                        <Divider sx={{ my: 2 }}/>
+                        <Box sx={{ my: 2 }}>
+                            <Typography gutterBottom>Font Size ({fontSize}pt)</Typography>
+                            <Slider value={fontSize} onChange={(e, val) => setFontSize(val)} min={8} max={16} step={1} valueLabelDisplay="auto" />
+                        </Box>
+                        <Divider sx={{ my: 2 }}/>
+                        <Typography variant="subtitle1" gutterBottom>Reorder Sections</Typography>
+                        <DragDropContext onDragEnd={onDragEnd}>
+                            <Droppable droppableId="sections-list">
+                                {(provided) => (
+                                <Box {...provided.droppableProps} ref={provided.innerRef}>
+                                    {(sectionOrder || []).map((sectionKey, index) => (
+                                    <Draggable key={sectionKey} draggableId={sectionKey} index={index}>
+                                        {(provided) => (
+                                        <Paper
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            elevation={2}
+                                            sx={{ p: 1.5, my: 1, display: 'flex', alignItems: 'center', cursor: 'grab', '&:hover': { bgcolor: 'action.hover' } }}
+                                        >
+                                            <DragIndicator sx={{ mr: 1, color: 'text.secondary' }} />
+                                            <Typography sx={{ textTransform: 'capitalize' }}>{sectionKey}</Typography>
+                                        </Paper>
+                                        )}
+                                    </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                </Box>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
+                    </Paper>
+                </Grid>
+            )}
+            <Grid item xs={12} md={isMobile ? 12 : 9}>
+              <Paper elevation={3} sx={{ overflow: "hidden", display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <TemplateSelector activeTab={activeTab} handleTemplateChange={handleTabChange} isMobile={isMobile}/>
+                <Box sx={{ p: 2, bgcolor: "grey.200", overflow: "auto", flexGrow: 1 }}>
+                  <Box ref={resumeRef}>
+                    {renderTemplate()}
+                  </Box>
+                </Box>
+              </Paper>
+            </Grid>
+        </Grid>
       </Container>
-
-      <Zoom in={isMobile && !isPrinting}>
-        <SpeedDial
-          ariaLabel="Resume actions"
-          sx={{
-            display: isPrinting ? "none" : undefined,
-            position: "fixed",
-            bottom: { xs: 70, sm: 16 },
-            right: 16,
-            zIndex: 1000,
-          }}
-          icon={<SpeedDialIcon />}
-          onClose={() => setSpeedDialOpen(false)}
-          onOpen={() => setSpeedDialOpen(true)}
-          open={speedDialOpen}
-          direction={isExtraSmallMobile ? "up" : "left"}
-          FabProps={{
-            sx: {
-              bgcolor: lavenderPalette.primary,
-              "&:hover": { bgcolor: lavenderPalette.deep },
-            },
-          }}
-        >
-          {speedDialActions.map((action) => (
-            <SpeedDialAction
-              key={action.name}
-              icon={action.icon}
-              tooltipTitle={action.name}
-              tooltipOpen={isExtraSmallMobile}
-              onClick={action.action}
-            />
-          ))}
-        </SpeedDial>
-      </Zoom>
-
-      {!isPrinting && (
-        <>
-          <ColorMenu
-            colorMenu={colorMenu}
-            handleColorMenuClose={handleColorMenuClose}
-            changeColorScheme={changeColorScheme}
-            COLOR_SCHEMES={COLOR_SCHEMES}
-            isMobile={isMobile}
-            className="no-print"
-          />
-          <FontMenu
-            fontMenu={fontMenu}
-            handleFontMenuClose={handleFontMenuClose}
-            changeFontFamily={changeFontFamily}
-            FONTS={FONTS}
-            isMobile={isMobile}
-            className="no-print"
-          />
-          <ExportMenu
-            exportMenu={exportMenu}
-            handleExportMenuClose={handleExportMenuClose}
-            downloadPDF={downloadPDF}
-            printResume={printResume}
-            loading={loading}
-            isMobile={isMobile}
-            handleDisplayresume={handleDisplayresume}
-            className="no-print"
-          />
-        </>
-      )}
-
-      <EnhanceResumeDialog
-        open={showEnhanceDialog}
-        onClose={() => setShowEnhanceDialog(false)}
-        resumeData={resumeData}
+      <ExportMenu
+        exportMenu={exportMenu}
+        handleExportMenuClose={handleExportMenuClose}
+        downloadPDF={pdfGenerator.downloadPDF}
+        downloadDocx={downloadDocx}
+        printResume={printResume}
+        loading={loading}
+        handleDisplayresume={handleDisplayresume}
       />
-
-      <Snackbar
-        open={snackbar.open && !isPrinting}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: isSmallMobile ? "center" : "left",
-        }}
-        sx={{
-          display: isPrinting ? "none" : undefined,
-          bottom: { xs: 76, sm: 24 },
-        }}
-        className="no-print"
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          sx={{ width: "100%", boxShadow: 2 }}
-        >
+      <ColorMenu
+        colorMenu={colorMenu}
+        handleColorMenuClose={handleColorMenuClose}
+        changeColorScheme={changeColorScheme}
+        COLOR_SCHEMES={COLOR_SCHEMES}
+      />
+      <FontMenu
+        fontMenu={fontMenu}
+        handleFontMenuClose={handleFontMenuClose}
+        changeFontFamily={changeFontFamily}
+        FONTS={FONTS}
+        fontFamily={fontFamily}
+      />
+      <EnhanceResumeDialog open={showEnhanceDialog} onClose={() => setShowEnhanceDialog(false)} resumeData={resumeData} />
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

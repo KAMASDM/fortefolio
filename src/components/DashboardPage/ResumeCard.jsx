@@ -33,7 +33,7 @@ const lavenderPalette = {
   accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
 };
 
-const ResumeCard = ({ resume, onEdit, onContextMenu }) => {
+  const ResumeCard = ({ resume, onEdit, onContextMenu, onFindJobs }) => {
   const lastModifiedDate = resume.lastModified
     ? new Date(resume.lastModified)
     : null;
@@ -334,6 +334,19 @@ const ResumeCard = ({ resume, onEdit, onContextMenu }) => {
               >
                 {" "}
                 <EditIcon fontSize="small" />{" "}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Find Jobs">
+              <IconButton
+                size="small"
+                onClick={() => onFindJobs && onFindJobs(resume.title)}
+                sx={{
+                  backgroundColor: alpha(lavenderPalette.medium, 0.05),
+                  color: lavenderPalette.deep,
+                  mr: 1,
+                }}
+              >
+                <DescriptionIcon fontSize="small" />
               </IconButton>
             </Tooltip>
             <Tooltip title="More Options">

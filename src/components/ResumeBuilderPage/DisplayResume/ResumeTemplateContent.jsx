@@ -3,7 +3,6 @@ import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";
 import IndiaTemplate from "../Templates/IndiaTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
-import { SidebarTemplate } from "../Templates/SidebarTemplate";
 import { CanadaTemplate } from "../Templates/CanadaTemplate";
 import EuropenUnionTemplate from "../Templates/EuropenUnionTemplate";
 import { EuropassTemplate } from "../Templates/NewTemplate";
@@ -24,7 +23,9 @@ export const ResumeTemplateContent = ({
   isMobile,
   isSmallMobile,
   starredSections = [],
-  toggleStarSection = () => { },
+  toggleStarSection = () => {},
+  sectionOrder = ['experience', 'education', 'projects', 'skills', 'references'], // Default order
+  fontSize = 10,
 }) => {
   const TemplateComponent =
     {
@@ -32,7 +33,6 @@ export const ResumeTemplateContent = ({
       [TEMPLATES.MINIMAL]: MinimalTemplate,
       [TEMPLATES.CREATIVE]: CreativeTemplate,
       [TEMPLATES.PROFESSIONAL]: ProfessionalTemplate,
-      // [TEMPLATES.SIDEBAR]: SidebarTemplate,
       [TEMPLATES.EUROPASS]: EuropassTemplate,
       [TEMPLATES.CANADA]: CanadaTemplate,
       [TEMPLATES.EUROPE]: EuropenUnionTemplate,
@@ -52,6 +52,8 @@ export const ResumeTemplateContent = ({
     getInitials,
     isMobile,
     isSmallMobile,
+    sectionOrder, // Pass the order to the template
+    fontSize, // Pass font size to the template
   };
 
   return <TemplateComponent {...commonProps} />;

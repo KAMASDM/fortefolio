@@ -1,0 +1,33 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        "profile": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        },
+        "resumes": {
+          ".read": "auth != null && auth.uid === $uid",
+          "$resumeId": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && auth.uid === $uid",
+            "resumeData": {
+              ".validate": "newData.hasChildren(['personalInfo'])"
+            },
+            "metadata": {
+              ".validate": "newData.hasChildren(['title','lastModified'])",
+              "createdAt": {
+                ".validate": "data.exists() ? newData.val() === data.val() : newData.isNumber()"
+              },
+              "lastModified": {
+                ".validate": "newData.isNumber()"
+              }
+            }
+          }
+        }
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}

@@ -15,6 +15,7 @@ import {
   Chip,
   Alert,
   Zoom,
+  CircularProgress
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -27,6 +28,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Business as CompanyIcon,
   Badge as PositionIcon,
+  AutoAwesome as AiIcon
 } from "@mui/icons-material";
 
 const lavenderPalette = {
@@ -88,6 +90,7 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
   const [experiences, setExperiences] = useState([defaultExperienceEntry]);
   const [lastSavedExperiences, setLastSavedExperiences] = useState(experiences);
   const [formComplete, setFormComplete] = useState(0);
+  const [aiLoading, setAiLoading] = useState({});
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -198,6 +201,39 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
   const removeExperience = (id) => {
     const updated = experiences.filter((exp) => exp.id !== id);
     setExperiences(updated.length > 0 ? updated : [defaultExperienceEntry]);
+  };
+
+  const handleAiSuggestion = async (expId, respIndex) => {
+    const responsibilityText = experiences.find(exp => exp.id === expId).responsibilities[respIndex];
+    if (!responsibilityText) return;
+
+    setAiLoading(prev => ({ ...prev, [`${expId}-${respIndex}`]: true }));
+
+    const prompt = `Rewrite the following resume bullet point to be more impactful and achievement-oriented. Focus on using strong action verbs and quantifying results where possible. Original bullet point: "${responsibilityText}"`;
+
+    try {
+        const apiKey = import.meta.env.VITE_APP_OPENAI_API_KEY;
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: [{ role: "user", content: prompt }],
+                max_tokens: 60,
+            }),
+        });
+
+        const result = await response.json();
+        const suggestion = result.choices[0].message.content.trim();
+        handleResponsibilityChange(expId, respIndex, suggestion);
+    } catch (error) {
+        console.error("Error getting AI suggestion:", error);
+    } finally {
+        setAiLoading(prev => ({ ...prev, [`${expId}-${respIndex}`]: false }));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -406,6 +442,19 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
                         size="small"
                         multiline
                       />
+                      <Tooltip title="Get AI suggestions for this bullet point">
+                        <span>
+                            <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => handleAiSuggestion(experience.id, respIndex)}
+                                disabled={aiLoading[`${experience.id}-${respIndex}`]}
+                                sx={{ ml: 1 }}
+                            >
+                                {aiLoading[`${experience.id}-${respIndex}`] ? <CircularProgress size={20} /> : <AiIcon fontSize="small" />}
+                            </IconButton>
+                        </span>
+                      </Tooltip>
                       <Tooltip title="Remove responsibility">
                         <span>
                           <IconButton
