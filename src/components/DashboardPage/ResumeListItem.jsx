@@ -30,7 +30,7 @@ const lavenderPalette = {
   accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
 };
 
-const ResumeListItem = ({ resume, onEdit, onPreview, onContextMenu, onFindJobs }) => {
+const ResumeListItem = ({ resume, onEdit, onPreview, onContextMenu }) => {
   const lastModifiedDate = resume.lastModified
     ? new Date(resume.lastModified)
     : null;
@@ -161,15 +161,6 @@ const ResumeListItem = ({ resume, onEdit, onPreview, onContextMenu, onFindJobs }
             >
               {" "}
               <VisibilityIcon />{" "}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Find Jobs">
-            <IconButton
-              size="small"
-              onClick={() => onFindJobs && onFindJobs(resume.title)}
-              sx={{ color: lavenderPalette.deep, ml: 0.5 }}
-            >
-              <DescriptionIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="Edit">

@@ -18,7 +18,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
-import jsPDF from "jspdf";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -123,13 +122,31 @@ const GeneratedContentDialog = ({
     return () => clearInterval(tipInterval);
   }, [loading, open]);
 
-  const handleExportPdf = () => {
-    const doc = new jsPDF();
-    doc.setFont("helvetica");
-    doc.setFontSize(12);
-    const lines = doc.splitTextToSize(content, 180);
-    doc.text(lines, 15, 20);
-    doc.save(`${title || "document"}.pdf`);
+  const handleDownloadPDF = () => {
+    // Create a simple print dialog for PDF generation
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            @media print { body { margin: 20px; } }
+          </style>
+        </head>
+        <body>
+          <h1>${title}</h1>
+          <pre style="white-space: pre-wrap; font-family: inherit;">${content}</pre>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
   };
 
   const handleCopyContent = () => {
@@ -286,7 +303,7 @@ const GeneratedContentDialog = ({
           Copy
         </Button>
         <Button
-          onClick={handleExportPdf}
+          onClick={handleDownloadPDF}
           startIcon={<DownloadIcon />}
           disabled={!content || loading}
           variant="outlined"

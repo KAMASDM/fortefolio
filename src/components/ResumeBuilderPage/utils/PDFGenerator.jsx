@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import html2pdf from "html2pdf.js";
+import { generateTemplatePDF } from './advancedPDFGenerator';
 
 export const PDFGenerator = ({
   resumeRef,
@@ -8,6 +8,7 @@ export const PDFGenerator = ({
   personalInfo,
   onSuccess,
   onError,
+  templateType = 'MODERN'
 }) => {
   const downloadPDF = async () => {
     if (!resumeRef.current) {
@@ -17,67 +18,35 @@ export const PDFGenerator = ({
 
     setLoading(true);
     const element = resumeRef.current;
-    const filename = `${personalInfo.fullName || "Resume"}.pdf`;
-
-    const borderedPages = element.querySelectorAll(".page.with-border");
-    const pageContainer = element.querySelector(".page-container");
-
-    const prevScale = pageContainer.style.transform;
 
     try {
-      borderedPages.forEach((page) => {
-        page.style.border = "none";
-        page.style.boxShadow = "none";
-        page.style.minWidth = "794px";
-        page.style.minHeight = "1122px";
-      });
-      if (pageContainer) {
-        pageContainer.style.gap = "0px";
-        pageContainer.style.minWidth = "794px !important";
-        pageContainer.style.transform = "scale(1)";
+      // Use advanced PDF generator that preserves template design
+      const result = await generateTemplatePDF(
+        element, 
+        personalInfo, 
+        templateType,
+        {
+          scale: 3, // High quality
+          quality: 0.98 // Near perfect quality
+        }
+      );
+      
+      if (result.success) {
+        onSuccess(result.message);
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      await html2pdf()
-        .set({
-          margin: [0, 0],
-          filename,
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-          },
-          jsPDF: {
-            unit: "mm",
-            format: "a4",
-            orientation: "portrait",
-          },
-        })
-        .from(element)
-        .save();
-
-      onSuccess("Resume downloaded successfully!");
+      
     } catch (error) {
       console.error("PDF generation failed:", error);
-      onError("Could not generate PDF. Try using Print instead.");
+      onError("Could not generate PDF with template design. Please try again.");
+      
+      // Fallback to print dialog
       setTimeout(() => {
-        if (window.confirm("PDF failed. Try printing instead?")) {
+        if (window.confirm("PDF generation failed. Would you like to try printing instead?")) {
           window.print();
         }
       }, 500);
     } finally {
-      setTimeout(() => {
-        borderedPages.forEach((page) => {
-          page.style.border = "";
-          page.style.boxShadow = "";
-        });
-        if (pageContainer) {
-          pageContainer.style.gap = "";
-          pageContainer.style.minWidth = "100%";
-          pageContainer.style.transform = prevScale;
-        }
-        setLoading(false);
-      }, 200);
+      setLoading(false);
     }
   };
 

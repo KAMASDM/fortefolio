@@ -1,144 +1,227 @@
-import React, { useEffect, useState } from "react";
-import { CircularProgress, Skeleton } from "@mui/material";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  CircularProgress,
+  Skeleton,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Link,
+  Divider,
+  InputAdornment,
+  Alert
+} from "@mui/material";
+import { Search as SearchIcon, LocationOn as LocationIcon } from "@mui/icons-material";
+import { useAuth } from "../../context/AuthContext";
 
-// Simple component to fetch job matches for a resume title from a backend
-// Endpoint expected: GET /api/jobs?query=<query>
-// The server created in /server returns mock data by default and has notes
-// on how to enable the Google Cloud Talent Solution integration.
+// --- Helper component for a single job listing ---
+const JobListing = ({ job }) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      p: 2,
+      mb: 2,
+      transition: "box-shadow 0.3s",
+      "&:hover": {
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      },
+    }}
+  >
+    <Link
+      href={job.applicationInfo?.uris?.[0] || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="none"
+      color="inherit"
+    >
+      <Typography variant="h6" sx={{ fontWeight: 600, color: "#2E2152" }}>
+        {job.title}
+      </Typography>
+    </Link>
+    <Typography variant="body1" sx={{ color: "#4A3B77", fontWeight: 500 }}>
+      {job.companyDisplayName}
+    </Typography>
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      {(job.addresses || []).join(', ')}
+    </Typography>
+    <Typography
+        variant="body2"
+        sx={{ color: "#4A3B77", mb: 2, maxHeight: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}
+        dangerouslySetInnerHTML={{ __html: job.descriptionSnippet || 'No description available.' }}
+    />
+    <Button
+      variant="contained"
+      href={job.applicationInfo?.uris?.[0] || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      sx={{
+        bgcolor: "#9D88D9",
+        "&:hover": { bgcolor: "#7F68C9" },
+      }}
+    >
+      Apply Now
+    </Button>
+  </Paper>
+);
 
-const JobSearch = ({ resumeTitle }) => {
+
+// --- Main JobSearch Component ---
+const JobSearch = ({ resumeTitle, resumeData }) => {
+  const { currentUser } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const providerEndpoint = import.meta.env.VITE_GOOGLE_JOBS_ENDPOINT || "";
-  const apiKey = import.meta.env.VITE_GOOGLE_JOBS_API_KEY || "";
-  const gcpProject = import.meta.env.VITE_GOOGLE_TALENT_PROJECT || "";
-  const gcpTenant = import.meta.env.VITE_GOOGLE_TALENT_TENANT || "";
-  const useGoogleTalent = !!(gcpProject && gcpTenant && apiKey);
+  // State for user filters
+  const [keywords, setKeywords] = useState(resumeTitle || "");
+  const [location, setLocation] = useState("");
 
-  useEffect(() => {
-    if (!resumeTitle) return;
-    const controller = new AbortController();
+  // Backend API URL
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-    const fetchJobs = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // If Google Talent v4 env vars are present, call the official searchJobs endpoint.
-        if (useGoogleTalent) {
-          // Endpoint: POST https://jobs.googleapis.com/v4/projects/{projectId}/tenants/{tenantId}:searchJobs?key=API_KEY
-          const url = `https://jobs.googleapis.com/v4/projects/${encodeURIComponent(gcpProject)}/tenants/${encodeURIComponent(gcpTenant)}:searchJobs?key=${encodeURIComponent(apiKey)}`;
-          const body = {
-            requestMetadata: {
-              domain: window.location.hostname,
-              sessionId: `session-${Math.random().toString(36).slice(2, 10)}`,
-              userId: 'anonymous',
-            },
-            searchMode: 'JOB_SEARCH',
-            query: resumeTitle,
-            pageSize: 10,
-          };
+  // Extract skills from resume data for better job matching
+  const extractSkillsFromResume = () => {
+    const skills = [];
+    
+    // Get skills from resume
+    if (resumeData?.skills && Array.isArray(resumeData.skills)) {
+      skills.push(...resumeData.skills.map(s => s.name || s));
+    }
+    
+    return skills.filter(Boolean);
+  };
 
-          try {
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body),
-              signal: controller.signal,
-            });
-            if (!res.ok) {
-              const text = await res.text();
-              throw new Error(text || `HTTP ${res.status}`);
-            }
-            const payload = await res.json();
-            // Google Talent returns matchingJobs in response; try common fields
-            const items = payload.matchingJobs || payload.jobs || payload.results || [];
-            const jobsList = items.map((it, i) => {
-              const job = it.job || it; // matchingJobs may wrap job object
-              return {
-                id: job.name || job.jobId || `job-${i}`,
-                title: job.title || job.jobTitle || '',
-                company: (job.companyDisplayName || (job.employer && job.employer.name)) || '',
-                location: (job.addresses && job.addresses[0]) || job.address || '',
-                url: job.applicationInfo?.uris?.[0] || job.incentives || '#',
-                description: job.description || job.titleSnippet || '',
-              };
-            });
-            setJobs(jobsList);
-          } catch (err) {
-            throw err; // rethrow to be handled by outer catch
-          }
-        } else if (providerEndpoint && apiKey) {
-          const separator = providerEndpoint.includes("?") ? "&" : "?";
-          const url = `${providerEndpoint}${separator}query=${encodeURIComponent(resumeTitle)}&key=${encodeURIComponent(apiKey)}`;
-          const res = await fetch(url, { signal: controller.signal });
-          if (!res.ok) {
-            const text = await res.text();
-            throw new Error(text || `HTTP ${res.status}`);
-          }
-          const payload = await res.json();
-          const jobsList = payload.jobs || payload.results || [];
-          setJobs(jobsList.map((it, i) => ({
-            id: it.id || it.jobId || `job-${i}`,
-            title: it.title || it.jobTitle || it.name || '',
-            company: it.companyName || it.company || '',
-            location: it.location || it.address || '',
-            url: it.url || it.applyUrl || it.jobUrl || '#',
-            description: it.description || it.snippet || it.summary || '',
-          })));
-        } else {
-          // Fallback mock data
-          setJobs([
-            { id: 'mock-1', title: `${resumeTitle} Engineer`, company: 'Acme', location: 'Remote', url: '#', description: `Work on ${resumeTitle}` },
-            { id: 'mock-2', title: `${resumeTitle} Specialist`, company: 'Example LLC', location: 'NY', url: '#', description: `Build ${resumeTitle}` },
-          ]);
-        }
-      } catch (err) {
-        if (err.name !== 'AbortError') setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchJobs = useCallback(async () => {
+    if (!keywords.trim() && !location.trim()) {
+      setError("Please enter job keywords or location to search.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Extract skills from resume for better matching
+      const resumeSkills = extractSkillsFromResume();
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keywords: keywords.trim(),
+          location: location.trim(),
+          userId: currentUser?.uid || 'anonymous',
+          resumeSkills: resumeSkills,
+          experienceLevel: resumeData?.experienceLevel || null
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `Server error: ${response.status}`);
       }
-    };
 
-    fetchJobs();
-    return () => controller.abort();
-  }, [resumeTitle, providerEndpoint, apiKey]);
+      if (data.success) {
+        setJobs(data.jobs || []);
+        if (data.jobs.length === 0) {
+          setError("No jobs found matching your criteria. Try different keywords or location.");
+        }
+      } else {
+        throw new Error(data.error || 'Failed to fetch jobs');
+      }
+
+    } catch (err) {
+      console.error("Error fetching jobs:", err);
+      setError(`Failed to fetch jobs: ${err.message}. Make sure the backend server is running on ${API_BASE_URL}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [keywords, location, currentUser, resumeData, API_BASE_URL]);
+
+
+  const handleSearch = () => {
+      fetchJobs();
+  };
+
+  // Run initial search on component mount
+  useEffect(() => {
+    handleSearch();
+  }, []);
+
 
   return (
-    <div>
-      <h3>Jobs matching: "{resumeTitle}"</h3>
-      {loading && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <CircularProgress size={20} />
-          <div>Loading jobs…</div>
-        </div>
+    <Box>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: '#2E2152' }}>
+        Find Your Next Job
+      </Typography>
+
+      {/* --- Filter Inputs --- */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
+        <TextField
+          label="Job Title / Keywords"
+          variant="outlined"
+          value={keywords}
+          onChange={(e) => setKeywords(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <TextField
+          label="Location (e.g., City, State, Country)"
+          variant="outlined"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+           InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <LocationIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          disabled={loading}
+          sx={{
+            bgcolor: "#9D88D9",
+            "&:hover": { bgcolor: "#7F68C9" },
+            py: 1.5
+          }}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Search Jobs"}
+        </Button>
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* --- Job Listings --- */}
+       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      {!loading && !error && jobs.length === 0 && (
+        <Typography sx={{ textAlign: 'center', mt: 4 }}>No jobs found. Try adjusting your search.</Typography>
       )}
-      {error && <div style={{ color: 'crimson' }}>Error: {error}</div>}
-      {!loading && !error && jobs.length === 0 && <div>No jobs found.</div>}
-      <ul style={{ paddingLeft: 0, listStyle: 'none' }}>
+      
+      <Box sx={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto', pr: 1 }}>
         {loading
-          ? [1, 2, 3].map((i) => (
-              <li key={i} style={{ margin: '12px 0', paddingBottom: 8 }}>
-                <Skeleton variant="text" width="60%" />
-                <Skeleton variant="text" width="40%" />
-                <Skeleton variant="rectangular" width="100%" height={48} />
-              </li>
+          ? Array(5).fill(0).map((_, i) => (
+              <Box key={i} sx={{ mb: 2 }}>
+                <Skeleton variant="text" width="80%" height={40} />
+                <Skeleton variant="text" width="50%" />
+                <Skeleton variant="rectangular" height={60} />
+              </Box>
             ))
-          : jobs.map((job) => (
-              <li key={job.id || job.url} style={{ margin: '12px 0', borderBottom: '1px solid #eee', paddingBottom: 8 }}>
-                <a href={job.url || '#'} target="_blank" rel="noreferrer" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div style={{ fontWeight: 600 }}>{job.title}</div>
-                  <div style={{ color: '#555' }}>{job.company} — {job.location}</div>
-                  {job.description && <p style={{ marginTop: 6 }}>{job.description}</p>}
-                </a>
-              </li>
-            ))}
-      </ul>
-      <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-        <strong>Note:</strong> Calling third-party APIs from the browser may require CORS and exposes your API key to end users. For production, prefer a backend proxy.
-      </div>
-    </div>
+          : jobs.map((job, index) => <JobListing key={job.name || `job-${index}`} job={job} />)}
+      </Box>
+    </Box>
   );
 };
 

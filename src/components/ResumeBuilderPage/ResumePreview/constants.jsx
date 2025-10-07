@@ -1,11 +1,11 @@
 export const constants = {
   TEMPLATES: {
-    // MODERN: "modern",
-    // MINIMAL: "minimal",
-    // CREATIVE: "creative",
-    // PROFESSIONAL: "professional",
-    // SIDEBAR: "sidebar",
-    // CANADA: "canada",
+    MODERN: "modern",
+    MINIMAL: "minimal",
+    CREATIVE: "creative",
+    PROFESSIONAL: "professional",
+    SIDEBAR: "sidebar",
+    CANADA: "canada",
     EUROPASS: "europass",
     EUROPE: "europe",
     AUSTRALIA: "australia",

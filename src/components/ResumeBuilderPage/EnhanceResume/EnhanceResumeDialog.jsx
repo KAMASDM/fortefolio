@@ -21,7 +21,6 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
-import jsPDF from "jspdf";
 
 const resumeLoadingTips = [
   {
@@ -242,31 +241,43 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
       return;
     }
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 15;
-    let y = margin;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Resume Enhancement Suggestions", margin, y);
-    y += 15;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-
-    const lines = doc.splitTextToSize(enhancedContent, pageWidth - 2 * margin);
-
-    lines.forEach((line) => {
-      if (y > doc.internal.pageSize.getHeight() - margin * 1.5) {
-        doc.addPage();
-        y = margin;
-      }
-      doc.text(line, margin, y);
-      y += 6;
-    });
-
-    doc.save("resume_enhancement_suggestions.pdf");
+    // Create a simple print dialog for PDF generation
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Resume Enhancement Suggestions</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 40px; 
+              line-height: 1.6; 
+              color: #333;
+            }
+            h1 {
+              color: #2c3e50;
+              border-bottom: 2px solid #3498db;
+              padding-bottom: 10px;
+            }
+            @media print { 
+              body { margin: 20px; }
+              h1 { color: #000; border-bottom: 1px solid #000; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Resume Enhancement Suggestions</h1>
+          <pre style="white-space: pre-wrap; font-family: inherit;">${enhancedContent}</pre>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
   };
 
   const handleCopyContent = () => {

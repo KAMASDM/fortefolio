@@ -64,12 +64,12 @@ export const TemplateSelector = ({
           },
         }}
       >
-        {/* <Tab label="Modern" icon={<Description />} iconPosition="start" /> */}
-        {/* <Tab label="Minimal" icon={<Article />} iconPosition="start" />
+        <Tab label="Modern" icon={<Description />} iconPosition="start" />
+        <Tab label="Minimal" icon={<Article />} iconPosition="start" />
         <Tab label="Creative" icon={<Brush />} iconPosition="start" />
-        <Tab label="Professional" icon={<Work />} iconPosition="start" /> */}
-        <Tab label="Elegant" icon={<ElegantIcon />} iconPosition="start" />
-        {/* <Tab
+        <Tab label="Professional" icon={<Work />} iconPosition="start" />
+        <Tab label="Sidebar" icon={<ElegantIcon />} iconPosition="start" />
+        <Tab
           label="Canada"
           icon={
             <img
@@ -81,7 +81,8 @@ export const TemplateSelector = ({
             />
           }
           iconPosition="start"
-        /> */}
+        />
+        <Tab label="Europass" icon={<ElegantIcon />} iconPosition="start" />
         <Tab
           label="Europe"
           icon={

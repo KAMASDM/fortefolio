@@ -27,9 +27,7 @@ import {
   FormatColorFill,
   TextFormat,
   Print,
-  DragIndicator,
 } from "@mui/icons-material";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { ResumeTemplateContent } from "../DisplayResume/ResumeTemplateContent";
 import { constants } from "./constants";
 import { exportToDocx } from "../utils/exportUtils";
@@ -54,7 +52,7 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
   const resumeRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState(0);
-  const [activeTemplate, setActiveTemplate] = useState(TEMPLATES.EUROPASS);
+  const [activeTemplate, setActiveTemplate] = useState(TEMPLATES.MODERN);
   const [fontFamily, setFontFamily] = useState(FONTS.POPPINS);
   const [colorScheme, setColorScheme] = useState(COLOR_SCHEMES.BLUE);
   const [fontSize, setFontSize] = useState(10);
@@ -71,14 +69,6 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
   const { personalInfo = {} } = resumeData;
   const { currentUser } = useAuth();
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-    const items = Array.from(sectionOrder);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    setSectionOrder(items);
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return "";
     try {
@@ -93,12 +83,18 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     const newTemplate = {
-        0: TEMPLATES.EUROPASS,
-        1: TEMPLATES.EUROPE,
-        2: TEMPLATES.AUSTRALIA,
-        3: TEMPLATES.USA,
-        4: TEMPLATES.INDIA,
-      }[newValue] || TEMPLATES.INDIA;
+        0: TEMPLATES.MODERN,
+        1: TEMPLATES.MINIMAL,
+        2: TEMPLATES.CREATIVE,
+        3: TEMPLATES.PROFESSIONAL,
+        4: TEMPLATES.SIDEBAR,
+        5: TEMPLATES.CANADA,
+        6: TEMPLATES.EUROPASS,
+        7: TEMPLATES.EUROPE,
+        8: TEMPLATES.AUSTRALIA,
+        9: TEMPLATES.USA,
+        10: TEMPLATES.INDIA,
+      }[newValue] || TEMPLATES.MODERN;
     setActiveTemplate(newTemplate);
   };
 
@@ -238,35 +234,26 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
                         <Divider sx={{ my: 2 }}/>
                         <Box sx={{ my: 2 }}>
                             <Typography gutterBottom>Font Size ({fontSize}pt)</Typography>
-                            <Slider value={fontSize} onChange={(e, val) => setFontSize(val)} min={8} max={16} step={1} valueLabelDisplay="auto" />
+                            <Slider 
+                              value={fontSize} 
+                              onChange={(e, val) => setFontSize(val)} 
+                              min={8} 
+                              max={16} 
+                              step={1} 
+                              valueLabelDisplay="auto"
+                              marks={[
+                                { value: 8, label: '8' },
+                                { value: 10, label: '10' },
+                                { value: 12, label: '12' },
+                                { value: 14, label: '14' },
+                                { value: 16, label: '16' },
+                              ]}
+                            />
                         </Box>
                         <Divider sx={{ my: 2 }}/>
-                        <Typography variant="subtitle1" gutterBottom>Reorder Sections</Typography>
-                        <DragDropContext onDragEnd={onDragEnd}>
-                            <Droppable droppableId="sections-list">
-                                {(provided) => (
-                                <Box {...provided.droppableProps} ref={provided.innerRef}>
-                                    {(sectionOrder || []).map((sectionKey, index) => (
-                                    <Draggable key={sectionKey} draggableId={sectionKey} index={index}>
-                                        {(provided) => (
-                                        <Paper
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            elevation={2}
-                                            sx={{ p: 1.5, my: 1, display: 'flex', alignItems: 'center', cursor: 'grab', '&:hover': { bgcolor: 'action.hover' } }}
-                                        >
-                                            <DragIndicator sx={{ mr: 1, color: 'text.secondary' }} />
-                                            <Typography sx={{ textTransform: 'capitalize' }}>{sectionKey}</Typography>
-                                        </Paper>
-                                        )}
-                                    </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </Box>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', mt: 2 }}>
+                          💡 Tip: Adjust font size to fit more content or improve readability
+                        </Typography>
                     </Paper>
                 </Grid>
             )}
@@ -274,7 +261,29 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
               <Paper elevation={3} sx={{ overflow: "hidden", display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <TemplateSelector activeTab={activeTab} handleTemplateChange={handleTabChange} isMobile={isMobile}/>
                 <Box sx={{ p: 2, bgcolor: "grey.200", overflow: "auto", flexGrow: 1 }}>
-                  <Box ref={resumeRef}>
+                  <Box 
+                    ref={resumeRef}
+                    sx={{
+                      '& p, & span, & div:not([class*="MuiBox"]):not([class*="MuiPaper"])': {
+                        fontSize: `${fontSize}pt`,
+                      },
+                      '& h1': {
+                        fontSize: `${fontSize * 2.5}pt`,
+                      },
+                      '& h2': {
+                        fontSize: `${fontSize * 2}pt`,
+                      },
+                      '& h3, & h4': {
+                        fontSize: `${fontSize * 1.5}pt`,
+                      },
+                      '& h5': {
+                        fontSize: `${fontSize * 1.3}pt`,
+                      },
+                      '& h6': {
+                        fontSize: `${fontSize * 1.1}pt`,
+                      },
+                    }}
+                  >
                     {renderTemplate()}
                   </Box>
                 </Box>

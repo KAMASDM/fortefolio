@@ -184,16 +184,17 @@ const CreateResumeDialog = ({
         </Typography>
         <Grid container spacing={2} sx={{ mt: 1 }}>
           {[
-            { id: "india", name: "India" },
             { id: "modern", name: "Modern" },
             { id: "minimal", name: "Minimal" },
             { id: "creative", name: "Creative" },
             { id: "professional", name: "Professional" },
-            { id: "elegant", name: "Elegant" },
+            { id: "sidebar", name: "Sidebar" },
             { id: "canada", name: "Canada" },
+            { id: "europass", name: "Europass" },
             { id: "europe", name: "Europe" },
             { id: "australia", name: "Australia" },
             { id: "usa", name: "USA" },
+            { id: "india", name: "India" },
           ].map((template) => (
             <Grid item xs={6} sm={3} key={template.id}>
               <Box

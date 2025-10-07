@@ -733,6 +733,13 @@ function ResumeBuilderPage() {
   const [showVisaFormDialog, setShowVisaFormDialog] = useState(false);
   const [showResumeTips, setShowResumeTips] = useState(false);
   const [showSOPFormDialog, setShowSOPFormDialog] = useState(false);
+  const [sectionOrder, setSectionOrder] = useState([
+    'education',
+    'experience',
+    'skills',
+    'projects',
+    'references'
+  ]);
 
   const completedSections = useMemo(() => {
     const completed = {};
@@ -1906,7 +1913,14 @@ Now, based on all the provided information, conduct the interview by generating 
               ) : (
                 <Box sx={{ mt: { xs: 0, sm: -2 } }}>
                   {" "}
-                  <ResumePreview resumeData={resumeData} onBack={prevStep} />
+                  <ResumePreview 
+                    resumeData={resumeData} 
+                    onBack={prevStep} 
+                    sectionOrder={sectionOrder}
+                    setSectionOrder={setSectionOrder}
+                    onUpdateData={updateResumeData}
+                    setUnsavedChanges={setUnsavedChanges}
+                  />
                 </Box>
               )}
             </Container>

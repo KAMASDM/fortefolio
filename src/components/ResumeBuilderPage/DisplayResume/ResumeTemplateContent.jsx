@@ -3,8 +3,9 @@ import { MinimalTemplate } from "../Templates/MinimalTemplate";
 import { CreativeTemplate } from "../Templates/CreativeTemplate";
 import IndiaTemplate from "../Templates/IndiaTemplate";
 import { ProfessionalTemplate } from "../Templates/ProfessionalTemplate";
+import { SidebarTemplate } from "../Templates/SidebarTemplate";
 import { CanadaTemplate } from "../Templates/CanadaTemplate";
-import EuropenUnionTemplate from "../Templates/EuropenUnionTemplate";
+import EuropeanUnionTemplate from "../Templates/EuropenUnionTemplate";
 import { EuropassTemplate } from "../Templates/NewTemplate";
 import { AustraliaTemplate } from "../Templates/AustraliaTemplate";
 import { UsaTemplate } from "../Templates/UsaTemplate";
@@ -33,9 +34,10 @@ export const ResumeTemplateContent = ({
       [TEMPLATES.MINIMAL]: MinimalTemplate,
       [TEMPLATES.CREATIVE]: CreativeTemplate,
       [TEMPLATES.PROFESSIONAL]: ProfessionalTemplate,
+      [TEMPLATES.SIDEBAR]: SidebarTemplate,
       [TEMPLATES.EUROPASS]: EuropassTemplate,
       [TEMPLATES.CANADA]: CanadaTemplate,
-      [TEMPLATES.EUROPE]: EuropenUnionTemplate,
+      [TEMPLATES.EUROPE]: EuropeanUnionTemplate,
       [TEMPLATES.AUSTRALIA]: AustraliaTemplate,
       [TEMPLATES.USA]: UsaTemplate,
       [TEMPLATES.INDIA]: IndiaTemplate,
