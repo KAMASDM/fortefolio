@@ -1,22 +1,17 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
 
-# Clear cache on every build
+# Force fresh install and build
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 [build.processing]
-  skip_processing = false
-
-# Disable asset optimization that might cache old files
-[build.processing.css]
-  bundle = false
-  minify = false
-
-[build.processing.js]
-  bundle = false
-  minify = false
+  skip_processing = true
 
 # Cache busting headers
 [[headers]]

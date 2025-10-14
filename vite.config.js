@@ -5,10 +5,12 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'global': 'globalThis',
+    '__BUILD_TIME__': JSON.stringify(new Date().toISOString()),
   },
   build: {
     target: 'es2020',
     chunkSizeWarningLimit: 1600,
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -31,6 +33,10 @@ export default defineConfig({
             return 'vendor';
           }
         },
+        // Force new hashes
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
   },
