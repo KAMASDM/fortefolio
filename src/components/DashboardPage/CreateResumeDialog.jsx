@@ -100,7 +100,7 @@ const CreateResumeDialog = ({
         </Box>
         <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.8)" }}>
           {" "}
-          Get started with your professional resume in just a few clicks{" "}
+          Get started with your professional resume in just a few clicks.{" "}
         </Typography>
       </Box>
     </Box>
