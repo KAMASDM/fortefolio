@@ -5,13 +5,13 @@ import {
   Grid,
   CardContent,
   useTheme,
-  alpha,
   Button,
   useMediaQuery,
   TextField,
   Paper,
   Container,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";

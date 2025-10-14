@@ -1,5 +1,4 @@
 import {
-  alpha,
   Avatar,
   IconButton,
   LinearProgress,
@@ -7,6 +6,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import { formatDistanceToNow } from "date-fns";
 import { motion } from "framer-motion";

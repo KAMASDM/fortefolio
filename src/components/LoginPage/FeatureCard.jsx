@@ -1,11 +1,11 @@
 import {
-  alpha,
   Avatar,
   Box,
   Card,
   CardContent,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import React from "react";
 

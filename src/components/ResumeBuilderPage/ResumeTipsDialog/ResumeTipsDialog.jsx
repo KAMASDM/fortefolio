@@ -6,12 +6,12 @@ import {
   IconButton,
   Button,
   useTheme,
-  alpha,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   Close as CloseIcon,
   Lightbulb as LightbulbIcon,

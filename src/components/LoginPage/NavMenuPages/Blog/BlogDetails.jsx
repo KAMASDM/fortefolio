@@ -7,11 +7,11 @@ import {
   Chip,
   Button,
   useTheme,
-  alpha,
   Stack,
   useMediaQuery,
   Paper,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";

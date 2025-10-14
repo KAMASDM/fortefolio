@@ -11,8 +11,8 @@ import {
   CardActions,
   Chip,
   LinearProgress,
-  alpha,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   Description as DescriptionIcon,
   Edit as EditIcon,
