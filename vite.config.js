@@ -15,22 +15,22 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
+            // Group React, MUI, and Emotion together - they have tight dependencies
+            if (id.includes('react') || id.includes('react-dom') || 
+                id.includes('@mui') || id.includes('@emotion')) {
+              return 'react-mui-vendor';
             }
-            // MUI and Emotion must be in the same chunk
-            if (id.includes('@mui') || id.includes('@emotion')) {
-              return 'mui-vendor';
-            }
+            // Keep these separate as they're large and independent
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
             }
             if (id.includes('firebase')) {
               return 'firebase-vendor';
             }
-            if (id.includes('html2canvas')) {
+            if (id.includes('html2canvas') || id.includes('jspdf')) {
               return 'pdf-vendor';
             }
+            // Everything else goes to vendor
             return 'vendor';
           }
         },
