@@ -18,7 +18,8 @@ export default defineConfig({
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react-vendor';
             }
-            if (id.includes('@mui')) {
+            // MUI and Emotion must be in the same chunk
+            if (id.includes('@mui') || id.includes('@emotion')) {
               return 'mui-vendor';
             }
             if (id.includes('framer-motion')) {
