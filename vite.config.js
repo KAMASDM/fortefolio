@@ -15,12 +15,14 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // Group React, MUI, and Emotion together - they have tight dependencies
+            // Put ALL React-related packages together
             if (id.includes('react') || id.includes('react-dom') || 
-                id.includes('@mui') || id.includes('@emotion')) {
-              return 'react-mui-vendor';
+                id.includes('react-router') || id.includes('react-beautiful-dnd') ||
+                id.includes('react-to-print') || id.includes('formik') ||
+                id.includes('@emotion') || id.includes('@mui')) {
+              return 'react-vendor';
             }
-            // Keep these separate as they're large and independent
+            // Large independent libraries
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
             }
@@ -30,7 +32,7 @@ export default defineConfig({
             if (id.includes('html2canvas') || id.includes('jspdf')) {
               return 'pdf-vendor';
             }
-            // Everything else goes to vendor
+            // Everything else (should be minimal now)
             return 'vendor';
           }
         },
