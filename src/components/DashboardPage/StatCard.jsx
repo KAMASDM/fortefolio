@@ -1,4 +1,5 @@
-import { alpha, Grid, Paper, Typography } from "@mui/material";
+import { Grid, Paper, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import { motion } from "framer-motion";
 

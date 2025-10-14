@@ -1,4 +1,5 @@
-import { alpha, Box } from "@mui/material";
+import { Box } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 
 const lavenderPalette = {

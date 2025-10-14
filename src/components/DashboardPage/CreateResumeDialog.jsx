@@ -1,5 +1,4 @@
 import {
-  alpha,
   Box,
   Button,
   CircularProgress,
@@ -12,6 +11,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   Add as AddIcon,
   NoteAdd as NoteAddIcon,
