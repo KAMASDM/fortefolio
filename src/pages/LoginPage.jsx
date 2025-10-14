@@ -13,7 +13,6 @@ import {
   Grid,
   useTheme,
   useMediaQuery,
-  alpha,
   Avatar,
   Divider,
   IconButton,
@@ -24,6 +23,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import InfoIcon from "@mui/icons-material/Info";
 import GroupIcon from "@mui/icons-material/Group";
 import ReceiptIcon from "@mui/icons-material/Receipt";

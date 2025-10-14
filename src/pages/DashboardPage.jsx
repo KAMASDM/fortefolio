@@ -40,9 +40,9 @@ import {
   useMediaQuery,
   InputAdornment,
   ButtonGroup,
-  alpha,
   Skeleton,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   Add as AddIcon,
   Description as DescriptionIcon,
