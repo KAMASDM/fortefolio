@@ -107,6 +107,19 @@ exports.handler = async (event, context) => {
     // Determine timeout based on max_tokens (longer content needs more time)
     const baseTimeout = maxTokens > 1000 ? 45000 : maxTokens > 500 ? 35000 : 25000;
     
+    // Check if API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('Missing OPENAI_API_KEY environment variable');
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: false,
+          error: 'Service configuration error. Please contact support.'
+        })
+      };
+    }
+
     // Initialize OpenAI client
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -149,7 +162,13 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('OpenAI API Error:', error);
+    console.error('OpenAI API Error:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      stack: error.stack,
+      hasApiKey: !!process.env.OPENAI_API_KEY
+    });
     
     let statusCode = 500;
     let errorMessage = 'Failed to generate content. Please try again.';
