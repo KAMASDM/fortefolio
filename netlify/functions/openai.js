@@ -120,6 +120,8 @@ exports.handler = async (event, context) => {
       };
     }
 
+
+
     // Initialize OpenAI client
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -147,6 +149,8 @@ exports.handler = async (event, context) => {
       }),
       timeoutPromise
     ]);
+
+
 
     return {
       statusCode: 200,

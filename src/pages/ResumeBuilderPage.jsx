@@ -883,7 +883,16 @@ function ResumeBuilderPage() {
       }
       fullPrompt = `Generate visa interview questions for student visa to ${additionalData.country}. University: ${additionalData.universityName}, Course: ${additionalData.courseName}. Include 10-12 realistic questions covering: purpose, finances, ties to home country, post-study plans. Format as numbered list with answers.`;
     } else {
-      let basePrompt = `Based on the following resume data, please generate a ${type}. `;
+      // Create a concise summary of resume data instead of full JSON
+      const resumeSummary = `
+Name: ${resumeData.personalInfo?.fullName || 'N/A'}
+Email: ${resumeData.personalInfo?.email || 'N/A'}
+Skills: ${resumeData.skills?.map(skill => skill.name).join(', ') || 'N/A'}
+Experience: ${resumeData.experience?.length ? resumeData.experience.map(exp => `${exp.jobTitle} at ${exp.company}`).join(', ') : 'N/A'}
+Education: ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} from ${edu.institution}`).join(', ') : 'N/A'}
+Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.name).join(', ') : 'N/A'}`.trim();
+
+      let basePrompt = `Based on the following resume information, please generate a ${type}. `;
       switch (type) {
         case "Interview Questions":
           basePrompt +=
@@ -896,11 +905,7 @@ function ResumeBuilderPage() {
         default:
           basePrompt += "";
       }
-      fullPrompt = `${basePrompt}\n\nResume Data:\n${JSON.stringify(
-        resumeData,
-        null,
-        2
-      )}\n\n${type}:`;
+      fullPrompt = `${basePrompt}\n\nResume Information:\n${resumeSummary}\n\n${type}:`;
     }
 
     try {
