@@ -74,6 +74,7 @@ import VisaInterviewFormDialog from "../components/ResumeBuilderPage/GenerateQue
 import FloatingElements from "../components/DashboardPage/FloatingElements";
 import { getCustomTheme } from "../theme/customTheme";
 import SOPFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/SOPFormDialog";
+import { callOpenAI } from "../utils/openai";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -1151,7 +1152,7 @@ Now, based on all the provided information, conduct the interview by generating 
           break;
         case "Cover Letter":
           basePrompt +=
-            "Write a professional and compelling cover letter for my job application. Here are my details: Job Application Information: Position title: [Exact job title from posting] Company name: [Company name] Department/Team: [If specified in job posting] Job posting source: [Where you found the job - LinkedIn, company website, etc.] Application deadline: [If mentioned] Company Research: Company mission/values: [What the company stands for] Recent company news: [Recent achievements, expansions, products, or initiatives] Company culture: [What you know about their work environment] Industry position: [Their role in the industry, competitors, market position] Why you want to work there: [Specific reasons beyond just the job] Job Requirements Analysis: Key qualifications required: [Top 5-6 requirements from job posting] Preferred qualifications: [Additional skills/experience they want] Specific skills mentioned: [Technical skills, software, methodologies listed] Experience level required: [Years of experience, seniority level] Education requirements: [Degree requirements, certifications needed] Your Background: Current position/status: [Your current job title and company] Years of relevant experience: [Total experience in this field/role] Education: [Highest degree, relevant certifications, graduation year] Industry experience: [Industries you've worked in] Career progression: [Brief overview of your career growth] Relevant Experience: Most relevant role: [Job title, company, duration, key responsibilities] Relevant project 1: [Specific project that matches job requirements] Relevant project 2: [Another project showcasing required skills] Leadership experience: [Any management, team lead, or project lead roles] Cross-functional collaboration: [Experience working with different teams] Key Achievements: Quantifiable achievement 1: [Specific result with numbers/percentages] Quantifiable achievement 2: [Another measurable accomplishment] Award or recognition: [Any awards, recognition, or special acknowledgments] Problem-solving example: [A challenge you solved and the impact] Innovation/improvement: [Process improvements or innovations you've made] Skills Match: Technical skills: [Skills that directly match job requirements] Soft skills: [Communication, leadership, analytical skills, etc.] Industry knowledge: [Specific industry expertise relevant to role] Tools/software: [Specific tools mentioned in job posting that you know] Certifications: [Relevant certifications you hold] Personal Motivation: Why this role interests you: [Specific aspects of the job that excite you] Career goals alignment: [How this role fits your career trajectory] What you hope to contribute: [How you plan to add value to the team] Growth opportunities: [What you hope to learn/develop in this role] Connection/Referral: Referral source: [If someone referred you, mention their name and role] Networking connection: [If you met someone from the company] Previous interaction: [Any prior contact with the company] Mutual connections: [LinkedIn connections or professional relationships] Availability and Logistics: Start date availability: [When you can begin] Location preference: [Remote, hybrid, on-site flexibility] Salary expectations: [If you want to mention this] Relocation willingness: [If job requires relocation] Additional Information: Cover letter length: [Typically 3-4 paragraphs, 250-400 words] Tone preference: [Professional, enthusiastic, confident, etc.] Industry style: [Conservative for finance, creative for marketing, etc.] Special circumstances: [Career change, gap in employment, etc.] Writing Instructions: Write a cover letter that: Opens with a strong hook that shows knowledge of the company and enthusiasm for the role Clearly connects my experience and skills to the specific job requirements Highlights 2-3 specific achievements that demonstrate my ability to excel in this role Shows genuine interest in the company and explains why I want to work there Demonstrates cultural fit and alignment with company values Includes a confident call to action for next steps Maintains professional tone while showing personality and enthusiasm Uses specific examples and quantifiable results where possible Avoids generic language and clearly differentiates me from other candidates Follows standard business letter format with proper salutation and closing Make sure the letter tells a compelling story of why I'm the ideal candidate for this specific role at this specific company, focusing on mutual benefit and value creation.";
+            "Write a professional cover letter (3-4 paragraphs, 250-400 words) that: 1) Opens with enthusiasm for the specific role and company 2) Highlights 2-3 key achievements from my experience that match the role requirements 3) Explains my interest in the company and how I can contribute 4) Closes with a confident call to action. Use a professional tone, include specific examples, and make it compelling and personalized.";
           break;
         default:
           basePrompt += "";
@@ -1164,62 +1165,45 @@ Now, based on all the provided information, conduct the interview by generating 
     }
 
     try {
-      const apiKey = import.meta.env.VITE_APP_OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error("OpenAI API key is not configured.");
-      }
-      const apiUrl = "https://api.openai.com/v1/chat/completions";
-
-      const payload = {
-        ...apiPayload,
-        messages: [
-          {
-            role: "system",
-            content:
-              type === "Statement of Purpose"
-                ? getRandomSystemMessage()
-                : "You are a helpful assistant.",
-          },
-          {
-            role: "user",
-            content: fullPrompt,
-          },
-        ],
-      };
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+      // Use secure Firebase Function instead of direct API call
+      const messages = [
+        {
+          role: "system",
+          content:
+            type === "Statement of Purpose"
+              ? getRandomSystemMessage()
+              : "You are a helpful assistant.",
         },
-        body: JSON.stringify(payload),
+        {
+          role: "user",
+          content: fullPrompt,
+        },
+      ];
+
+      const model = apiPayload.model || "gpt-3.5-turbo";
+      const temperature = apiPayload.temperature || 0.7;
+      const maxTokens = apiPayload.max_tokens || 1500;
+
+      const message = await callOpenAI(messages, {
+        model,
+        temperature,
+        maxTokens,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `OpenAI API error: ${response.status} ${
-            errorData.error?.message || response.statusText
-          }`
-        );
-      }
-
-      const result = await response.json();
-      let message = result.choices?.[0]?.message?.content;
-
       if (message) {
+        let processedMessage = message;
+
         if (type === "Statement of Purpose") {
-          message = postProcessSOP(message);
-          message = addFinalHumanTouches(message);
+          processedMessage = postProcessSOP(processedMessage);
+          processedMessage = addFinalHumanTouches(processedMessage);
         }
 
         if (type === "Visa Interview Questions") {
           const redFlagTips = `\n\n---\n\n RED FLAG INDICATORS I'M WATCHING FOR:\n\n🚩 Financial Red Flags:\n- The sponsor's income doesn't justify the expense\n- Recent large deposits in bank accounts\n- Inconsistent financial documentation\n- Vague explanations about funding sources\n\n🚩 Intent Red Flags:\n- Weak ties to the home country\n- Strong connections in the destination country\n- Evasive answers about return plans\n- Inconsistent story about the purpose of travel\n\n🚩 Credibility Red Flags:**\n- Contradictory statements\n- Nervous behavior beyond normal interview anxiety\n- Rehearsed or coached answers\n- Unable to provide specific details about plans`;
-          message += redFlagTips;
+          processedMessage += redFlagTips;
         }
 
-        setGeneratedContent(message.trim());
+        setGeneratedContent(processedMessage.trim());
       } else {
         setGenerateContentError(`No ${type} generated. Please try again.`);
       }

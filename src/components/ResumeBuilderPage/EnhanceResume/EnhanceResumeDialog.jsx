@@ -21,6 +21,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import { callOpenAI } from "../../../utils/openai";
 
 const resumeLoadingTips = [
   {
@@ -182,47 +183,20 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
     prompt += "\nProvide enhancement suggestions below:\n";
 
     try {
-      const apiKey = import.meta.env.VITE_APP_OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error("OpenAI API key is not configured.");
-      }
-      const apiUrl = "https://api.openai.com/v1/chat/completions";
+      // Use secure Firebase Function instead of direct API call
+      const messages = [{ role: "user", content: prompt }];
 
-      const payload = {
+      const message = await callOpenAI(messages, {
         model: "gpt-4",
-        messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
-        max_tokens: 1500,
-      };
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(payload),
+        maxTokens: 1500,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("OpenAI API Error Data:", errorData);
-        throw new Error(
-          `AI API error: ${response.status} ${
-            errorData?.error?.message || response.statusText || "Unknown error"
-          }`
-        );
-      }
-
-      const result = await response.json();
-
-      const message = result.choices?.[0]?.message?.content;
       if (message) {
         setEnhancedContent(message.trim());
       } else {
-        console.error("Unexpected API response structure:", result);
         setEnhanceError(
-          "No enhancement suggestions received. The response might be empty or malformed."
+          "No enhancement suggestions received. Please try again."
         );
       }
     } catch (err) {

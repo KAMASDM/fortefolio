@@ -30,6 +30,7 @@ import {
   Badge as PositionIcon,
   AutoAwesome as AiIcon
 } from "@mui/icons-material";
+import { getAISuggestion } from "../../../utils/openai";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -212,25 +213,12 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
     const prompt = `Rewrite the following resume bullet point to be more impactful and achievement-oriented. Focus on using strong action verbs and quantifying results where possible. Original bullet point: "${responsibilityText}"`;
 
     try {
-        const apiKey = import.meta.env.VITE_APP_OPENAI_API_KEY;
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [{ role: "user", content: prompt }],
-                max_tokens: 60,
-            }),
-        });
-
-        const result = await response.json();
-        const suggestion = result.choices[0].message.content.trim();
+        // Use secure Firebase Function instead of direct API call
+        const suggestion = await getAISuggestion(prompt, 60);
         handleResponsibilityChange(expId, respIndex, suggestion);
     } catch (error) {
         console.error("Error getting AI suggestion:", error);
+        alert("Failed to get AI suggestion. Please try again.");
     } finally {
         setAiLoading(prev => ({ ...prev, [`${expId}-${respIndex}`]: false }));
     }

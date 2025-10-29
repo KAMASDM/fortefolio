@@ -1,5 +1,20 @@
 node_modules
 .env
+.env.local
 dist
 
 public/MakeMyForte.pdf
+
+# Firebase
+.firebase/
+*-debug.log
+firebase-debug.log
+functions/node_modules
+functions/.env
+.runtimeconfig.json
+
+# Documentation (generated/temporary)
+*.md
+!README.md
+# Local Netlify folder
+.netlify

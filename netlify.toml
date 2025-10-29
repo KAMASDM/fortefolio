@@ -6,6 +6,16 @@
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "nft"
+  
+[functions.openai]
+  timeout = 60
+
+[functions.ai-suggestion]  
+  timeout = 30
+
 [build.processing]
   skip_processing = true
 
