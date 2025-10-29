@@ -171,10 +171,7 @@ exports.handler = async (event, context) => {
       status: error.status,
       code: error.code,
       stack: error.stack,
-      hasApiKey: !!process.env.OPENAI_API_KEY,
-      apiKeyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) : 'MISSING',
-      nodeVersion: process.version,
-      timestamp: new Date().toISOString()
+      hasApiKey: !!process.env.OPENAI_API_KEY
     });
     
     let statusCode = 500;
