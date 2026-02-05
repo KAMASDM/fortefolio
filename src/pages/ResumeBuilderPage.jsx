@@ -858,7 +858,7 @@ function ResumeBuilderPage() {
     let apiPayload = {
       model: "gemini-1.5-pro-latest",
       temperature: 0.7,
-      max_tokens: 1200, // Reduced for speed reliability
+      max_tokens: 2500, // Increased for detailed content
     };
 
     if (type === "Statement of Purpose" && additionalData) {
@@ -920,7 +920,7 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
           break;
         case "Cover Letter":
           basePrompt +=
-            "Write a professional cover letter (3-4 paragraphs, 250-400 words) that: 1) Opens with enthusiasm for the specific role and company (use 'Hiring Manager' and 'your company' if names are not specified, do NOT use bracketed placeholders like [Name]) 2) Highlights 2-3 key achievements from the provided Experience section that match the role 3) Explains interest in contributing 4) Closes with a confident call to action. Use a professional tone, include specific examples from the resume context, and make it compelling.";
+            "Write a detailed, professional cover letter (minimum 350 words) that: 1) Opens with strong enthusiasm for the specific role and company (use 'Hiring Manager' and 'your company' if names are not specified, do NOT use bracketed placeholders like [Name]) 2) Dedicates a full paragraph to highlighting key achievements from the provided Experience section that match the role 3) Dedicates another full paragraph to explaining specific interest in the company's mission/industry 4) Closes with a confident call to action. Use a professional, persuasive tone. Do not be concise. Expand on the resume details to tell a compelling story.";
           break;
         default:
           basePrompt += "";
