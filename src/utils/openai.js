@@ -71,7 +71,7 @@ export const callOpenAI = async (messages, options = {}) => {
     if (result.success) {
       return result.content;
     } else {
-      throw new Error("Failed to generate content");
+      throw new Error(result.error || "Failed to generate content");
     }
   } catch (error) {
     console.error("Netlify Function Error:", error);
