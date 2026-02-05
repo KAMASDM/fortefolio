@@ -187,7 +187,7 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
       const messages = [{ role: "user", content: prompt }];
 
       const message = await callOpenAI(messages, {
-        model: "gpt-4",
+        model: "gemini-1.5-pro-latest",
         temperature: 0.7,
         maxTokens: 1500,
       });
