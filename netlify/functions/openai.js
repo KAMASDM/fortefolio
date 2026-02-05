@@ -85,7 +85,7 @@ exports.handler = async (event, context) => {
     // 2. Fix: Nest config parameters properly for @google/genai SDK
     const modelConfig = {
       temperature: temperature,
-      maxOutputTokens: 3000, // INCREASED from whatever was passed (often 1500)
+      maxOutputTokens: Math.min(maxTokens || 1200, 2000), // Cap at 2000, default 1200
       topP: 0.95,
       topK: 40,
       // Temporarily disable safety settings to debug 500 error

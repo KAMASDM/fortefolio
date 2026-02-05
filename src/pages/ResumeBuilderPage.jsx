@@ -858,7 +858,7 @@ function ResumeBuilderPage() {
     let apiPayload = {
       model: "gemini-1.5-pro-latest",
       temperature: 0.7,
-      max_tokens: 3000,
+      max_tokens: 1200, // Reduced for speed reliability
     };
 
     if (type === "Statement of Purpose" && additionalData) {
