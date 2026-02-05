@@ -856,16 +856,16 @@ function ResumeBuilderPage() {
 
     let fullPrompt = "";
     let apiPayload = {
-      model: "gpt-4",
+      model: "gemini-1.5-pro-latest",
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 3000,
     };
 
     if (type === "Statement of Purpose" && additionalData) {
       fullPrompt = generateHumanizedSOPPrompt(resumeData, additionalData);
 
       apiPayload = {
-        model: "gpt-4",
+        model: "gemini-1.5-pro-latest",
         temperature: 1.0,
         max_tokens: 1500,
         top_p: 0.9,
@@ -883,14 +883,34 @@ function ResumeBuilderPage() {
       }
       fullPrompt = `Generate visa interview questions for student visa to ${additionalData.country}. University: ${additionalData.universityName}, Course: ${additionalData.courseName}. Include 10-12 realistic questions covering: purpose, finances, ties to home country, post-study plans. Format as numbered list with answers.`;
     } else {
-      // Create a concise summary of resume data instead of full JSON
+      // Create a concise but informative summary of resume data
       const resumeSummary = `
 Name: ${resumeData.personalInfo?.fullName || 'N/A'}
-Email: ${resumeData.personalInfo?.email || 'N/A'}
-Skills: ${resumeData.skills?.map(skill => skill.name).join(', ') || 'N/A'}
-Experience: ${resumeData.experience?.length ? resumeData.experience.map(exp => `${exp.jobTitle} at ${exp.company}`).join(', ') : 'N/A'}
-Education: ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} from ${edu.institution}`).join(', ') : 'N/A'}
-Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.name).join(', ') : 'N/A'}`.trim();
+Contact: ${resumeData.personalInfo?.email || ''} ${resumeData.personalInfo?.phone || ''}
+Professional Summary: ${resumeData.personalInfo?.summary || 'N/A'}
+
+Skills:
+${resumeData.skills?.map(cat => `- ${cat.name}: ${Array.isArray(cat.skills) ? cat.skills.join(', ') : cat.skills}`).join('\n') || 'N/A'}
+
+Experience:
+${resumeData.experience?.length ? resumeData.experience.map(exp => `
+Position: ${exp.position || exp.jobTitle || 'N/A'}
+Company: ${exp.company || 'N/A'}
+Duration: ${exp.startDate || ''} - ${exp.current ? 'Present' : exp.endDate || ''}
+Key Responsibilities:
+${Array.isArray(exp.responsibilities) ? exp.responsibilities.map(r => `- ${r}`).join('\n') : (exp.responsibilities || exp.description || 'N/A')}
+`).join('\n') : 'N/A'}
+
+Projects:
+${resumeData.projects?.length ? resumeData.projects.map(proj => `
+Title: ${proj.title || proj.name || 'N/A'}
+Description: ${proj.description || 'N/A'}
+Technologies: ${proj.technologies || 'N/A'}
+`).join('\n') : 'N/A'}
+
+Education:
+${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} from ${edu.institution} (${edu.year || ''})`).join('\n') : 'N/A'}
+`.trim();
 
       let basePrompt = `Based on the following resume information, please generate a ${type}. `;
       switch (type) {
@@ -900,7 +920,7 @@ Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.n
           break;
         case "Cover Letter":
           basePrompt +=
-            "Write a professional cover letter (3-4 paragraphs, 250-400 words) that: 1) Opens with enthusiasm for the specific role and company 2) Highlights 2-3 key achievements from my experience that match the role requirements 3) Explains my interest in the company and how I can contribute 4) Closes with a confident call to action. Use a professional tone, include specific examples, and make it compelling and personalized.";
+            "Write a professional cover letter (3-4 paragraphs, 250-400 words) that: 1) Opens with enthusiasm for the specific role and company (use 'Hiring Manager' and 'your company' if names are not specified, do NOT use bracketed placeholders like [Name]) 2) Highlights 2-3 key achievements from the provided Experience section that match the role 3) Explains interest in contributing 4) Closes with a confident call to action. Use a professional tone, include specific examples from the resume context, and make it compelling.";
           break;
         default:
           basePrompt += "";
@@ -924,7 +944,7 @@ Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.n
         },
       ];
 
-      const model = apiPayload.model || "gpt-3.5-turbo";
+      const model = apiPayload.model || "gemini-1.5-flash-latest";
       const temperature = apiPayload.temperature || 0.7;
       const maxTokens = apiPayload.max_tokens || 1500;
 
@@ -1335,8 +1355,10 @@ Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.n
         <ListItem disablePadding>
           <ListItemButton
             onClick={handleGenerateInterviewQuestions}
+            disabled={isGeneratingContent}
             sx={{
               "&:hover": { backgroundColor: "#f3f0fa" },
+              opacity: isGeneratingContent ? 0.5 : 1,
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
@@ -1352,8 +1374,10 @@ Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.n
         <ListItem disablePadding>
           <ListItemButton
             onClick={handleGenerateCoverLetter}
+            disabled={isGeneratingContent}
             sx={{
               "&:hover": { backgroundColor: "#f3f0fa" },
+              opacity: isGeneratingContent ? 0.5 : 1,
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
@@ -1369,8 +1393,10 @@ Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.n
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => setShowSOPFormDialog(true)}
+            disabled={isGeneratingContent}
             sx={{
               "&:hover": { backgroundColor: "#f3f0fa" },
+              opacity: isGeneratingContent ? 0.5 : 1,
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
@@ -1386,8 +1412,10 @@ Projects: ${resumeData.projects?.length ? resumeData.projects.map(proj => proj.n
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => setShowVisaFormDialog(true)}
+            disabled={isGeneratingContent}
             sx={{
               "&:hover": { backgroundColor: "#f3f0fa" },
+              opacity: isGeneratingContent ? 0.5 : 1,
             }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>

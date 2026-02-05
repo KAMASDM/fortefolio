@@ -2,25 +2,27 @@ import { auth } from "../firebaseConfig";
 
 /**
  * Get the correct base URL for API calls
- * In development with Netlify dev server, use localhost:8888
+ * In development (localhost), always use Netlify dev server on port 8888
  * In production, use relative URLs
  */
 const getApiBaseUrl = () => {
-  if (window.location.hostname === 'localhost' && window.location.port === '8888') {
+  // In development, always use Netlify dev server
+  if (window.location.hostname === 'localhost') {
     return 'http://localhost:8888';
   }
+  // In production, use relative URLs
   return '';
 };
 
 /**
- * Call OpenAI API securely through Netlify Functions
+ * Call Gemini API securely through Netlify Functions
  * @param {Array} messages - Array of message objects with role and content
  * @param {Object} options - Optional parameters (model, temperature, maxTokens)
  * @returns {Promise<string>} - The generated content
  */
 export const callOpenAI = async (messages, options = {}) => {
   const {
-    model = "gpt-3.5-turbo",
+    model = "gemini-1.5-flash",
     temperature = 0.7,
     maxTokens = 1500,
   } = options;

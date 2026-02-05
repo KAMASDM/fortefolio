@@ -202,7 +202,7 @@ const GeneratedContentDialog = ({
 
       <DialogContent
         dividers
-        sx={{ p: 3, borderColor: lavenderPalette.soft, overflow: "hidden" }}
+        sx={{ p: 3, borderColor: lavenderPalette.soft, overflowY: "auto" }}
       >
         {loading && (
           <Box

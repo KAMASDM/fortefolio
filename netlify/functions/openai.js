@@ -1,49 +1,14 @@
-const OpenAI = require('openai');
+const { GoogleGenAI } = require('@google/genai');
+const {
+  ENTERPRISE_SAFETY_SETTINGS,
+  formatMessages,
+  createErrorResponse,
+  createSuccessResponse,
+  mapModelName,
+  approximateTokenCount
+} = require('./gemini-utils');
 
-// Simple in-memory rate limiting (you might want to use a database for production)
-const rateLimits = new Map();
-
-const cleanupRateLimit = () => {
-  const now = Date.now();
-  const hourAgo = now - (60 * 60 * 1000);
-  
-  rateLimits.forEach((calls, userId) => {
-    const filteredCalls = calls.filter(timestamp => timestamp > hourAgo);
-    if (filteredCalls.length === 0) {
-      rateLimits.delete(userId);
-    } else {
-      rateLimits.set(userId, filteredCalls);
-    }
-  });
-};
-
-const checkRateLimit = (userId) => {
-  cleanupRateLimit();
-  
-  const now = Date.now();
-  const hourAgo = now - (60 * 60 * 1000);
-  const MAX_CALLS_PER_HOUR = 50;
-  
-  const userCalls = rateLimits.get(userId) || [];
-  const recentCalls = userCalls.filter(timestamp => timestamp > hourAgo);
-  
-  if (recentCalls.length >= MAX_CALLS_PER_HOUR) {
-    return {
-      allowed: false,
-      remaining: 0,
-      resetTime: recentCalls[0] + (60 * 60 * 1000)
-    };
-  }
-  
-  recentCalls.push(now);
-  rateLimits.set(userId, recentCalls);
-  
-  return {
-    allowed: true,
-    remaining: MAX_CALLS_PER_HOUR - recentCalls.length,
-    resetTime: recentCalls[0] + (60 * 60 * 1000)
-  };
-};
+// Rate limiting disabled (no-op)
 
 exports.handler = async (event, context) => {
   // Increase function timeout to 30 seconds
@@ -66,15 +31,17 @@ exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      },
+      headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
 
+  // 1. Setup AbortController for network-level timeouts
+  const controller = new AbortController();
+  let timeoutId = null;
+
   try {
-    const { messages, model = "gpt-3.5-turbo", temperature = 0.7, maxTokens = 1500, userId } = JSON.parse(event.body);
+    const { messages, model = "gemini-1.5-flash", temperature = 0.7, maxTokens = 1500, userId } = JSON.parse(event.body);
 
     // Basic validation
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -88,126 +55,149 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Check rate limit if userId is provided
-    if (userId) {
-      const rateLimitResult = checkRateLimit(userId);
-      if (!rateLimitResult.allowed) {
-        return {
-          statusCode: 429,
-          headers: { 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({
-            success: false,
-            error: 'Rate limit exceeded. Please try again later.',
-            resetTime: rateLimitResult.resetTime
-          })
-        };
-      }
+    // Rate limiting disabled
+
+    // Check environment
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('Missing GEMINI_API_KEY environment variable');
+      return createErrorResponse(500, 'Service configuration error.', 'CONFIG_ERROR');
     }
 
-    // Determine timeout based on max_tokens (longer content needs more time)
+    // Determine timeout based on token count
     const baseTimeout = maxTokens > 1000 ? 45000 : maxTokens > 500 ? 35000 : 25000;
     
-    // Check if API key is available
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('Missing OPENAI_API_KEY environment variable');
-      return {
-        statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({
-          success: false,
-          error: 'Service configuration error. Please contact support.'
-        })
-      };
+    // Start the timeout timer
+    timeoutId = setTimeout(() => {
+      controller.abort();
+    }, baseTimeout);
+
+    // Initialize Gemini client
+    const ai = new GoogleGenAI({ 
+      apiKey: process.env.GEMINI_API_KEY 
+    });
+
+    const geminiModel = mapModelName(model);
+    console.log(`Using model: ${geminiModel} (mapped from ${model})`);
+    
+    // 2. Fix: Nest config parameters properly for @google/genai SDK
+    const modelConfig = {
+      temperature: temperature,
+      maxOutputTokens: 3000, // INCREASED from whatever was passed (often 1500)
+      topP: 0.95,
+      topK: 40,
+      // Temporarily disable safety settings to debug 500 error
+      // safetySettings: ENTERPRISE_SAFETY_SETTINGS,
+      responseMimeType: 'text/plain',
+    };
+    
+    let prompt = formatMessages(messages);
+    
+    // 3. Call API with config object and signal
+    // Note: In @google/genai, generateContent accepts (options, requestOptions)
+    // or ({ model, contents, config }, requestOptions)
+    const result = await ai.models.generateContent({
+      model: geminiModel,
+      contents: prompt,
+      config: modelConfig,
+    }, {
+      // Pass the signal to the fetch request to enable actual cancellation
+      signal: controller.signal 
+    });
+
+    // Clear timeout immediately after success
+    if (timeoutId) clearTimeout(timeoutId);
+
+    // 4. Validate Response (New SDK uses getters)
+    let text = null;
+    try {
+        text = result.text;
+    } catch(e) {
+        // .text() getter might throw if there are no text parts
+        console.log("Could not get text via getter:", e.message);
     }
 
+    // Fallback: Manually check candidates if getter fails
+    if (!text && result.candidates && result.candidates.length > 0) {
+        const candidate = result.candidates[0];
+        
+        // Check for MAX_TOKENS finish reason - the content might be there but truncated
+        if (candidate.finishReason === 'MAX_TOKENS') {
+            console.log("Response truncated due to MAX_TOKENS");
+            // Try to extract text part even if truncated
+            if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+                text = candidate.content.parts.map(p => p.text).join('');
+            }
+        }
+    }
 
+    // Handle case where text is null (e.g. Safety Filter trigger)
+    if (!text) {
+       console.warn('Empty response text. Candidates:', JSON.stringify(result.candidates));
+       
+       // Check if it was blocked by safety settings
+       const finishReason = result.candidates?.[0]?.finishReason;
+       if (finishReason === 'SAFETY') {
+         throw new Error('Content was blocked due to safety filters.');
+       } else if (finishReason === 'MAX_TOKENS') {
+           // If we're here, we hit MAX_TOKENS but couldn't extract text. 
+           // This implies the max tokens limit was too low for ANY output?
+           // OR the SDK is handling MAX_TOKENS differently.
+           console.log("Hit MAX_TOKENS but extracted no text?");
+       }
+       throw new Error('AI returned an empty response.');
+    }
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      timeout: baseTimeout,
-    });
-
-    // Create a timeout promise to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), baseTimeout);
-    });
-
-    // Optimize model selection for faster responses
-    const optimizedModel = model === "gpt-3.5-turbo" && maxTokens > 1000 ? "gpt-3.5-turbo" : model;
-    
-    // Call OpenAI API with timeout
-    const completion = await Promise.race([
-      openai.chat.completions.create({
-        model: optimizedModel,
-        messages: messages,
-        temperature: temperature,
-        max_tokens: maxTokens,
-        // Add parameters for faster response
-        frequency_penalty: 0.1,
-        presence_penalty: 0.1,
-      }),
-      timeoutPromise
-    ]);
-
-
-
-    return {
-      statusCode: 200,
+    return createSuccessResponse(text, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
+        'X-Model-Used': geminiModel,
+        'X-Generation-Time': Date.now().toString()
       },
-      body: JSON.stringify({
-        success: true,
-        content: completion.choices[0].message.content,
-        usage: completion.usage,
-      })
-    };
+      usage: {
+        prompt_tokens: approximateTokenCount(prompt),
+        completion_tokens: approximateTokenCount(text),
+        total_tokens: approximateTokenCount(prompt + text)
+      },
+      model: geminiModel,
+    });
 
   } catch (error) {
-    console.error('OpenAI API Error:', {
+    // Clean up timeout if it's still running
+    if (timeoutId) clearTimeout(timeoutId);
+
+    console.error('Gemini API Error:', {
       message: error.message,
+      name: error.name,
       status: error.status,
-      code: error.code,
-      stack: error.stack,
-      hasApiKey: !!process.env.OPENAI_API_KEY
+      timestamp: new Date().toISOString()
     });
     
     let statusCode = 500;
-    let errorMessage = 'Failed to generate content. Please try again.';
+    // Include the actual error message for debugging
+    let errorMessage = `Failed to generate content: ${error.message}`;
+    let errorCode = 'GEMINI_API_ERROR';
 
-    // Handle different error types
-    if (error.message === 'Request timeout') {
+    // Handle AbortError specifically
+    if (error.name === 'AbortError' || error.message === 'Request timeout') {
       statusCode = 408;
-      errorMessage = 'Request took too long. Please try with a shorter prompt or try again.';
-    } else if (error.status === 429) {
-      statusCode = 429;
-      errorMessage = 'Rate limit exceeded. Please try again later.';
-    } else if (error.status === 401) {
-      statusCode = 500; // Don't expose auth errors to client
-      errorMessage = 'Service temporarily unavailable. Please contact support.';
-    } else if (error.status === 400) {
+      errorMessage = 'Request took too long. Please try with a shorter prompt.';
+      errorCode = 'TIMEOUT';
+    } 
+    else if (error.message?.includes('JSON')) {
       statusCode = 400;
-      errorMessage = 'Invalid request. Please check your input.';
-    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      errorMessage = 'Invalid request format.';
+      errorCode = 'INVALID_JSON';
+    } 
+    else if (error.status === 429 || error.message?.includes('429') || error.message?.includes('quota')) {
       statusCode = 503;
-      errorMessage = 'Unable to connect to AI service. Please try again later.';
-    } else if (error.message && error.message.includes('JSON')) {
-      statusCode = 422;
-      errorMessage = 'Invalid response format. Please try again.';
+      errorMessage = 'AI service temporarily unavailable. Please try again later.';
+      errorCode = 'UPSTREAM_RATE_LIMIT';
+    } 
+    else if (error.message?.includes('safety') || error.message?.includes('blocked')) {
+      statusCode = 400;
+      errorMessage = 'Content was blocked due to safety filters.';
+      errorCode = 'SAFETY_FILTER';
     }
 
-    return {
-      statusCode: statusCode,
-      headers: { 
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        success: false,
-        error: errorMessage
-      })
-    };
+    return createErrorResponse(statusCode, errorMessage, errorCode);
   }
 };
