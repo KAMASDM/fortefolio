@@ -64,7 +64,10 @@ exports.handler = async (event, context) => {
     }
 
     // Determine timeout based on token count
-    const baseTimeout = maxTokens > 1000 ? 45000 : maxTokens > 500 ? 35000 : 25000;
+    // Netlify standard functions have a 10s default timeout unless configured otherwise.
+    // Even with configuration, 26s is often the hard limit on some plans/gateways.
+    // We'll set a safer internal timeout to try to return a 408 before the platform 502s.
+    const baseTimeout = 24000; // 24 seconds (under the typical 26s AWS Lambda gateway limit)
     
     // Start the timeout timer
     timeoutId = setTimeout(() => {
