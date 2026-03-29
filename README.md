@@ -66,15 +66,15 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
-# OpenAI API Key (CRITICAL - Keep this secure!)
-OPENAI_API_KEY=sk-proj-your_openai_api_key_here
+# Google Gemini API Key (CRITICAL - Keep this secure!)
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 🔐 Security Best Practices:
 
 1. **Never commit `.env` files** - Already in `.gitignore`
 2. **Use Netlify Environment Variables** for production deployment
-3. **OpenAI API calls are server-side only** - No client-side exposure
+3. **Gemini API calls are server-side only** - No client-side exposure
 4. **Rate limiting implemented** - 50 calls/hour per user
 5. **Authentication required** - All AI features require login
 
@@ -124,7 +124,7 @@ npm run lint         # Run ESLint
 ### Environment Variables in Netlify:
 1. Go to Netlify Dashboard → Site Settings → Environment Variables
 2. Add all variables from your `.env` file
-3. **Critical:** Set `OPENAI_API_KEY` with your actual API key
+3. **Critical:** Set `GEMINI_API_KEY` with your actual API key
 
 ### Deploy:
 ```bash

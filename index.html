@@ -10,6 +10,27 @@
 
 <body>
   <div id="root"></div>
+  <script>
+    // Dev-only cleanup: stale SW/cache can serve an old /@react-refresh module
+    // and break @vitejs/plugin-react preamble detection.
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => registration.unregister());
+        });
+      }
+
+      if ("caches" in window) {
+        caches.keys().then((keys) => {
+          keys.forEach((key) => {
+            if (key.includes("vite") || key.includes("workbox") || key.includes("app-cache")) {
+              caches.delete(key);
+            }
+          });
+        });
+      }
+    }
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

@@ -668,12 +668,9 @@ export const ModernTemplate = ({
                         )}
                       </Typography>
                       {project.technologies && (
-                        <Typography
-                          variant="body2"
+                        <Box
                           sx={{
-                            fontStyle: "italic",
                             mt: 1,
-                            color: "rgba(0, 0, 0, 0.6)",
                             display: "flex",
                             flexWrap: "wrap",
                             gap: 0.75,
@@ -696,7 +693,7 @@ export const ModernTemplate = ({
                                 }}
                               />
                             ))}
-                        </Typography>
+                        </Box>
                       )}
                       <Typography
                         variant="body2"

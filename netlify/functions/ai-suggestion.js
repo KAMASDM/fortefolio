@@ -1,4 +1,10 @@
-const OpenAI = require('openai');
+const { GoogleGenAI } = require('@google/genai');
+const {
+  ENTERPRISE_SAFETY_SETTINGS,
+  getGenerationConfig,
+  createSuccessResponse,
+  createErrorResponse
+} = require('./gemini-utils');
 
 exports.handler = async (event, context) => {
   // Handle CORS preflight requests
@@ -39,38 +45,30 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      timeout: 15000, // 15 seconds timeout for quick suggestions
-    });
+    // Initialize Gemini client
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
     // Create a timeout promise
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timeout')), 15000);
     });
 
-    const completion = await Promise.race([
-      openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: maxTokens,
+    // Configure generation for quick, focused suggestions using utility
+    const generationConfig = getGenerationConfig('quick', maxTokens);
+
+    const result = await Promise.race([
+      ai.models.generateContent({
+        model: "gemini-3-pro-preview",
+        contents: prompt,
+        generationConfig: generationConfig,
+        safetySettings: ENTERPRISE_SAFETY_SETTINGS,
       }),
       timeoutPromise
     ]);
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        success: true,
-        content: completion.choices[0].message.content.trim(),
-      })
-    };
+    const text = result.text;
+
+    return createSuccessResponse(text.trim());
 
   } catch (error) {
     console.error('OpenAI API Error:', error);
@@ -86,16 +84,6 @@ exports.handler = async (event, context) => {
       errorMessage = 'Rate limit exceeded. Please try again later.';
     }
     
-    return {
-      statusCode: statusCode,
-      headers: { 
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        success: false,
-        error: errorMessage
-      })
-    };
+    return createErrorResponse(statusCode, errorMessage, error.code || 'AI_SUGGESTION_ERROR');
   }
 };

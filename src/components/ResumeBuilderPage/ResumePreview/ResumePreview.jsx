@@ -32,12 +32,14 @@ import { ResumeTemplateContent } from "../DisplayResume/ResumeTemplateContent";
 import { constants } from "./constants";
 import { exportToDocx } from "../utils/exportUtils";
 import { PDFGenerator } from "../utils/PDFGenerator";
+import { openTemplatePrintPreview } from "../utils/advancedPDFGenerator";
 import { ExportMenu } from "../ExportMenu/ExportMenu";
 import { ColorMenu } from "../ColorMenu/ColorMenu";
 import { FontMenu } from "../FontMenu/FontMenu";
 import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
 import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
 import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
+import PreviewWrapper from "../Templates/PreviewWrapper";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -84,16 +86,29 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
     setActiveTab(newValue);
     const newTemplate = {
         0: TEMPLATES.MODERN,
-        1: TEMPLATES.MINIMAL,
-        2: TEMPLATES.CREATIVE,
-        3: TEMPLATES.PROFESSIONAL,
-        4: TEMPLATES.SIDEBAR,
-        5: TEMPLATES.CANADA,
-        6: TEMPLATES.EUROPASS,
-        7: TEMPLATES.EUROPE,
-        8: TEMPLATES.AUSTRALIA,
-        9: TEMPLATES.USA,
-        10: TEMPLATES.INDIA,
+        1: TEMPLATES.MODERN_NEO,
+        2: TEMPLATES.MODERN_SLATE,
+        3: TEMPLATES.MODERN_AURORA,
+        4: TEMPLATES.MODERN_METRO,
+        5: TEMPLATES.MODERN_ZEN,
+        6: TEMPLATES.MODERN_NOVA,
+        7: TEMPLATES.MODERN_EDGE,
+        8: TEMPLATES.MODERN_PRISM,
+        9: TEMPLATES.MODERN_SUMMIT,
+        10: TEMPLATES.MODERN_FLOW,
+        11: TEMPLATES.MINIMAL,
+        12: TEMPLATES.CREATIVE,
+        13: TEMPLATES.PROFESSIONAL,
+        14: TEMPLATES.EXECUTIVE,
+        15: TEMPLATES.CLASSIC,
+        16: TEMPLATES.TIMELINE,
+        17: TEMPLATES.SIDEBAR,
+        18: TEMPLATES.CANADA,
+        19: TEMPLATES.EUROPASS,
+        20: TEMPLATES.EUROPE,
+        21: TEMPLATES.AUSTRALIA,
+        22: TEMPLATES.USA,
+        23: TEMPLATES.INDIA,
       }[newValue] || TEMPLATES.MODERN;
     setActiveTemplate(newTemplate);
   };
@@ -156,6 +171,8 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
     loading,
     setLoading,
     personalInfo,
+    resumeData,
+    colorScheme,
     onSuccess: (message) => {
       setSnackbar({ open: true, message, severity: "success" });
       handleExportMenuClose();
@@ -172,22 +189,39 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
     handleExportMenuClose();
   };
 
-  const printResume = () => {
-    setIsPrinting(true);
-    setTimeout(() => {
-      window.print();
-    }, 100);
-  };
+  const printResume = async () => {
+    if (!resumeRef.current) {
+      setSnackbar({
+        open: true,
+        message: "Resume reference not found. Please try again.",
+        severity: "error",
+      });
+      return;
+    }
 
-  useEffect(() => {
-    const handleAfterPrint = () => {
+    setIsPrinting(true);
+    try {
+      const result = await openTemplatePrintPreview(resumeRef.current, personalInfo);
+
+      if (result.success) {
+        setSnackbar({
+          open: true,
+          message: "Print dialog opened.",
+          severity: "success",
+        });
+      }
+      handleExportMenuClose();
+    } catch (error) {
+      console.error("Print generation failed:", error);
+      setSnackbar({
+        open: true,
+        message: "Could not open print preview. Please try again.",
+        severity: "error",
+      });
+    } finally {
       setIsPrinting(false);
-    };
-    window.addEventListener("afterprint", handleAfterPrint);
-    return () => {
-      window.removeEventListener("afterprint", handleAfterPrint);
-    };
-  }, []);
+    }
+  };
 
   const renderTemplate = () => {
     const commonProps = {
@@ -233,6 +267,15 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
                         <Typography variant="h6" gutterBottom>Customize</Typography>
                         <Divider sx={{ my: 2 }}/>
                         <Box sx={{ my: 2 }}>
+                            <Typography gutterBottom>Template</Typography>
+                            <TemplateSelector
+                              activeTab={activeTab}
+                              handleTemplateChange={handleTabChange}
+                              isMobile={false}
+                            />
+                        </Box>
+                        <Divider sx={{ my: 2 }}/>
+                        <Box sx={{ my: 2 }}>
                             <Typography gutterBottom>Font Size ({fontSize}pt)</Typography>
                             <Slider 
                               value={fontSize} 
@@ -259,32 +302,48 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
             )}
             <Grid item xs={12} md={isMobile ? 12 : 9}>
               <Paper elevation={3} sx={{ overflow: "hidden", display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <TemplateSelector activeTab={activeTab} handleTemplateChange={handleTabChange} isMobile={isMobile}/>
+                {isMobile && (
+                  <TemplateSelector
+                    activeTab={activeTab}
+                    handleTemplateChange={handleTabChange}
+                    isMobile={true}
+                  />
+                )}
                 <Box sx={{ p: 2, bgcolor: "grey.200", overflow: "auto", flexGrow: 1 }}>
-                  <Box 
-                    ref={resumeRef}
-                    sx={{
-                      '& p, & span, & div:not([class*="MuiBox"]):not([class*="MuiPaper"])': {
-                        fontSize: `${fontSize}pt`,
-                      },
-                      '& h1': {
-                        fontSize: `${fontSize * 2.5}pt`,
-                      },
-                      '& h2': {
-                        fontSize: `${fontSize * 2}pt`,
-                      },
-                      '& h3, & h4': {
-                        fontSize: `${fontSize * 1.5}pt`,
-                      },
-                      '& h5': {
-                        fontSize: `${fontSize * 1.3}pt`,
-                      },
-                      '& h6': {
-                        fontSize: `${fontSize * 1.1}pt`,
-                      },
-                    }}
-                  >
-                    {renderTemplate()}
+                  <Box className="resume-preview-shell">
+                    <PreviewWrapper>
+                      <Box
+                        ref={resumeRef}
+                        id="print-resume-root"
+                        className="resume-container"
+                        sx={{
+                          width: "794px",
+                          minWidth: "794px",
+                          margin: "0 auto",
+                          backgroundColor: "#fff",
+                          '& p, & span, & div:not([class*="MuiBox"]):not([class*="MuiPaper"])': {
+                            fontSize: `${fontSize}pt`,
+                          },
+                          '& h1': {
+                            fontSize: `${fontSize * 2.5}pt`,
+                          },
+                          '& h2': {
+                            fontSize: `${fontSize * 2}pt`,
+                          },
+                          '& h3, & h4': {
+                            fontSize: `${fontSize * 1.5}pt`,
+                          },
+                          '& h5': {
+                            fontSize: `${fontSize * 1.3}pt`,
+                          },
+                          '& h6': {
+                            fontSize: `${fontSize * 1.1}pt`,
+                          },
+                        }}
+                      >
+                        {renderTemplate()}
+                      </Box>
+                    </PreviewWrapper>
                   </Box>
                 </Box>
               </Paper>

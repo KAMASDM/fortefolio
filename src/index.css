@@ -161,45 +161,74 @@ body {
 }
 
 @media print {
-  body * {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body.resume-print-mode * {
     visibility: hidden !important;
   }
 
-  .resume-container,
-  .resume-container * {
+  body.resume-print-mode #print-resume-root,
+  body.resume-print-mode #print-resume-root * {
     visibility: visible !important;
   }
 
-  .resume-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+  body.resume-print-mode {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
   }
 
-  .page-container {
-    gap: 0 !important;
-    min-width: 794px !important;
-    transform: scale(1) !important;
-    transform-origin: top left !important;
-  }
-
-  .page {
-    border: none !important;
+  body.resume-print-mode #print-resume-root {
+    position: fixed !important;
+    top: 0 !important;
+    left: 50% !important;
+    width: 190mm !important;
+    min-width: 190mm !important;
+    max-width: 190mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
     box-shadow: none !important;
-    page-break-after: always;
-
-    width: 100%;
-    min-height: 100vh;
-    page-break-after: always;
-    page-break-inside: avoid;
-    display: flex;
-    flex-direction: column;
-
+    transform: translateX(-50%) !important;
+    overflow: visible !important;
+    z-index: 9999 !important;
   }
 
-  * {
+  body.resume-print-mode #print-resume-root > *:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  body.resume-print-mode .resume-preview-shell,
+  body.resume-print-mode .page-wrapper,
+  body.resume-print-mode .page-container,
+  body.resume-print-mode .MuiPaper-root,
+  body.resume-print-mode .MuiContainer-root,
+  body.resume-print-mode .MuiGrid-root {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  body.resume-print-mode .no-print,
+  body.resume-print-mode .MuiSpeedDial-root,
+  body.resume-print-mode .MuiPopover-root,
+  body.resume-print-mode .MuiMenu-root,
+  body.resume-print-mode .MuiDrawer-root,
+  body.resume-print-mode .MuiSnackbar-root {
+    display: none !important;
+  }
+
+  #print-resume-root,
+  #print-resume-root * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    box-sizing: border-box !important;
+  }
+
+  #print-resume-root .MuiGrid-container,
+  #print-resume-root .MuiGrid-root {
+    overflow: visible !important;
   }
 }

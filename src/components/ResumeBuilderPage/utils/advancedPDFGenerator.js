@@ -1,216 +1,101 @@
-import html2canvas from 'html2canvas';
+const RENDER_WIDTH_PX = 794;
 
-/**
- * Production-ready PDF generator that preserves template design
- * Creates a high-quality print dialog with proper page handling
- */
-export const generateTemplatePDF = async (element, personalInfo, templateType, options = {}) => {
+const PRINT_HIDE_SELECTORS = [
+  ".MuiSpeedDial-root",
+  ".MuiBackdrop-root",
+  ".MuiPopover-root",
+  ".MuiTooltip-popper",
+  "button",
+  "[role=tooltip]",
+].join(", ");
+
+export const openTemplatePrintPreview = async (element, personalInfo) => {
   if (!element) {
-    throw new Error('Element not found');
+    throw new Error("Element not found");
   }
 
-  const filename = `${personalInfo?.fullName || 'Resume'}.pdf`;
-  const { scale = 3 } = options; // Higher scale for better quality
+  const filename = `${personalInfo?.fullName || "Resume"}`;
+  const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
+    .map((node) => node.outerHTML)
+    .join("\n");
 
-  try {
-    // Hide overlay elements
-    const overlayElements = element.querySelectorAll(
-      '.MuiSpeedDial-root, .MuiBackdrop-root, .MuiPopover-root, .MuiDrawer-root, .MuiTooltip-popper, button'
-    );
-    
-    const hiddenElements = [];
-    overlayElements.forEach(el => {
-      if (el.style.display !== 'none') {
-        hiddenElements.push({ element: el, originalDisplay: el.style.display });
-        el.style.display = 'none';
-      }
-    });
+  const clone = element.cloneNode(true);
+  clone.querySelectorAll(PRINT_HIDE_SELECTORS).forEach((node) => node.remove());
+  clone.style.display = "block";
+  clone.style.visibility = "visible";
+  clone.style.width = `${RENDER_WIDTH_PX}px`;
+  clone.style.minWidth = `${RENDER_WIDTH_PX}px`;
+  clone.style.maxWidth = `${RENDER_WIDTH_PX}px`;
+  clone.style.margin = "0 auto";
+  clone.style.transform = "none";
 
-    // Clean up page styling for PDF
-    const pages = element.querySelectorAll('.page, [class*="page"]');
-    const pageStyles = [];
-    pages.forEach(page => {
-      pageStyles.push({
-        element: page,
-        border: page.style.border,
-        boxShadow: page.style.boxShadow,
-        margin: page.style.margin,
-        padding: page.style.padding
-      });
-      page.style.border = 'none';
-      page.style.boxShadow = 'none';
-      page.style.margin = '0';
-      page.style.padding = '20px';
-    });
+  const printWindow = window.open("", "_blank", "width=1200,height=800");
+  if (!printWindow) {
+    throw new Error("Pop-up blocked. Please allow pop-ups for this site.");
+  }
 
-    // Wait for layout to settle
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    // Capture with maximum quality
-    const canvas = await html2canvas(element, {
-      scale: scale,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: element.scrollWidth,
-      height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
-      imageTimeout: 0,
-      onclone: (clonedDoc) => {
-        const style = clonedDoc.createElement('style');
-        style.textContent = `
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-          * { 
-            -webkit-print-color-adjust: exact !important; 
-            color-adjust: exact !important;
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${filename}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        ${styles}
+        <style>
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          button, .MuiSpeedDial-root, .MuiBackdrop-root { display: none !important; }
-        `;
-        clonedDoc.head.appendChild(style);
-      }
-    });
 
-    // Convert to high-quality image
-    const imgData = canvas.toDataURL('image/png', 1.0);
-    
-    // Calculate A4 dimensions (at 96 DPI)
-    const A4_WIDTH = 794;
-    const A4_HEIGHT = 1123;
-    
-    // Calculate scaled dimensions
-    const imgAspectRatio = canvas.width / canvas.height;
-    let displayWidth = A4_WIDTH;
-    let displayHeight = A4_WIDTH / imgAspectRatio;
-    
-    // Create an optimized print window
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${filename.replace('.pdf', '')}</title>
-          <meta charset="UTF-8">
-          <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-          <style>
-            @page {
-              size: A4;
-              margin: 0;
-            }
-            
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-            
-            html, body {
-              width: 100%;
-              height: 100%;
-              margin: 0;
-              padding: 0;
-              background: white;
-            }
-            
-            .print-container {
-              width: 100%;
-              background: white;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-            }
-            
-            .resume-image {
-              width: 100%;
-              max-width: 210mm;
-              height: auto;
-              display: block;
-              page-break-inside: auto;
-            }
-            
-            @media print {
-              html, body {
-                width: 210mm;
-                height: 297mm;
-              }
-              
-              .print-container {
-                width: 210mm !important;
-              }
-              
-              .resume-image {
-                width: 210mm !important;
-                max-width: 210mm !important;
-                height: auto !important;
-              }
-            }
-            
-            @media screen {
-              body {
-                padding: 20px;
-                background: #f5f5f5;
-              }
-              
-              .print-container {
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                max-width: 210mm;
-                margin: 0 auto;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="print-container">
-            <img src="${imgData}" alt="Resume" class="resume-image" />
-          </div>
-          <script>
-            window.onload = function() {
-              // Wait a bit for image to fully render
-              setTimeout(function() {
-                window.print();
-              }, 1000);
-            };
-            
-            // Close window after print dialog is dismissed
-            window.onafterprint = function() {
-              setTimeout(function() {
-                window.close();
-              }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
 
-    // Restore original styles
-    setTimeout(() => {
-      pageStyles.forEach(({ element, border, boxShadow, margin, padding }) => {
-        element.style.border = border;
-        element.style.boxShadow = boxShadow;
-        element.style.margin = margin;
-        element.style.padding = padding;
-      });
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
 
-      hiddenElements.forEach(({ element, originalDisplay }) => {
-        element.style.display = originalDisplay;
-      });
-    }, 2000);
+          #print-root {
+            width: 190mm;
+            margin: 0 auto;
+          }
 
-    return { 
-      success: true, 
-      message: 'High-quality PDF print dialog opened with template design preserved! Use "Save as PDF" in print options.' 
-    };
+          #print-root .page-container {
+            transform: none !important;
+            transform-origin: top left !important;
+            width: ${RENDER_WIDTH_PX}px !important;
+            min-width: ${RENDER_WIDTH_PX}px !important;
+          }
 
-  } catch (error) {
-    console.error('PDF generation error:', error);
-    throw new Error(`Failed to generate PDF: ${error.message}`);
-  }
+          #print-root .MuiPaper-root {
+            box-shadow: none !important;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="print-root">${clone.outerHTML}</div>
+        <script>
+          window.onload = function () {
+            setTimeout(function () {
+              window.focus();
+              window.print();
+            }, 1000);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  return {
+    success: true,
+    message: "Print dialog opened.",
+  };
 };
