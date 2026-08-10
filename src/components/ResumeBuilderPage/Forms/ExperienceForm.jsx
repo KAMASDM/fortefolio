@@ -218,7 +218,7 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
         handleResponsibilityChange(expId, respIndex, suggestion);
     } catch (error) {
         console.error("Error getting AI suggestion:", error);
-        alert("Failed to get AI suggestion. Please try again.");
+        alert(error.message);
     } finally {
         setAiLoading(prev => ({ ...prev, [`${expId}-${respIndex}`]: false }));
     }

@@ -201,9 +201,7 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
       }
     } catch (err) {
       console.error("Error enhancing resume:", err);
-      setEnhanceError(
-        `Failed to get enhancement suggestions: ${err.message}. Please try again later.`
-      );
+      setEnhanceError(err.message);
     } finally {
       setIsEnhancing(false);
     }

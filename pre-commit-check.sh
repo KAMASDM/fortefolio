@@ -49,5 +49,9 @@ echo "5️⃣ Staged files for commit:"
 git diff --cached --name-only | sed 's/^/   ✓ /'
 
 echo ""
-echo "✅ All security checks passed!"
-echo "   Safe to commit."
+echo "6️⃣ Running lint and automated tests..."
+npm run lint
+npm test
+
+echo ""
+echo "✅ Security, lint, and test checks passed!"

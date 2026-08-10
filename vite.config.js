@@ -9,19 +9,12 @@ export default defineConfig({
   },
   build: {
     target: 'es2020',
-    chunkSizeWarningLimit: 1600,
+    chunkSizeWarningLimit: 2600,
     sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // Put ALL React-related packages together
-            if (id.includes('react') || id.includes('react-dom') || 
-                id.includes('react-router') || id.includes('react-beautiful-dnd') ||
-                id.includes('react-to-print') || id.includes('formik') ||
-                id.includes('@emotion') || id.includes('@mui')) {
-              return 'react-vendor';
-            }
             // Large independent libraries
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
@@ -32,7 +25,8 @@ export default defineConfig({
             if (id.includes('html2canvas') || id.includes('jspdf')) {
               return 'pdf-vendor';
             }
-            // Everything else (should be minimal now)
+            // Keep the remaining interdependent UI/runtime packages together
+            // to avoid circular vendor chunks in modern Rollup versions.
             return 'vendor';
           }
         },

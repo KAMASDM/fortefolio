@@ -1,5 +1,17 @@
 import { auth } from "../firebaseConfig";
 
+const DEFAULT_AI_ERROR =
+  "We couldn't complete that AI request right now. Your work is safe—please try again.";
+
+const getFriendlyAIError = (response, result = {}) => {
+  if (result.error) return result.error;
+  if (response.status === 401) return "Please sign in again to use the AI writing tools.";
+  if (response.status === 408) return "This is taking longer than expected. Please try again in a moment.";
+  if (response.status === 429) return "You've made several AI requests in a short time. Please wait a moment and try again.";
+  if (response.status >= 500) return "Our AI writing assistant is unavailable right now. Your work is safe—please try again in a little while.";
+  return DEFAULT_AI_ERROR;
+};
+
 /**
  * Get the correct base URL for API calls
  * In development (localhost), always use Netlify dev server on port 8888
@@ -12,6 +24,18 @@ const getApiBaseUrl = () => {
   }
   // In production, use relative URLs
   return '';
+};
+
+const getAuthenticatedHeaders = async () => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("You must be signed in to use AI features.");
+  }
+  const idToken = await user.getIdToken();
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${idToken}`,
+  };
 };
 
 /**
@@ -28,21 +52,16 @@ export const callOpenAI = async (messages, options = {}) => {
   } = options;
 
   try {
-    // Get current user ID for rate limiting
-    const userId = auth.currentUser?.uid || null;
-    
     const baseUrl = getApiBaseUrl();
+    const headers = await getAuthenticatedHeaders();
     const response = await fetch(`${baseUrl}/.netlify/functions/openai`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         messages,
         model,
         temperature,
         maxTokens,
-        userId,
       }),
     });
 
@@ -58,20 +77,13 @@ export const callOpenAI = async (messages, options = {}) => {
     }
 
     if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error("Rate limit exceeded. Please try again later.");
-      } else if (response.status === 408) {
-        throw new Error("Request timeout. Please try with a shorter prompt or try again.");
-      } else if (response.status === 503) {
-        throw new Error("AI service temporarily unavailable. Please try again later.");
-      }
-      throw new Error(result.error || "Failed to generate content");
+      throw new Error(getFriendlyAIError(response, result));
     }
 
     if (result.success) {
       return result.content;
     } else {
-      throw new Error(result.error || "Failed to generate content");
+      throw new Error(result.error || DEFAULT_AI_ERROR);
     }
   } catch (error) {
     console.error("Netlify Function Error:", error);
@@ -80,13 +92,13 @@ export const callOpenAI = async (messages, options = {}) => {
     if (error.message.includes("Rate limit")) {
       throw new Error("Rate limit exceeded. Please try again later.");
     } else if (error.message.includes("timeout") || error.message.includes("Timeout")) {
-      throw new Error("Request took too long. Please try with a shorter prompt or try again.");
+      throw new Error("This is taking longer than expected. Please try again in a moment.");
     } else if (error.message.includes("fetch") || error.name === 'TypeError') {
       throw new Error("Network error. Please check your connection and try again.");
     } else if (error.message.includes("JSON")) {
-      throw new Error("Invalid response format. Please try again.");
+      throw new Error(DEFAULT_AI_ERROR);
     } else {
-      throw new Error(error.message || "Failed to generate content. Please try again.");
+      throw new Error(error.message || DEFAULT_AI_ERROR);
     }
   }
 };
@@ -100,31 +112,35 @@ export const callOpenAI = async (messages, options = {}) => {
 export const getAISuggestion = async (prompt, maxTokens = 60) => {
   try {
     const baseUrl = getApiBaseUrl();
+    const headers = await getAuthenticatedHeaders();
     const response = await fetch(`${baseUrl}/.netlify/functions/ai-suggestion`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         prompt,
         maxTokens,
       }),
     });
 
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      throw new Error(DEFAULT_AI_ERROR);
+    }
 
     if (!response.ok) {
-      throw new Error(result.error || "Failed to generate suggestion");
+      throw new Error(getFriendlyAIError(response, result));
     }
 
     if (result.success) {
       return result.content;
     } else {
-      throw new Error("Failed to generate suggestion");
+      throw new Error(DEFAULT_AI_ERROR);
     }
   } catch (error) {
     console.error("Netlify Function Error:", error);
-    throw new Error(error.message || "Failed to generate suggestion. Please try again.");
+    throw new Error(error.message || DEFAULT_AI_ERROR);
   }
 };
 

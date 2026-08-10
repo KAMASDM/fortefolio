@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { getDatabase, ref, get } from "firebase/database";
 import {
   Box,
   Typography,
@@ -21,8 +20,8 @@ import {
 import { ResumeTemplateContent } from "./ResumeTemplateContent";
 import { constants } from "../ResumePreview/constants";
 import { formatDate, isSectionEmpty, getInitials } from "../utils/resumeUtils";
-import app from "../../../firebaseConfig"; // Ensure you have your firebase app instance exported
 import PreviewWrapper from "../Templates/PreviewWrapper";
+import { getPublishedResume } from "../../../services/resumeService";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
@@ -53,12 +52,9 @@ const ResumeOnlyView = () => {
         return;
       }
       try {
-        const db = getDatabase(app);
-        const resumeRef = ref(db, `users/${userId}/resumes/${resumeId}`);
-        const snapshot = await get(resumeRef);
-
-        if (snapshot.exists()) {
-          const data = snapshot.val();
+        const data = await getPublishedResume(userId, resumeId);
+        if (data) {
+          const presentation = data.presentation || {};
           const formattedData = {
             id: resumeId,
             personalInfo: data.resumeData?.personalInfo || {},
@@ -67,10 +63,15 @@ const ResumeOnlyView = () => {
             skills: data.resumeData?.skills || [],
             projects: data.resumeData?.projects || [],
             references: data.resumeData?.references || [],
-            // You can also extract metadata if needed
-            activeTemplate: data.metadata?.template || activeTemplate,
-            fontFamily: data.metadata?.font || fontFamily,
-            colorScheme: data.metadata?.color || colorScheme,
+            activeTemplate: presentation.template || activeTemplate,
+            fontFamily: presentation.fontFamily || fontFamily,
+            colorScheme:
+              COLOR_SCHEMES[
+                String(presentation.colorScheme || "blue").toUpperCase()
+              ] || colorScheme,
+            fontSize: presentation.fontSize || 10,
+            sectionOrder: presentation.sectionOrder || [],
+            starredSections: presentation.starredSections || [],
           };
           setResumeData(formattedData);
         } else {
@@ -189,7 +190,9 @@ const ResumeOnlyView = () => {
         formatDate={formatDate}
         isMobile={isMobile}
         isSmallMobile={isSmallMobile}
-        starredSections={[]}
+        starredSections={resumeData.starredSections}
+        sectionOrder={resumeData.sectionOrder}
+        fontSize={resumeData.fontSize}
         toggleStarSection={() => {}}
       />
       <SpeedDial

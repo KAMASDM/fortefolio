@@ -66,7 +66,10 @@ export const ExportMenu = ({
         <ListItemIcon>
           <Print />
         </ListItemIcon>
-        <ListItemText>Print</ListItemText>
+        <ListItemText
+          primary="Template-faithful PDF / Print"
+          secondary="Use the browser dialog to save as PDF"
+        />
       </MenuItem>
       <MenuItem onClick={downloadPDF} disabled={loading}>
         <ListItemIcon>
@@ -76,7 +79,10 @@ export const ExportMenu = ({
             <PictureAsPdf />
           )}
         </ListItemIcon>
-        <ListItemText>Download PDF</ListItemText>
+        <ListItemText
+          primary="Download Standard PDF"
+          secondary="Accessible single-column layout"
+        />
       </MenuItem>
       <MenuItem onClick={downloadDocx} disabled={loading}>
         <ListItemIcon>
@@ -86,7 +92,10 @@ export const ExportMenu = ({
             <DocxIcon />
           )}
         </ListItemIcon>
-        <ListItemText>Download DOCX</ListItemText>
+        <ListItemText
+          primary="Download Editable DOCX"
+          secondary="Standard editable layout"
+        />
       </MenuItem>
       <Divider sx={{ my: 1 }} />
       <MenuItem onClick={handleDisplayresume}>

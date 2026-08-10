@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { database } from "../firebaseConfig";
-import { ref, onValue, off, serverTimestamp, update } from "firebase/database";
 import { ThemeProvider } from "@mui/material/styles";
 import AnimatedBackground from "../components/DashboardPage/AnimatedBackground";
 import {
@@ -75,6 +73,7 @@ import FloatingElements from "../components/DashboardPage/FloatingElements";
 import { getCustomTheme } from "../theme/customTheme";
 import SOPFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/SOPFormDialog";
 import { callOpenAI } from "../utils/openai";
+import { useResumeEditor } from "../hooks/useResumeEditor";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -92,23 +91,6 @@ const AnimatedCard = styled(Paper)(({ theme }) => ({
   transition: "all 0.3s ease-in-out",
   position: "relative",
 }));
-
-const initialResumeState = {
-  personalInfo: {
-    fullName: "",
-    email: "",
-    phone: "",
-    location: "",
-    linkedin: "",
-    website: "",
-    summary: "",
-  },
-  education: [],
-  experience: [],
-  skills: [],
-  projects: [],
-  references: [],
-};
 
 const sections = [
   {
@@ -293,7 +275,7 @@ const postProcessSOP = (sopContent) => {
 };
 
 const addHumanImperfections = (text) => {
-  let sentences = text.match(/[^\.!?]+[\.!?]+/g) || [];
+  let sentences = text.match(/[^.!?]+[.!?]+/g) || [];
 
   sentences = sentences.map((sentence, index) => {
     const random = Math.random();
@@ -483,7 +465,7 @@ const addConversationalElements = (text) => {
 };
 
 const addNaturalVariations = (text) => {
-  let sentences = text.match(/[^\.!?]+[\.!?]+/g) || [];
+  let sentences = text.match(/[^.!?]+[.!?]+/g) || [];
 
   sentences = sentences.map((sentence, index) => {
     if (index > 0 && Math.random() < 0.25) {
@@ -549,28 +531,36 @@ function ResumeBuilderPage() {
   }, [location?.state?.preview]);
 
   const [currentStep, setCurrentStep] = useState(sections[0].id);
-  const [resumeData, setResumeData] = useState(initialResumeState);
-  const [unsavedChanges, setUnsavedChanges] = useState(false);
-  const [resumeMetadata, setResumeMetadata] = useState({
-    title: "Untitled Resume",
-    lastModified: null,
-    createdAt: null,
-  });
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [saveError, setSaveError] = useState("");
   const [showTitleDialog, setShowTitleDialog] = useState(false);
   const [currentTitle, setCurrentTitle] = useState("");
-  const [notification, setNotification] = useState({
-    open: false,
-    message: "",
-    severity: "success",
+  const {
+    resumeData,
+    resumeMetadata,
+    setResumeMetadata,
+    presentation,
+    updatePresentation,
+    updateResumeData,
+    unsavedChanges,
+    setUnsavedChanges,
+    isLoading,
+    isSaving,
+    error,
+    saveError,
+    notification,
+    setNotification,
+    showLeaveConfirmation,
+    setShowLeaveConfirmation,
+    navigateWithConfirmation,
+    handleConfirmedNavigation,
+    saveResumeData,
+  } = useResumeEditor({
+    currentUser,
+    resumeId,
+    navigate,
+    initialPreview: location?.state?.preview === true,
   });
-  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState(null);
 
   const [generatedContentTitle, setGeneratedContentTitle] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
@@ -581,13 +571,7 @@ function ResumeBuilderPage() {
   const [showVisaFormDialog, setShowVisaFormDialog] = useState(false);
   const [showResumeTips, setShowResumeTips] = useState(false);
   const [showSOPFormDialog, setShowSOPFormDialog] = useState(false);
-  const [sectionOrder, setSectionOrder] = useState([
-    'education',
-    'experience',
-    'skills',
-    'projects',
-    'references'
-  ]);
+  const sectionOrder = presentation.sectionOrder;
 
   const completedSections = useMemo(() => {
     const completed = {};
@@ -603,163 +587,6 @@ function ResumeBuilderPage() {
       100
     );
   }, [completedSections]);
-
-  useEffect(() => {
-    if (!currentUser || !resumeId) {
-      navigate("/dashboard");
-      return;
-    }
-    setIsLoading(true);
-    setError("");
-    const resumeRef = ref(
-      database,
-      `users/${currentUser.uid}/resumes/${resumeId}`
-    );
-    const listener = onValue(
-      resumeRef,
-      (snapshot) => {
-        const data = snapshot.val();
-        const resumeId = snapshot.key;
-
-        if (data) {
-          const loadedData = {
-            id: resumeId,
-            personalInfo: {
-              ...initialResumeState.personalInfo,
-              ...(data.resumeData?.personalInfo || {}),
-            },
-            education: data.resumeData?.education || [],
-            experience: data.resumeData?.experience || [],
-            skills: data.resumeData?.skills || [],
-            projects: data.resumeData?.projects || [],
-            references: data.resumeData?.references || [],
-          };
-
-          setResumeData(loadedData);
-          setResumeMetadata(
-            data.metadata || {
-              title: "Untitled Resume",
-              lastModified: null,
-              createdAt: serverTimestamp(),
-            }
-          );
-          setCurrentTitle(data.metadata?.title || "Untitled Resume");
-          setUnsavedChanges(false);
-        } else {
-          setError(`Resume with ID ${resumeId} not found.`);
-        }
-
-        setIsLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching resume:", err);
-        setError(
-          "Could not load resume data. Check connection or permissions."
-        );
-        setIsLoading(false);
-      }
-    );
-
-    return () => off(resumeRef, "value", listener);
-  }, [currentUser, resumeId, navigate]);
-
-  const saveResumeData = useCallback(
-    async (showSuccessNotification = true) => {
-      if (!currentUser || !resumeId || isSaving) return false;
-
-      setIsSaving(true);
-      setSaveError("");
-
-      const resumeRef = ref(
-        database,
-        `users/${currentUser.uid}/resumes/${resumeId}`
-      );
-      const updates = {
-        resumeData: resumeData,
-        "metadata/lastModified": serverTimestamp(),
-        "metadata/title": resumeMetadata.title,
-        ...(resumeMetadata.createdAt === null && {
-          "metadata/createdAt": serverTimestamp(),
-        }),
-      };
-
-      try {
-        await update(resumeRef, updates);
-        console.log("Resume saved successfully:", resumeId);
-        setUnsavedChanges(false);
-        if (showSuccessNotification) {
-          setNotification({
-            open: true,
-            message: "Resume saved successfully!",
-            severity: "success",
-          });
-        }
-
-        return true;
-      } catch (err) {
-        console.error("Firebase save error:", err);
-        setSaveError("Failed to save. Please check connection and try again.");
-        setNotification({
-          open: true,
-          message: "Failed to save changes",
-          severity: "error",
-        });
-        return false;
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [
-      currentUser,
-      resumeId,
-      isSaving,
-      resumeData,
-      resumeMetadata.title,
-      resumeMetadata.createdAt,
-    ]
-  );
-
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (unsavedChanges) {
-        e.preventDefault();
-        e.returnValue =
-          "You have unsaved changes. Are you sure you want to leave?";
-        return e.returnValue;
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [unsavedChanges]);
-
-  useEffect(() => {
-    if (unsavedChanges) {
-      const debounce = setTimeout(() => {
-        saveResumeData(false);
-      }, 5000);
-
-      return () => clearTimeout(debounce);
-    }
-  }, [resumeData, saveResumeData, unsavedChanges]);
-
-  useEffect(() => {
-    return () => {
-      if (unsavedChanges) {
-        console.log(
-          "Attempting auto-save on unmount due to unsaved changes..."
-        );
-        saveResumeData(false);
-      }
-    };
-  }, [unsavedChanges, saveResumeData]);
-
-  const updateResumeData = useCallback((sectionKey, data) => {
-    setResumeData((prevData) => ({
-      ...prevData,
-      [sectionKey]: data,
-    }));
-    // setUnsavedChanges(true);
-  }, []);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -782,29 +609,6 @@ function ResumeBuilderPage() {
     )
       return;
     handleNavItemClick(newValue);
-  };
-
-  const navigateWithConfirmation = (destination) => {
-    if (unsavedChanges) {
-      setPendingNavigation(destination);
-      setShowLeaveConfirmation(true);
-    } else {
-      navigate(destination);
-    }
-  };
-
-  const handleConfirmedNavigation = async (saveBeforeLeaving) => {
-    setShowLeaveConfirmation(false);
-    let canNavigate = true;
-
-    if (saveBeforeLeaving && unsavedChanges) {
-      canNavigate = await saveResumeData(true);
-    }
-
-    if (canNavigate && pendingNavigation) {
-      navigate(pendingNavigation);
-    }
-    setPendingNavigation(null);
   };
 
   const nextStep = () => {
@@ -972,7 +776,7 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
       }
     } catch (err) {
       console.error(`Error generating ${type}:`, err);
-      setGenerateContentError(`Failed to generate ${type}: ${err.message}`);
+      setGenerateContentError(err.message);
     } finally {
       setIsGeneratingContent(false);
     }
@@ -1667,13 +1471,13 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
               ) : (
                 <Box sx={{ mt: { xs: 0, sm: -2 } }}>
                   {" "}
-                  <ResumePreview 
-                    resumeData={resumeData} 
-                    onBack={prevStep} 
+                  <ResumePreview
+                    resumeData={resumeData}
+                    onBack={prevStep}
                     sectionOrder={sectionOrder}
-                    setSectionOrder={setSectionOrder}
-                    onUpdateData={updateResumeData}
-                    setUnsavedChanges={setUnsavedChanges}
+                    presentation={presentation}
+                    onPresentationChange={updatePresentation}
+                    onBeforePublish={() => saveResumeData(false)}
                   />
                 </Box>
               )}

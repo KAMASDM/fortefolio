@@ -1,167 +1,175 @@
-# ForteFolio - AI-Powered Resume Builder
+# ForteFolio / MakeMyForte
 
-A modern, feature-rich resume builder with AI-powered content generation, multiple professional templates, and real-time collaboration features.
+ForteFolio is a React resume builder with Firebase authentication and storage,
+24 resume layouts, AI-assisted writing, public publishing, and PDF/DOCX export.
 
-## ✨ Features
+## Features
 
-- **11 Professional Templates** - Modern, Minimal, Creative, Professional, and more
-- **AI-Powered Content Generation** - Interview questions, cover letters, resume enhancement
-- **Real-time Collaboration** - Firebase-powered sync across devices
-- **Multi-format Export** - PDF, DOCX, and print-ready formats
-- **Secure API Integration** - Server-side OpenAI integration via Netlify Functions
-- **Mobile Responsive** - Works seamlessly on all devices
+- Google sign-in through Firebase Authentication
+- Private resume CRUD backed by Firebase Realtime Database
+- Six resume sections: personal details, education, experience, skills,
+  projects, and references
+- 24 core, modern, professional, and regional templates
+- Persistent template, color, font, font-size, section-order, and starred-section
+  settings
+- Five-second debounced autosave plus explicit saving and navigation protection
+- Gemini-powered resume suggestions, enhancement, cover letters, SOPs, and
+  interview questions
+- Explicit publish/unpublish workflow using separate public resume snapshots
+- Template-faithful browser print / Save as PDF
+- Standard accessible PDF and editable DOCX exports
 
-## 🚀 Quick Start
+## Technology
 
-### Prerequisites
-- Node.js 18+ 
-- Firebase account
-- OpenAI API key
-- Netlify account (for deployment)
+- React 18 and Vite
+- Material UI and Framer Motion
+- Firebase Authentication and Realtime Database
+- Netlify Functions
+- Google Gemini through `@google/genai`
+- Vitest and Testing Library
 
-### Installation
+The active backend is Netlify Functions plus Gemini. The former Firebase
+Functions/OpenAI implementation has been removed.
 
-1. **Clone the repository:**
-```bash
-git clone https://github.com/KAMASDM/fortefolio.git
-cd fortefolio
-```
+## Requirements
 
-2. **Install dependencies:**
+- Node.js 20 or newer
+- A Firebase project with Google authentication and Realtime Database enabled
+- A Gemini API key
+- A Firebase service account for the Netlify Functions runtime
+- Netlify CLI for full local AI testing
+
+## Local setup
+
 ```bash
 npm install
-```
-
-3. **Set up environment variables:**
-```bash
+npm install --prefix netlify/functions
 cp .env.example .env
-# Edit .env with your actual API keys (see Security section below)
+npm run dev
 ```
 
-4. **Start development server:**
-```bash
-netlify dev  # Use this for full functionality with AI features
-# OR
-npm run dev  # Frontend only (AI features won't work)
-```
-
-5. **Access the application:**
-- Full app with functions: `http://localhost:8888`
-- Frontend only: `http://localhost:5173`
-
-## 🔒 Security Setup
-
-### Environment Variables Required:
-
-Create a `.env` file from `.env.example` and fill in:
+`npm run dev` starts the frontend at `http://localhost:5173`. AI features expect
+Netlify Functions at port 8888, so use this for full-stack development:
 
 ```bash
-# Firebase Configuration (from Firebase Console)
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_DATABASE_URL=https://your_project-default-rtdb.firebaseio.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-
-# Google Gemini API Key (CRITICAL - Keep this secure!)
-GEMINI_API_KEY=your_gemini_api_key_here
+npx netlify dev
 ```
 
-### 🔐 Security Best Practices:
+## Environment variables
 
-1. **Never commit `.env` files** - Already in `.gitignore`
-2. **Use Netlify Environment Variables** for production deployment
-3. **Gemini API calls are server-side only** - No client-side exposure
-4. **Rate limiting implemented** - 50 calls/hour per user
-5. **Authentication required** - All AI features require login
+Frontend Firebase variables:
 
-## 📁 Project Structure
-
-```
-src/
-├── components/
-│   ├── DashboardPage/          # Dashboard UI components
-│   ├── LoginPage/              # Authentication & landing
-│   └── ResumeBuilderPage/      # Core resume builder
-│       ├── Templates/          # 11 resume templates
-│       ├── Forms/             # Data input forms
-│       ├── EnhanceResume/     # AI enhancement features
-│       └── ExportMenu/        # PDF/DOCX export
-├── context/
-│   └── AuthContext.jsx        # Authentication state
-├── pages/                     # Main page components
-├── utils/
-│   └── openai.js             # Secure AI API wrapper
-└── firebaseConfig.js         # Firebase setup
-
-netlify/functions/             # Serverless functions
-├── openai.js                 # Main AI generation
-└── ai-suggestion.js          # Quick suggestions
+```text
+VITE_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_DATABASE_URL
+VITE_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
+VITE_FIREBASE_MEASUREMENT_ID
 ```
 
-## 🛠️ Development
+Server-only Netlify variables:
 
-### Available Scripts:
+```text
+GEMINI_API_KEY
+FIREBASE_SERVICE_ACCOUNT_JSON
+FIREBASE_DATABASE_URL
+ALLOWED_ORIGINS
+```
+
+`FIREBASE_SERVICE_ACCOUNT_JSON` must contain the complete Firebase service
+account JSON document. `ALLOWED_ORIGINS` is an optional comma-separated list in
+addition to the production and local origins built into the function.
+
+Never prefix server secrets with `VITE_`; Vite-prefixed values are exposed to
+the browser.
+
+## Data and publishing model
+
+Private data remains under:
+
+```text
+users/{uid}/resumes/{resumeId}
+```
+
+Only the owner can read or write it. Presentation settings use the canonical:
+
+```text
+metadata.presentation
+├── template
+├── colorScheme
+├── fontFamily
+├── fontSize
+├── sectionOrder
+└── starredSections
+```
+
+Older `metadata.template`, `metadata.colorScheme`, and `metadata.color` records
+are read through compatibility normalization.
+
+Sharing never makes the private branch public. Selecting “Share Public Link”
+saves the resume and creates a bounded snapshot at:
+
+```text
+publicResumes/{uid}/{resumeId}
+```
+
+Anyone can read that published snapshot. Only its owner can publish, update, or
+remove it. “Disable Public Link” on the dashboard removes the snapshot.
+
+Deploy database rules after changing the sharing model:
+
 ```bash
-npm run dev          # Start Vite dev server (frontend only)
-netlify dev          # Start full development environment with functions
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
+npx firebase-tools deploy --only database
 ```
 
-### AI Features Development:
-- All AI features use Netlify Functions for security
-- Functions are automatically loaded in `netlify dev`
-- OpenAI API calls include timeout handling and error recovery
-- Rate limiting prevents API abuse
+## AI security
 
-## 🚀 Deployment
+The browser sends a current Firebase ID token to both AI functions. Functions
+verify the token with Firebase Admin before calling Gemini.
 
-### Environment Variables in Netlify:
-1. Go to Netlify Dashboard → Site Settings → Environment Variables
-2. Add all variables from your `.env` file
-3. **Critical:** Set `GEMINI_API_KEY` with your actual API key
+- Main generation: 50 requests per user per rolling one-hour window
+- Quick suggestions: 100 requests per user per rolling one-hour window
+- Counters are stored durably in Firebase and cannot be accessed by clients
+- Prompts and message counts are bounded server-side
+- CORS is restricted to configured origins
 
-### Deploy:
+## Export behavior
+
+- **Template-faithful PDF / Print** opens the browser print dialog; choose
+  “Save as PDF” to retain the selected visual template.
+- **Standard PDF** creates a consistent, accessible single-column document.
+- **Editable DOCX** creates a standard editable Word layout.
+
+The standard PDF and DOCX exports intentionally do not imitate every visual
+template.
+
+## Commands
+
 ```bash
+npm run dev
+npm run lint
+npm test
+npm run test:watch
 npm run build
-netlify deploy --prod
-# OR connect Git for automatic deployments
+npm run preview
 ```
 
-## 🧪 Testing AI Features
+The test suite covers normalization, persistence payloads, autosaving,
+navigation protection, public snapshot behavior, database-rule contracts, and
+AI authentication/CORS boundaries.
 
-1. **Access:** `http://localhost:8888` (Netlify dev server)
-2. **Login** with Google OAuth
-3. **Create/Edit Resume**
-4. **Test AI Features:**
-   - Generate Interview Questions
-   - AI Resume Enhancement
-   - Cover Letter Generation
-   - Statement of Purpose (SOP)
+## Deployment
 
-## 📊 Technology Stack
+Netlify runs:
 
-- **Frontend:** React 18, Vite, Material-UI, Framer Motion
-- **Backend:** Netlify Functions (serverless)
-- **Database:** Firebase Realtime Database
-- **Authentication:** Firebase Auth (Google OAuth)
-- **AI Integration:** OpenAI GPT-3.5-turbo
-- **Export:** Browser-native PDF, DOCX generation
-- **Deployment:** Netlify (frontend + functions)
+```bash
+npm install --prefix netlify/functions
+npm ci
+npm run build
+```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Configure all server variables in Netlify, deploy Firebase database rules, and
+then deploy the site. Node.js 20 is configured in `netlify.toml`.

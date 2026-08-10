@@ -1,16 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { database } from "../firebaseConfig";
-import {
-  ref,
-  onValue,
-  off,
-  push,
-  serverTimestamp,
-  set,
-  remove,
-} from "firebase/database";
 import {
   Container,
   Box,
@@ -61,6 +51,7 @@ import {
   ViewList as ListViewIcon,
   AutoAwesome as AutoAwesomeIcon,
   AutoAwesomeMotion as AutoAwesomeMotionIcon,
+  PublicOff as PublicOffIcon,
 } from "@mui/icons-material";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -72,6 +63,13 @@ import FloatingElements from "../components/DashboardPage/FloatingElements";
 import ResumeListItem from "../components/DashboardPage/ResumeListItem";
 import ResumeCard from "../components/DashboardPage/ResumeCard";
 import EmptyState from "../components/DashboardPage/EmptyState";
+import { useDashboardResumes } from "../hooks/useDashboardResumes";
+import {
+  createResume,
+  deleteResume,
+  duplicateResume,
+  unpublishResume,
+} from "../services/resumeService";
 
 const lavenderPalette = {
   light: "#EAE4F7",
@@ -85,24 +83,12 @@ const lavenderPalette = {
   accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
 };
 
-const initialResumeState = {
-  personalInfo: {},
-  education: [],
-  experience: [],
-  skills: [],
-  projects: [],
-};
-
 function DashboardPage() {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [resumes, setResumes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [filteredResumes, setFilteredResumes] = useState([]);
-  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("lastModified");
   const [sortDirection, setSortDirection] = useState("desc");
@@ -127,131 +113,19 @@ function DashboardPage() {
     type: "success",
   });
   const [isCreating, setIsCreating] = useState(false);
-  const [stats, setStats] = useState({ total: 0, recent: 0, completed: 0 });
   const [viewMode, setViewMode] = useState("list");
-
-  useEffect(() => {
-    if (!currentUser) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-    const resumesRef = ref(database, `users/${currentUser.uid}/resumes`);
-
-    const listener = onValue(
-      resumesRef,
-      (snapshot) => {
-        const data = snapshot.val();
-        const loadedResumes = [];
-
-        if (data) {
-          Object.keys(data).forEach((key) => {
-            const resumeEntry = data[key];
-            const resumeData = resumeEntry.resumeData || initialResumeState;
-            const metadata = resumeEntry.metadata || {};
-
-            const sections = {
-              hasPersonalInfo:
-                resumeData.personalInfo &&
-                Object.values(resumeData.personalInfo).some(
-                  (v) => v && String(v).trim() !== ""
-                ),
-              hasEducation:
-                resumeData.education && resumeData.education.length > 0,
-              hasExperience:
-                resumeData.experience && resumeData.experience.length > 0,
-              hasSkills: resumeData.skills && resumeData.skills.length > 0,
-              hasProjects:
-                resumeData.projects && resumeData.projects.length > 0,
-            };
-            const totalSections = 5;
-            const completedSections =
-              Object.values(sections).filter(Boolean).length;
-            const completionPercentage = Math.round(
-              (completedSections / totalSections) * 100
-            );
-
-            loadedResumes.push({
-              id: key,
-              title: metadata.title || "Untitled Resume",
-              lastModified: metadata.lastModified || null,
-              createdAt: metadata.createdAt || null,
-              template: metadata.template || "modern",
-              colorScheme: metadata.colorScheme || "purple",
-              shared: metadata.shared || false,
-              completionPercentage,
-              sections,
-            });
-          });
-        }
-
-        setResumes(loadedResumes);
-
-        const now = new Date();
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        setStats({
-          total: loadedResumes.length,
-          recent: loadedResumes.filter(
-            (r) => r.lastModified && new Date(r.lastModified) > oneWeekAgo
-          ).length,
-          completed: loadedResumes.filter((r) => r.completionPercentage === 100)
-            .length,
-        });
-
-        setIsLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching resumes:", err);
-        setError("Could not load your resumes. Please try again later.");
-        setIsLoading(false);
-      }
-    );
-
-    return () => off(resumesRef, "value", listener);
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (isLoading || !resumes) return;
-
-    let results = [...resumes];
-
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      results = results.filter((resume) =>
-        resume.title.toLowerCase().includes(search)
-      );
-    }
-
-    results.sort((a, b) => {
-      let valueA, valueB;
-
-      switch (sortBy) {
-        case "title":
-          valueA = a.title.toLowerCase();
-          valueB = b.title.toLowerCase();
-          return sortDirection === "asc"
-            ? valueA.localeCompare(valueB)
-            : valueB.localeCompare(valueA);
-        case "completion":
-          valueA = a.completionPercentage || 0;
-          valueB = b.completionPercentage || 0;
-          break;
-        case "createdAt":
-        case "lastModified":
-          valueA = a[sortBy] || 0;
-          valueB = b[sortBy] || 0;
-          break;
-        default:
-          valueA = a.lastModified || 0;
-          valueB = b.lastModified || 0;
-      }
-      return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
-    });
-
-    setFilteredResumes(results);
-  }, [resumes, searchTerm, sortBy, sortDirection, isLoading]);
+  const {
+    resumes,
+    filteredResumes,
+    stats,
+    isLoading,
+    error,
+    refresh,
+  } = useDashboardResumes(currentUser, {
+    searchTerm,
+    sortBy,
+    sortDirection,
+  });
 
   const handleCreateDialogOpen = () => {
     const defaultName = `Resume - ${format(new Date(), "MMMM d, yyyy")}`;
@@ -269,31 +143,19 @@ function DashboardPage() {
 
     setIsCreating(true);
 
-    const resumeName = newResumeName.trim();
-    const resumesRef = ref(database, `users/${currentUser.uid}/resumes`);
-    const newResumeRef = push(resumesRef);
-
-    const newResumeData = {
-      resumeData: initialResumeState,
-      metadata: {
-        title: resumeName,
-        createdAt: serverTimestamp(),
-        lastModified: serverTimestamp(),
+    try {
+      const newResumeId = await createResume(currentUser.uid, {
+        title: newResumeName.trim(),
         template: selectedTemplate,
         colorScheme: selectedColorScheme,
-        shared: false,
-      },
-    };
-
-    try {
-      await set(newResumeRef, newResumeData);
+      });
       setNotification({
         open: true,
         message: "Resume created successfully!",
         type: "success",
       });
       handleCreateDialogClose();
-      navigate(`/resume/${newResumeRef.key}`);
+      navigate(`/resume/${newResumeId}`);
     } catch (err) {
       console.error("Error creating new resume:", err);
       setNotification({
@@ -313,11 +175,7 @@ function DashboardPage() {
   const handleDelete = async (resumeId) => {
     if (!currentUser || !resumeId) return;
     try {
-      const resumeRef = ref(
-        database,
-        `users/${currentUser.uid}/resumes/${resumeId}`
-      );
-      await remove(resumeRef);
+      await deleteResume(currentUser.uid, resumeId);
       setNotification({
         open: true,
         message: "Resume deleted successfully",
@@ -338,36 +196,7 @@ function DashboardPage() {
   const handleDuplicate = async (resumeId) => {
     if (!currentUser || !resumeId) return;
     try {
-      const originalResumeRef = ref(
-        database,
-        `users/${currentUser.uid}/resumes/${resumeId}`
-      );
-      const snapshot = await new Promise((resolve, reject) => {
-        onValue(
-          originalResumeRef,
-          (snap) => resolve(snap),
-          (err) => reject(err),
-          { onlyOnce: true }
-        );
-      });
-
-      const originalData = snapshot.val();
-      if (!originalData) throw new Error("Resume not found");
-
-      const resumesRef = ref(database, `users/${currentUser.uid}/resumes`);
-      const newResumeRef = push(resumesRef);
-
-      const duplicateData = {
-        ...originalData,
-        metadata: {
-          ...(originalData.metadata || {}),
-          title: `${originalData.metadata?.title || "Resume"} (Copy)`,
-          createdAt: serverTimestamp(),
-          lastModified: serverTimestamp(),
-        },
-      };
-
-      await set(newResumeRef, duplicateData);
+      await duplicateResume(currentUser.uid, resumeId);
       setNotification({
         open: true,
         message: "Resume duplicated successfully",
@@ -419,12 +248,28 @@ function DashboardPage() {
     setConfirmation({ open: false, resumeId: null, title: "" });
 
   const handleRefresh = () => {
-    setIsLoading(true);
-    setError("");
+    refresh();
+  };
 
-    setTimeout(() => {
-      if (!error) setIsLoading(false);
-    }, 500);
+  const handleUnpublish = async (resumeId) => {
+    if (!currentUser || !resumeId) return;
+    try {
+      await unpublishResume(currentUser.uid, resumeId);
+      setNotification({
+        open: true,
+        message: "Public link disabled",
+        type: "success",
+      });
+    } catch (unpublishError) {
+      console.error("Error unpublishing resume:", unpublishError);
+      setNotification({
+        open: true,
+        message: "Failed to disable public link",
+        type: "error",
+      });
+    } finally {
+      handleContextMenuClose();
+    }
   };
 
   const handleNotificationClose = (event, reason) => {
@@ -1191,6 +1036,29 @@ function DashboardPage() {
             }}
           />
         </MenuItem>
+        {resumes.find((resume) => resume.id === contextMenu.resumeId)?.shared && (
+          <MenuItem
+            onClick={() => handleUnpublish(contextMenu.resumeId)}
+            sx={{
+              py: 1.5,
+              "&:hover": { backgroundColor: alpha(lavenderPalette.medium, 0.1) },
+            }}
+          >
+            <ListItemIcon>
+              <PublicOffIcon
+                fontSize="small"
+                sx={{ color: lavenderPalette.deep }}
+              />
+            </ListItemIcon>
+            <ListItemText
+              primary="Disable Public Link"
+              primaryTypographyProps={{
+                fontWeight: 500,
+                color: lavenderPalette.darkText,
+              }}
+            />
+          </MenuItem>
+        )}
         <Divider sx={{ my: 1 }} />
         <MenuItem
           onClick={() => {

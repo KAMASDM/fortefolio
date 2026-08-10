@@ -1,15 +1,12 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   Paper,
   useTheme,
   useMediaQuery,
-  SpeedDial,
-  SpeedDialAction,
   Snackbar,
   Alert,
   Container,
-  Zoom,
   FormControl,
   InputLabel,
   Select,
@@ -22,12 +19,6 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
-import {
-  Download,
-  FormatColorFill,
-  TextFormat,
-  Print,
-} from "@mui/icons-material";
 import { ResumeTemplateContent } from "../DisplayResume/ResumeTemplateContent";
 import { constants } from "./constants";
 import { exportToDocx } from "../utils/exportUtils";
@@ -42,30 +33,42 @@ import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
 import PreviewWrapper from "../Templates/PreviewWrapper";
 import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { publishResume } from "../../../services/resumeService";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
-const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder }) => {
+const ResumePreview = ({
+  resumeData,
+  onBack,
+  sectionOrder = [],
+  presentation,
+  onPresentationChange,
+  onBeforePublish,
+}) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isExtraSmallMobile = useMediaQuery("(max-width:400px)");
   const resumeRef = useRef(null);
 
-  const [activeTab, setActiveTab] = useState(0);
-  const [activeTemplate, setActiveTemplate] = useState(TEMPLATES.MODERN);
-  const [fontFamily, setFontFamily] = useState(FONTS.POPPINS);
-  const [colorScheme, setColorScheme] = useState(COLOR_SCHEMES.BLUE);
-  const [fontSize, setFontSize] = useState(10);
+  const activeTemplate = presentation?.template || TEMPLATES.MODERN;
+  const activeTab = Math.max(
+    0,
+    Object.values(TEMPLATES).indexOf(activeTemplate)
+  );
+  const fontFamily = presentation?.fontFamily || FONTS.POPPINS;
+  const colorSchemeKey = String(
+    presentation?.colorScheme || "blue"
+  ).toUpperCase();
+  const colorScheme = COLOR_SCHEMES[colorSchemeKey] || COLOR_SCHEMES.BLUE;
+  const fontSize = presentation?.fontSize || 10;
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [colorMenu, setColorMenu] = useState(null);
   const [fontMenu, setFontMenu] = useState(null);
   const [exportMenu, setExportMenu] = useState(null);
-  const [starredSections, setStarredSections] = useState([]);
-  const [speedDialOpen, setSpeedDialOpen] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
+  const starredSections = presentation?.starredSections || [];
+  const [, setIsPrinting] = useState(false);
   const [showEnhanceDialog, setShowEnhanceDialog] = useState(false);
 
   const { personalInfo = {} } = resumeData;
@@ -83,7 +86,6 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
   };
 
   const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
     const newTemplate = {
         0: TEMPLATES.MODERN,
         1: TEMPLATES.MODERN_NEO,
@@ -110,22 +112,15 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
         22: TEMPLATES.USA,
         23: TEMPLATES.INDIA,
       }[newValue] || TEMPLATES.MODERN;
-    setActiveTemplate(newTemplate);
-  };
-
-  const handleDropdownChange = (event) => {
-    const selectedTemplate = event.target.value;
-    const tabIndex = Object.values(TEMPLATES).indexOf(selectedTemplate);
-    setActiveTab(tabIndex >= 0 ? tabIndex : 0);
-    setActiveTemplate(selectedTemplate);
+    onPresentationChange({ template: newTemplate });
   };
 
   const toggleStarSection = (section) => {
-    setStarredSections(
-      starredSections.includes(section)
-        ? starredSections.filter((s) => s !== section)
-        : [...starredSections, section]
-    );
+    onPresentationChange({
+      starredSections: starredSections.includes(section)
+        ? starredSections.filter((item) => item !== section)
+        : [...starredSections, section],
+    });
   };
 
   const handleColorMenuOpen = (event) => setColorMenu(event.currentTarget);
@@ -135,18 +130,37 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
   const handleExportMenuOpen = (event) => setExportMenu(event.currentTarget);
   const handleExportMenuClose = () => setExportMenu(null);
 
-  const handleDisplayresume = () => {
+  const handleDisplayresume = async () => {
     handleExportMenuClose();
-    navigate(`/preview-only/${currentUser.uid}/${resumeData.id}`);
+    try {
+      const saved = await onBeforePublish();
+      if (!saved) {
+        throw new Error("Save failed");
+      }
+      await publishResume(currentUser.uid, resumeData.id);
+      navigate(`/preview-only/${currentUser.uid}/${resumeData.id}`);
+    } catch (publishError) {
+      console.error("Failed to publish resume:", publishError);
+      setSnackbar({
+        open: true,
+        message: "The public copy could not be published. Please try again.",
+        severity: "error",
+      });
+    }
   };
 
   const changeColorScheme = (scheme) => {
-    setColorScheme(scheme);
+    const entry = Object.entries(COLOR_SCHEMES).find(
+      ([, candidate]) => candidate === scheme
+    );
+    onPresentationChange({
+      colorScheme: (entry?.[0] || "BLUE").toLowerCase(),
+    });
     handleColorMenuClose();
   };
 
   const changeFontFamily = (font) => {
-    setFontFamily(font);
+    onPresentationChange({ fontFamily: font });
     handleFontMenuClose();
   };
 
@@ -242,13 +256,6 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
     return <ResumeTemplateContent {...commonProps} activeTemplate={activeTemplate} />;
   };
 
-  const speedDialActions = [
-    { icon: <Download />, name: "Download PDF", action: pdfGenerator.downloadPDF },
-    { icon: <Print />, name: "Print", action: printResume },
-    { icon: <FormatColorFill />, name: "Change Colors", action: handleColorMenuOpen },
-    { icon: <TextFormat />, name: "Change Font", action: handleFontMenuOpen },
-  ];
-
   return (
     <Stack spacing={0} sx={{ width: "100%", height: "100%", overflow: "hidden" }}>
       <ResumeToolbar
@@ -279,7 +286,9 @@ const ResumePreview = ({ resumeData, onBack, sectionOrder = [], setSectionOrder 
                             <Typography gutterBottom>Font Size ({fontSize}pt)</Typography>
                             <Slider 
                               value={fontSize} 
-                              onChange={(e, val) => setFontSize(val)} 
+                              onChange={(e, val) =>
+                                onPresentationChange({ fontSize: val })
+                              }
                               min={8} 
                               max={16} 
                               step={1} 

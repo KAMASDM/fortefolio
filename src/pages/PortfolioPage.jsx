@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getDatabase, ref, get } from "firebase/database";
 import {
   Box,
   Typography,
@@ -13,7 +12,7 @@ import {
 import { ResumeTemplateContent } from "../components/ResumeBuilderPage/DisplayResume/ResumeTemplateContent";
 import { constants } from "../components/ResumeBuilderPage/ResumePreview/constants";
 import { formatDate, isSectionEmpty, getInitials } from "../components/ResumeBuilderPage/utils/resumeUtils";
-import app from "../firebaseConfig";
+import { getPublishedResume } from "../services/resumeService";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
@@ -35,12 +34,9 @@ const PortfolioPage = () => {
         return;
       }
       try {
-        const db = getDatabase(app);
-        const resumeRef = ref(db, `users/${userId}/resumes/${resumeId}`);
-        const snapshot = await get(resumeRef);
-
-        if (snapshot.exists()) {
-          const data = snapshot.val();
+        const data = await getPublishedResume(userId, resumeId);
+        if (data) {
+          const presentation = data.presentation || {};
           const formattedData = {
             id: resumeId,
             personalInfo: data.resumeData?.personalInfo || {},
@@ -49,9 +45,15 @@ const PortfolioPage = () => {
             skills: data.resumeData?.skills || [],
             projects: data.resumeData?.projects || [],
             references: data.resumeData?.references || [],
-            activeTemplate: data.metadata?.template || TEMPLATES.MODERN,
-            fontFamily: data.metadata?.font || FONTS.POPPINS,
-            colorScheme: data.metadata?.color || COLOR_SCHEMES.BLUE,
+            activeTemplate: presentation.template || TEMPLATES.MODERN,
+            fontFamily: presentation.fontFamily || FONTS.POPPINS,
+            colorScheme:
+              COLOR_SCHEMES[
+                String(presentation.colorScheme || "blue").toUpperCase()
+              ] || COLOR_SCHEMES.BLUE,
+            fontSize: presentation.fontSize || 10,
+            sectionOrder: presentation.sectionOrder || [],
+            starredSections: presentation.starredSections || [],
           };
           setResumeData(formattedData);
         } else {
@@ -110,7 +112,9 @@ const PortfolioPage = () => {
                 formatDate={formatDate}
                 isMobile={isMobile}
                 isSmallMobile={isSmallMobile}
-                starredSections={[]}
+                starredSections={resumeData.starredSections}
+                sectionOrder={resumeData.sectionOrder}
+                fontSize={resumeData.fontSize}
                 toggleStarSection={() => {}}
             />
         </Paper>

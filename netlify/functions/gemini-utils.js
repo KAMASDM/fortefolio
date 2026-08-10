@@ -333,6 +333,76 @@ function createErrorResponse(statusCode, message, code = 'UNKNOWN_ERROR') {
   };
 }
 
+const AI_UNAVAILABLE_MESSAGE =
+  "Our AI writing assistant is unavailable right now. Your work is safe—please try again in a little while.";
+
+/**
+ * Convert Gemini SDK failures into safe, human-friendly API responses.
+ * Provider details stay in server logs and are never shown to users.
+ *
+ * @param {object} error - Error thrown by the Gemini SDK
+ * @param {string} fallbackMessage - Feature-specific fallback message
+ * @returns {{statusCode: number, message: string, code: string}}
+ */
+function normalizeGeminiError(
+  error,
+  fallbackMessage = "We couldn't complete that AI request right now. Your work is safe—please try again."
+) {
+  const status = Number(error?.statusCode || error?.status) || 500;
+  const details = `${error?.message || ''} ${error?.code || ''}`.toLowerCase();
+
+  if (error?.name === 'AbortError' || details.includes('request timeout')) {
+    return {
+      statusCode: 408,
+      message: "This is taking longer than expected. Please try again in a moment.",
+      code: 'TIMEOUT',
+    };
+  }
+
+  if (
+    status === 429 ||
+    details.includes('quota') ||
+    details.includes('resource_exhausted')
+  ) {
+    return {
+      statusCode: 503,
+      message: "Our AI writing assistant is busy right now. Please wait a moment and try again.",
+      code: 'AI_BUSY',
+    };
+  }
+
+  if (
+    status === 401 ||
+    status === 403 ||
+    details.includes('api key') ||
+    details.includes('api_key') ||
+    details.includes('permission denied') ||
+    details.includes('permission_denied') ||
+    details.includes('unauthenticated') ||
+    details.includes('forbidden')
+  ) {
+    return {
+      statusCode: 503,
+      message: AI_UNAVAILABLE_MESSAGE,
+      code: 'AI_SERVICE_UNAVAILABLE',
+    };
+  }
+
+  if (details.includes('safety') || details.includes('blocked')) {
+    return {
+      statusCode: 400,
+      message: "We couldn't create that content as written. Try rephrasing your request and we'll try again.",
+      code: 'SAFETY_FILTER',
+    };
+  }
+
+  return {
+    statusCode: status >= 400 && status < 500 ? status : 500,
+    message: fallbackMessage,
+    code: 'AI_REQUEST_FAILED',
+  };
+}
+
 /**
  * Create success response
  * @param {string} content - Response content
@@ -406,6 +476,8 @@ module.exports = {
   parseStructuredResponse,
   approximateTokenCount,
   createErrorResponse,
+  AI_UNAVAILABLE_MESSAGE,
+  normalizeGeminiError,
   createSuccessResponse,
   mapModelName,
   sanitizeInput
