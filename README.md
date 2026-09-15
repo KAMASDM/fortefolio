@@ -17,7 +17,7 @@ ForteFolio is a React resume builder with Firebase authentication and storage,
   interview questions
 - Explicit publish/unpublish workflow using separate public resume snapshots
 - Template-faithful browser print / Save as PDF
-- Standard accessible PDF and editable DOCX exports
+- Standard text PDF and editable DOCX exports
 
 ## Technology
 
@@ -33,7 +33,7 @@ Functions/OpenAI implementation has been removed.
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22.12+ recommended (also supports 20.19+ and 24+)
 - A Firebase project with Google authentication and Realtime Database enabled
 - A Gemini API key
 - A Firebase service account for the Netlify Functions runtime
@@ -103,7 +103,8 @@ metadata.presentation
 ├── fontFamily
 ├── fontSize
 ├── sectionOrder
-└── starredSections
+├── starredSections
+└── hiddenSections
 ```
 
 Older `metadata.template`, `metadata.colorScheme`, and `metadata.color` records
@@ -130,8 +131,8 @@ npx firebase-tools deploy --only database
 The browser sends a current Firebase ID token to both AI functions. Functions
 verify the token with Firebase Admin before calling Gemini.
 
-- Main generation: 50 requests per user per rolling one-hour window
-- Quick suggestions: 100 requests per user per rolling one-hour window
+- Main generation: 50 requests per user per one-hour window
+- Quick suggestions: 100 requests per user per one-hour window
 - Counters are stored durably in Firebase and cannot be accessed by clients
 - Prompts and message counts are bounded server-side
 - CORS is restricted to configured origins
@@ -140,7 +141,7 @@ verify the token with Firebase Admin before calling Gemini.
 
 - **Template-faithful PDF / Print** opens the browser print dialog; choose
   “Save as PDF” to retain the selected visual template.
-- **Standard PDF** creates a consistent, accessible single-column document.
+- **Standard PDF** creates a consistent single-column document with selectable text.
 - **Editable DOCX** creates a standard editable Word layout.
 
 The standard PDF and DOCX exports intentionally do not imitate every visual
@@ -172,4 +173,106 @@ npm run build
 ```
 
 Configure all server variables in Netlify, deploy Firebase database rules, and
-then deploy the site. Node.js 20 is configured in `netlify.toml`.
+then deploy the site. Node.js 22 is configured in `netlify.toml`.
+
+
+## Resume workflow upgrade — September 2026
+
+The editor now commits each input immediately to a single document state. Cloud
+saving remains debounced by five seconds. Changing sections immediately no longer
+loses the last keystrokes, and visiting a blank section does not create a saved
+placeholder entry. Ctrl/Cmd+S saves, while browser navigation and explicit exit
+controls protect unsaved work.
+
+### Faster creation
+
+- New resumes start with the signed-in user's name and email.
+- Desktop editing includes a live preview that can be hidden for more space.
+- Import existing resume **text** with AI, review the extracted sections, then
+  apply the result. PDF/DOCX file parsing is not included; paste their text instead.
+- Download and restore JSON backups, including presentation settings.
+- Undo and redo up to 50 groups of changes, including imports and AI applications.
+- Unsaved recovery drafts are stored per user and resume in **sessionStorage**.
+  They survive refreshing the same tab. This is not a full offline app: an initial
+  load still requires connectivity, and closing the tab can discard its recovery
+  draft. Cloud synchronization resumes after reconnecting.
+- The resume coach provides an actionable seven-item writing checklist. It does
+  not require references or projects and does not claim to predict ATS results.
+- Paste a job description for a local keyword comparison. Draft a factual summary
+  using the resume and job description, review/edit it, and apply it explicitly.
+- Experience bullet rewrites also require review before replacing the original.
+- Job search opens LinkedIn or Indeed with the chosen role and location. The
+  disconnected `/api/jobs/search` integration has been replaced; no jobs backend
+  or invented in-app listings are used.
+
+### Customization, export and sharing
+
+- Template search and keyboard-operable selection cover all 24 existing layouts.
+- Font, font-size and section-visibility controls work on mobile and desktop.
+  Font assets are bundled locally.
+- Section reordering is supported by **Minimal**, Standard PDF and DOCX. Other
+  templates retain their designed section placement, as stated in the controls.
+- A shared data layer filters empty entries, applies visibility settings, handles
+  legacy field names and removes unsafe website URLs from rendered/exported links.
+- DOCX now includes references, portfolio links, project links and experience
+  descriptions. PDF supports selectable text, links and flowing multipage entries.
+  Standard PDF uses bundled Poppins Latin glyphs; use browser print and check the
+  output for scripts outside this font's coverage. Formal PDF accessibility/tagging
+  certification has not been performed.
+- Public sharing has an explicit review dialog with email, phone, location and
+  reference controls. Phone and references are excluded by default from new
+  publications. Field controls cannot redact personal details typed into prose.
+- Publishing, unpublishing and deleting use atomic database updates. Existing
+  public links remain snapshots until updated; a disabled link no longer loads.
+- Public and portfolio URLs share a responsive reader with copy-link fallback,
+  native sharing, print and useful missing-link/error states.
+- Text printouts use text nodes rather than interpolating AI output into HTML.
+- Template printing copies Material UI CSSOM rules and removes hidden measurement
+  nodes, preserving generated styles in the print window.
+- Fixed inverted reference visibility in the Europe, India and USA templates.
+- Route pages and PDF/DOCX generation load on demand.
+
+### Backend and deployment
+
+AI import and summary drafting use server-owned JSON schemas with the installed
+Google GenAI SDK's `responseJsonSchema` and `abortSignal` configuration. See
+[Google's structured output documentation](https://ai.google.dev/gemini-api/docs/structured-output).
+`GEMINI_MODEL` optionally overrides the server model; the default remains
+`gemini-flash-latest`. Credentials stay on Netlify Functions, and both existing
+AI endpoints continue to verify Firebase tokens and apply durable per-user limits.
+
+The contact form now submits to **Netlify Forms** instead of displaying a simulated
+success. Enable [form detection in Netlify](https://docs.netlify.com/manage/forms/setup/)
+and deploy the included static form in
+`index.html`. Local development reports that delivery is unavailable and preserves
+the user's message. Live form delivery requires verification after deployment.
+
+Firebase and AI deployment configuration is still required. This change does not
+publish the site, deploy database rules, sign into a real Google account, or test
+production accounts or real email delivery.
+
+### Verification
+
+```bash
+npm ci --legacy-peer-deps
+npm install --prefix netlify/functions
+npm test
+npm run lint
+npm run build
+npx playwright install chromium  # once, if no Playwright browser is installed
+npm run test:browser
+```
+
+Unit tests cover saving races, retries, data normalization, privacy filters,
+backup validation, text matching, export contents and AI authentication boundaries.
+Browser tests exercise the actual application components and routing with isolated
+Firebase/authentication fixtures and controlled AI HTTP responses. They cover
+immediate section switching, recovery, undo/redo, mobile customization, all 24
+templates, imports, writing review, PDF/DOCX downloads, public sharing, browser Back,
+AI failure, reconnecting after offline edits, print styling and preserving contact
+messages when delivery is unavailable. Validation completed with 33 passing unit
+tests and 12 passing browser scenarios; the production build passes. Lint reports
+zero errors and 26 existing warnings. These tests do not establish live
+Firebase, Gemini or Netlify Forms availability.
+
+Browser artifacts are written to `test-results/` and are ignored by Git.

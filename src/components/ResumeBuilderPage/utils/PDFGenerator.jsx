@@ -1,4 +1,4 @@
-import { downloadResumePdf } from './resumePdfExport';
+
 
 export const PDFGenerator = ({
   resumeRef,
@@ -7,9 +7,9 @@ export const PDFGenerator = ({
   personalInfo,
   resumeData,
   colorScheme,
+  presentation,
   onSuccess,
   onError,
-  templateType = 'MODERN'
 }) => {
   const downloadPDF = async () => {
     if (!resumeRef.current) {
@@ -19,9 +19,11 @@ export const PDFGenerator = ({
 
     setLoading(true);
     try {
+      const { downloadResumePdf } = await import("./resumePdfExport");
       await downloadResumePdf({
         resumeData,
         colorScheme,
+        presentation,
         fileName: `${personalInfo?.fullName || 'Resume'}.pdf`,
       });
       onSuccess("PDF downloaded successfully.");

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Typography,
+  Alert,
   Box,
   Grid,
   CardContent,
@@ -58,6 +59,7 @@ const MotionButton = motion(Button);
 
 const ContactUs = () => {
   const theme = useTheme();
+  const [submission, setSubmission] = useState(null);
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -82,13 +84,19 @@ const ContactUs = () => {
         .min(10, "Message is too short (minimum 10 characters)")
         .required("Message is required"),
     }),
-    onSubmit: (values, { resetForm, setSubmitting }) => {
-      console.log("Form submitted:", values);
-      setTimeout(() => {
-        alert("Message Sent! We'll get back to you soon.");
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
+      setSubmission(null);
+      try {
+        // Netlify strips data-netlify after registering this static form.
+        if (import.meta.env.DEV || document.querySelector('form[name="contact"][data-netlify]')) {
+          throw new Error("Contact delivery isn't enabled here. Email support@anantsoftcomputing.com instead.");
+        }
+        const response = await fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ "form-name": "contact", ...values }).toString() });
+        if (!response.ok) throw new Error("The contact form is unavailable here. Email support@anantsoftcomputing.com instead.");
+        setSubmission({ severity: "success", message: "Your message was submitted. Thank you for getting in touch." });
         resetForm();
-        setSubmitting(false);
-      }, 1000);
+      } catch (error) { setSubmission({ severity: "error", message: error.message }); }
+      finally { setSubmitting(false); }
     },
   });
 
@@ -262,12 +270,15 @@ const ContactUs = () => {
                 </Typography>
                 <Box
                   component="form"
+              name="contact"
+              method="POST"
                   onSubmit={formik.handleSubmit}
                   sx={{ mt: 2 }}
                 >
                   <Grid container spacing={2.5}>
                     <Grid item xs={12} sm={6}>
-                      <TextField
+                      {submission && <Alert severity={submission.severity} sx={{ mb: 2 }}>{submission.message}</Alert>}
+                  <TextField
                         fullWidth
                         name="name"
                         label="Your Name"

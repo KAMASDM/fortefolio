@@ -430,26 +430,9 @@ function createSuccessResponse(content, metadata = {}) {
  * @param {string} model - Input model name
  * @returns {string} Gemini model name
  */
-function mapModelName(model) {
-  // Map everything to gemini-flash-latest for now as it's the only one with available free tier quota
-  // verified via test script on 2026-02-05
-  const modelMap = {
-    "gpt-3.5-turbo": "gemini-flash-latest",
-    "gpt-4": "gemini-flash-latest",
-    "gpt-4-turbo": "gemini-flash-latest",
-    
-    // Explicit Gemini mapppings
-    "gemini-1.5-flash": "gemini-flash-latest",
-    "gemini-1.5-flash-latest": "gemini-flash-latest",
-    "gemini-1.5-pro": "gemini-flash-latest", 
-    "gemini-1.5-pro-latest": "gemini-flash-latest", 
-    
-    // Newer models that are currently rate limited/quota exceeded
-    "gemini-2.0-flash": "gemini-flash-latest", 
-    "gemini-2.0-flash-lite": "gemini-flash-latest",
-    "gemini-3-pro-preview": "gemini-flash-latest"
-  };
-  return modelMap[model] || "gemini-flash-latest";
+function mapModelName(_model) {
+  // Deployment controls provider/model selection; legacy client names stay compatible.
+  return process.env.GEMINI_MODEL || "gemini-flash-latest";
 }
 
 /**

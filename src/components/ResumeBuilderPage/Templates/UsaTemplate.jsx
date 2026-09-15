@@ -219,7 +219,7 @@ export const UsaTemplate = ({
               </Link>
             </Box>
           )}
-          {personalInfo.portfolio && (
+          {personalInfo.portfolio && personalInfo.portfolio !== personalInfo.website && (
             <Box component="span">
               <Link href={personalInfo.portfolio} target="_blank">
                 Portfolio
@@ -585,7 +585,7 @@ export const UsaTemplate = ({
         </Box>
       ),
 
-      isSectionEmpty("references") && (
+      !isSectionEmpty("references") && (
         <Box sx={{ pageBreakInside: 'avoid' }}>
           <SectionTitle
             title="References"

@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   NPM_FLAGS = "--legacy-peer-deps"
 
 [functions]
@@ -17,7 +17,7 @@
   timeout = 26
 
 [build.processing]
-  skip_processing = true
+  skip_processing = false
 
 # Cache busting headers
 [[headers]]

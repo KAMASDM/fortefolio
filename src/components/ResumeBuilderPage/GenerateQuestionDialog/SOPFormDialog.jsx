@@ -13,16 +13,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const StyledTextField = (props) => (
   <TextField

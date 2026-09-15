@@ -14,6 +14,7 @@ import {
   GitHub as GitHubIcon,
   Language as LanguageIcon,
 } from "@mui/icons-material";
+import EditableText from "../ResumePreview/EditableText";
 
 const contactItems = (personalInfo) => [
   { key: "email", label: personalInfo.email, icon: EmailIcon, href: personalInfo.email ? `mailto:${personalInfo.email}` : null },
@@ -38,6 +39,9 @@ export const ClassicTemplate = ({
   colorScheme,
   fontFamily,
   isSectionEmpty,
+  editMode = false,
+  onEditPersonalInfo = () => {},
+  onEditListItem = () => {},
 }) => {
   const {
     personalInfo = {},
@@ -72,11 +76,21 @@ export const ClassicTemplate = ({
             lineHeight: 1,
           }}
         >
-          {personalInfo.fullName || "Your Name"}
+          <EditableText
+            editMode={editMode}
+            value={personalInfo.fullName}
+            placeholder="Your Name"
+            onCommit={(v) => onEditPersonalInfo("fullName", v)}
+          />
         </Typography>
-        {personalInfo.jobTitle && (
+        {(editMode || personalInfo.jobTitle) && (
           <Typography sx={{ mt: 1.2, color: colorScheme.primary, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>
-            {personalInfo.jobTitle}
+            <EditableText
+              editMode={editMode}
+              value={personalInfo.jobTitle}
+              placeholder="Add a job title"
+              onCommit={(v) => onEditPersonalInfo("jobTitle", v)}
+            />
           </Typography>
         )}
         <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap" justifyContent="center" sx={{ mt: 2.2 }}>
@@ -95,12 +109,19 @@ export const ClassicTemplate = ({
         </Stack>
       </Box>
 
-      {personalInfo.summary && (
+      {(editMode || personalInfo.summary) && (
         <Box sx={{ mb: 4 }}>
           <Divider sx={{ borderColor: "rgba(146, 120, 77, 0.28)", mb: 1.4 }} />
           <Typography sx={sectionTitleSx(colorScheme)}>Profile</Typography>
           <Typography sx={{ mt: 1.1, lineHeight: 1.9, color: "#374151" }}>
-            {personalInfo.summary}
+            <EditableText
+              editMode={editMode}
+              multiline
+              component="div"
+              value={personalInfo.summary}
+              placeholder="Add a professional summary"
+              onCommit={(v) => onEditPersonalInfo("summary", v)}
+            />
           </Typography>
         </Box>
       )}
@@ -115,10 +136,20 @@ export const ClassicTemplate = ({
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={8}>
                     <Typography sx={{ fontWeight: 800, fontSize: "1.02rem" }}>
-                      {exp.position || "Position Title"}
+                      <EditableText
+                        editMode={editMode}
+                        value={exp.position}
+                        placeholder="Position Title"
+                        onCommit={(v) => onEditListItem("experience", index, "position", v)}
+                      />
                     </Typography>
                     <Typography sx={{ mt: 0.35, color: colorScheme.primary, fontWeight: 700 }}>
-                      {exp.company || "Company Name"}
+                      <EditableText
+                        editMode={editMode}
+                        value={exp.company}
+                        placeholder="Company Name"
+                        onCommit={(v) => onEditListItem("experience", index, "company", v)}
+                      />
                       {exp.location ? ` | ${exp.location}` : ""}
                     </Typography>
                   </Grid>
@@ -128,8 +159,17 @@ export const ClassicTemplate = ({
                     </Typography>
                   </Grid>
                 </Grid>
-                {exp.description && (
-                  <Typography sx={{ mt: 1.1, lineHeight: 1.8, color: "#374151" }}>{exp.description}</Typography>
+                {(editMode || exp.description) && (
+                  <Typography sx={{ mt: 1.1, lineHeight: 1.8, color: "#374151" }}>
+                    <EditableText
+                      editMode={editMode}
+                      multiline
+                      component="div"
+                      value={exp.description}
+                      placeholder="Add a description"
+                      onCommit={(v) => onEditListItem("experience", index, "description", v)}
+                    />
+                  </Typography>
                 )}
                 {typeof exp.responsibilities === "string" && exp.responsibilities.trim() && (
                   <Box component="ul" sx={{ pl: 2.2, mt: 1.1, mb: 0 }}>
@@ -157,9 +197,21 @@ export const ClassicTemplate = ({
               <Stack spacing={2} sx={{ mt: 1.4 }}>
                 {education.map((item, index) => (
                   <Box key={item.id || index}>
-                    <Typography sx={{ fontWeight: 800 }}>{item.degree || "Degree"}</Typography>
+                    <Typography sx={{ fontWeight: 800 }}>
+                      <EditableText
+                        editMode={editMode}
+                        value={item.degree}
+                        placeholder="Degree"
+                        onCommit={(v) => onEditListItem("education", index, "degree", v)}
+                      />
+                    </Typography>
                     <Typography sx={{ color: colorScheme.primary, fontWeight: 700, mt: 0.3 }}>
-                      {item.institution || "Institution"}
+                      <EditableText
+                        editMode={editMode}
+                        value={item.institution}
+                        placeholder="Institution"
+                        onCommit={(v) => onEditListItem("education", index, "institution", v)}
+                      />
                     </Typography>
                     <Typography sx={{ color: "#6b7280", mt: 0.35 }}>
                       {formatDate(item.startDate) || "Start Date"} - {item.current ? "Present" : formatDate(item.endDate) || "End Date"}
@@ -196,10 +248,24 @@ export const ClassicTemplate = ({
               <Stack spacing={2.2} sx={{ mt: 1.4 }}>
                 {projects.map((project, index) => (
                   <Box key={project.id || index}>
-                    <Typography sx={{ fontWeight: 800 }}>{project.title || "Project Title"}</Typography>
-                    {project.description && (
+                    <Typography sx={{ fontWeight: 800 }}>
+                      <EditableText
+                        editMode={editMode}
+                        value={project.title}
+                        placeholder="Project Title"
+                        onCommit={(v) => onEditListItem("projects", index, "title", v)}
+                      />
+                    </Typography>
+                    {(editMode || project.description) && (
                       <Typography sx={{ mt: 0.75, lineHeight: 1.75, color: "#374151" }}>
-                        {project.description}
+                        <EditableText
+                          editMode={editMode}
+                          multiline
+                          component="div"
+                          value={project.description}
+                          placeholder="Add a description"
+                          onCommit={(v) => onEditListItem("projects", index, "description", v)}
+                        />
                       </Typography>
                     )}
                     <Stack direction="row" spacing={1.4} sx={{ mt: 0.8 }}>
@@ -219,11 +285,30 @@ export const ClassicTemplate = ({
               <Stack spacing={1.8} sx={{ mt: 1.4 }}>
                 {references.map((reference, index) => (
                   <Box key={reference.id || index}>
-                    <Typography sx={{ fontWeight: 800 }}>{reference.name || "Reference Name"}</Typography>
-                    <Typography sx={{ color: colorScheme.primary, fontWeight: 700, mt: 0.25 }}>
-                      {reference.position || "Role"}
+                    <Typography sx={{ fontWeight: 800 }}>
+                      <EditableText
+                        editMode={editMode}
+                        value={reference.name}
+                        placeholder="Reference Name"
+                        onCommit={(v) => onEditListItem("references", index, "name", v)}
+                      />
                     </Typography>
-                    <Typography sx={{ color: "#6b7280" }}>{reference.company || "Company"}</Typography>
+                    <Typography sx={{ color: colorScheme.primary, fontWeight: 700, mt: 0.25 }}>
+                      <EditableText
+                        editMode={editMode}
+                        value={reference.position}
+                        placeholder="Role"
+                        onCommit={(v) => onEditListItem("references", index, "position", v)}
+                      />
+                    </Typography>
+                    <Typography sx={{ color: "#6b7280" }}>
+                      <EditableText
+                        editMode={editMode}
+                        value={reference.company}
+                        placeholder="Company"
+                        onCommit={(v) => onEditListItem("references", index, "company", v)}
+                      />
+                    </Typography>
                     {reference.email && <Typography sx={{ color: "#6b7280" }}>{reference.email}</Typography>}
                     {reference.phone && <Typography sx={{ color: "#6b7280" }}>{reference.phone}</Typography>}
                   </Box>

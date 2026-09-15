@@ -1,3 +1,4 @@
+const { tasks } = require("./resume-tasks");
 const { GoogleGenAI } = require('@google/genai');
 const {
   ENTERPRISE_SAFETY_SETTINGS,
@@ -45,7 +46,9 @@ exports.handler = async (event, context) => {
 
   try {
     const user = await authenticateRequest(event);
-    const { messages, model = "gemini-1.5-flash", temperature = 0.7, maxTokens = 1500 } = JSON.parse(event.body);
+    if (!event.body || event.body.length > 120000) return respond(createErrorResponse(400, "Please use a shorter resume or prompt.", "INVALID_REQUEST"));
+    const { messages, model, temperature = 0.7, maxTokens = 1500, task } = JSON.parse(event.body);
+    if (task && !Object.hasOwn(tasks, task)) return respond(createErrorResponse(400, "Unknown writing task.", "INVALID_REQUEST"));
 
     // Basic validation
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -106,12 +109,14 @@ exports.handler = async (event, context) => {
     
     // 2. Fix: Nest config parameters properly for @google/genai SDK
     const modelConfig = {
-      temperature: temperature,
-      maxOutputTokens: Math.min(maxTokens || 2000, 8192), // Allow larger outputs for Flash model
+      temperature: Number.isFinite(temperature) ? Math.max(0, Math.min(1, temperature)) : 0.7,
+      maxOutputTokens: Math.max(60, Math.min(Number(maxTokens) || 2000, 8192)), // Allow larger outputs for Flash model
       topP: 0.95,
       topK: 40,
       safetySettings: ENTERPRISE_SAFETY_SETTINGS,
-      responseMimeType: 'text/plain',
+      responseMimeType: task ? 'application/json' : 'text/plain',
+      ...(task ? { responseJsonSchema: tasks[task].schema, systemInstruction: tasks[task].instruction } : { systemInstruction: "Help users write accurate career documents. Never invent credentials, employers, skills or achievements. Use only facts the user supplied." }),
+      abortSignal: controller.signal,
     };
     
     let prompt = formatMessages(sanitizedMessages);
@@ -123,9 +128,6 @@ exports.handler = async (event, context) => {
       model: geminiModel,
       contents: prompt,
       config: modelConfig,
-    }, {
-      // Pass the signal to the fetch request to enable actual cancellation
-      signal: controller.signal 
     });
 
     // Clear timeout immediately after success

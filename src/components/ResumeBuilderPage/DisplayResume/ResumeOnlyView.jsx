@@ -1,235 +1,209 @@
-import { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useParams, Link as RouterLink } from "react-router-dom";
 import {
-  Box,
-  Typography,
-  useTheme,
-  useMediaQuery,
-  SpeedDial,
-  SpeedDialIcon,
-  SpeedDialAction,
-  Snackbar,
   Alert,
-  CircularProgress, // Added for loading indicator
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import {
-  Share as ShareIcon,
-  Email as EmailIcon,
-  ContentCopy as CopyIcon,
-} from "@mui/icons-material";
+import { ContentCopy, Share, Print } from "@mui/icons-material";
 import { ResumeTemplateContent } from "./ResumeTemplateContent";
-import { constants } from "../ResumePreview/constants";
-import { formatDate, isSectionEmpty, getInitials } from "../utils/resumeUtils";
 import PreviewWrapper from "../Templates/PreviewWrapper";
+import { constants } from "../ResumePreview/constants";
+import { formatDate, getInitials, isSectionEmpty } from "../utils/resumeUtils";
+import { openTemplatePrintPreview } from "../utils/advancedPDFGenerator";
 import { getPublishedResume } from "../../../services/resumeService";
+import {
+  normalizePresentation,
+  normalizeResumeData,
+} from "../../../services/resumeModel";
 
-const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
-
-const ResumeOnlyView = () => {
+export default function ResumeOnlyView() {
   const { userId, resumeId } = useParams();
-  const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const [resumeData, setResumeData] = useState(null);
+  const [record, setRecord] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-
-  const {
-    activeTemplate = TEMPLATES.MODERN,
-    fontFamily = FONTS.POPPINS,
-    colorScheme = COLOR_SCHEMES.BLUE,
-  } = location.state || {};
-
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [manualCopy, setManualCopy] = useState(false);
+  const resumeRef = useRef(null);
+  const url = `${window.location.origin}/preview-only/${userId}/${resumeId}`;
   useEffect(() => {
-    const fetchResumeData = async () => {
-      if (!userId || !resumeId) {
-        setError("User ID or Resume ID is missing.");
-        setLoading(false);
-        return;
-      }
-      try {
-        const data = await getPublishedResume(userId, resumeId);
-        if (data) {
-          const presentation = data.presentation || {};
-          const formattedData = {
-            id: resumeId,
-            personalInfo: data.resumeData?.personalInfo || {},
-            education: data.resumeData?.education || [],
-            experience: data.resumeData?.experience || [],
-            skills: data.resumeData?.skills || [],
-            projects: data.resumeData?.projects || [],
-            references: data.resumeData?.references || [],
-            activeTemplate: presentation.template || activeTemplate,
-            fontFamily: presentation.fontFamily || fontFamily,
-            colorScheme:
-              COLOR_SCHEMES[
-                String(presentation.colorScheme || "blue").toUpperCase()
-              ] || colorScheme,
-            fontSize: presentation.fontSize || 10,
-            sectionOrder: presentation.sectionOrder || [],
-            starredSections: presentation.starredSections || [],
-          };
-          setResumeData(formattedData);
-        } else {
-          setError("Resume not found.");
-        }
-      } catch (err) {
-        console.error("Firebase fetch error:", err);
-        setError("Failed to fetch resume data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResumeData();
-  }, [userId, resumeId, activeTemplate, fontFamily, colorScheme]);
-
-  const currentUrl = window.location.href;
-
-  const handleShare = (platform) => {
-    switch (platform) {
-      case "email":
-        window.open(
-          `mailto:?subject=Check out this resume&body=${encodeURIComponent(
-            currentUrl
-          )}`,
-          "_blank"
-        );
-        break;
-      case "copy":
-        navigator.clipboard.writeText(currentUrl).then(() => {
-          setSnackbarMessage("Link copied to clipboard!");
-          setOpenSnackbar(true);
-        });
-        break;
-      default:
-        if (navigator.share) {
-          navigator
-            .share({
-              title: "Resume",
-              url: currentUrl,
-            })
-            .catch((err) => console.error("Error sharing:", err));
-        } else {
-          navigator.clipboard.writeText(currentUrl).then(() => {
-            setSnackbarMessage("Link copied to clipboard!");
-            setOpenSnackbar(true);
+    let active = true;
+    setLoading(true);
+    setError("");
+    setRecord(null);
+    getPublishedResume(userId, resumeId)
+      .then((result) => {
+        if (!active) return;
+        if (result)
+          setRecord({
+            ...result,
+            resumeData: normalizeResumeData(result.resumeData),
+            presentation: normalizePresentation({
+              presentation: result.presentation,
+            }),
           });
-        }
+        else
+          setError(
+            "This resume isn't public. The owner may have disabled or replaced the link.",
+          );
+      })
+      .catch(() => {
+        if (active)
+          setError(
+            "We couldn't load this resume. Check your connection and try again.",
+          );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [userId, resumeId]);
+  useEffect(() => {
+    const previous = document.title;
+    if (record)
+      document.title = `${record.resumeData.personalInfo.fullName || record.title} · Resume`;
+    return () => {
+      document.title = previous;
+    };
+  }, [record]);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setNotice("Link copied");
+    } catch {
+      setManualCopy(true);
+      setNotice("Select and copy the link below.");
     }
   };
-
-  const shareActions = [
-    { icon: <EmailIcon />, name: "Email", action: () => handleShare("email") },
-    {
-      icon: <CopyIcon />,
-      name: "Copy Link",
-      action: () => handleShare("copy"),
-    },
-  ];
-
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
-
-  if (loading) {
+  if (loading)
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-        }}
-      >
+      <Stack alignItems="center" gap={2} sx={{ py: 10 }}>
         <CircularProgress />
-        <Typography sx={{ ml: 2 }}>Loading Resume...</Typography>
-      </Box>
+        <Typography>Loading resume…</Typography>
+      </Stack>
     );
-  }
-
-  if (error || !resumeData) {
+  if (error)
     return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="h6" color="error">
-          {error || "Resume data not found."}
-        </Typography>
-        <Typography variant="body1">
-          Please check the URL or generate the resume again.
-        </Typography>
-      </Box>
+      <Container maxWidth="sm" sx={{ py: 10 }}>
+        <Alert severity="info">{error}</Alert>
+        <Button sx={{ mt: 2 }} onClick={() => window.location.reload()}>
+          Try again
+        </Button>
+        <Button component={RouterLink} to="/">
+          Create your own resume
+        </Button>
+      </Container>
     );
-  }
-
+  if (!record) return null;
+  const { resumeData, presentation } = record;
   return (
-    <Box
-      sx={{
-        p: { xs: 2, sm: 3, md: 4 },
-        margin: "auto",
-        minHeight: "100vh",
-        fontFamily: resumeData.fontFamily,
-        color: theme.palette.text.primary,
-        position: "relative",
-        width: "100%", // Instead of minWidth
-        marginInline: "8px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <ResumeTemplateContent
-        resumeData={resumeData}
-        activeTemplate={resumeData.activeTemplate}
-        fontFamily={resumeData.fontFamily}
-        colorScheme={resumeData.colorScheme}
-        isSectionEmpty={(section) => isSectionEmpty(section, resumeData)}
-        getInitials={getInitials}
-        formatDate={formatDate}
-        isMobile={isMobile}
-        isSmallMobile={isSmallMobile}
-        starredSections={resumeData.starredSections}
-        sectionOrder={resumeData.sectionOrder}
-        fontSize={resumeData.fontSize}
-        toggleStarSection={() => {}}
-      />
-      <SpeedDial
-        ariaLabel="Share Resume"
-        sx={{
-          position: "fixed",
-          right: { xs: 16, sm: 24, md: 30 },
-          bottom: { xs: 16, sm: 24, md: 30 },
-        }}
-        icon={<SpeedDialIcon openIcon={<ShareIcon />} />}
-        direction="up"
+    <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 } }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        flexWrap="wrap"
+        gap={1}
+        sx={{ mb: 2 }}
+        className="no-print"
       >
-        {shareActions.map((action) => (
-          <SpeedDialAction
-            key={action.name}
-            icon={action.icon}
-            tooltipTitle={action.name}
-            onClick={action.action}
-          />
-        ))}
-      </SpeedDial>
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity="success"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
+        <Box>
+          <Typography variant="h6">
+            {resumeData.personalInfo.fullName || record.title}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Published resume
+          </Typography>
+        </Box>
+        <Stack direction="row" gap={0.5}>
+          <Button startIcon={<ContentCopy />} onClick={copy}>
+            Copy link
+          </Button>
+          <Button
+            startIcon={<Share />}
+            onClick={async () => {
+              try {
+                if (navigator.share)
+                  await navigator.share({ title: record.title, url });
+                else await copy();
+              } catch (e) {
+                if (e.name !== "AbortError")
+                  setNotice("Sharing is unavailable. Use Copy link.");
+              }
+            }}
+          >
+            Share
+          </Button>
+          <Button
+            startIcon={<Print />}
+            onClick={async () => {
+              try {
+                await openTemplatePrintPreview(
+                  resumeRef.current,
+                  resumeData.personalInfo,
+                );
+              } catch (e) {
+                setNotice(e.message);
+              }
+            }}
+          >
+            Print
+          </Button>
+        </Stack>
+      </Stack>
+      {notice && (
+        <Alert onClose={() => setNotice("")} sx={{ mb: 2 }}>
+          {notice}
         </Alert>
-      </Snackbar>
-    </Box>
+      )}
+      {manualCopy && (
+        <TextField
+          fullWidth
+          value={url}
+          label="Public link"
+          InputProps={{ readOnly: true }}
+          onFocus={(e) => e.target.select()}
+          sx={{ mb: 2 }}
+        />
+      )}
+      <Paper variant="outlined" sx={{ overflow: "hidden", bgcolor: "white" }}>
+        <PreviewWrapper>
+          <div ref={resumeRef} id="print-resume-root" style={{ width: 794 }}>
+            <ResumeTemplateContent
+              resumeData={resumeData}
+              activeTemplate={presentation.template}
+              fontFamily={presentation.fontFamily}
+              fontSize={presentation.fontSize}
+              colorScheme={
+                constants.COLOR_SCHEMES[
+                  presentation.colorScheme.toUpperCase()
+                ] || constants.COLOR_SCHEMES.BLUE
+              }
+              hiddenSections={presentation.hiddenSections}
+              sectionOrder={presentation.sectionOrder}
+              starredSections={presentation.starredSections}
+              isSectionEmpty={(section) => isSectionEmpty(section, resumeData)}
+              formatDate={formatDate}
+              getInitials={getInitials}
+              isMobile={false}
+              isSmallMobile={false}
+            />
+          </div>
+        </PreviewWrapper>
+      </Paper>
+      <Box sx={{ textAlign: "center", mt: 3 }}>
+        <Button component={RouterLink} to="/">
+          Create your resume with ForteFolio
+        </Button>
+      </Box>
+    </Container>
   );
-};
-
-export default ResumeOnlyView;
+}

@@ -17,14 +17,7 @@ const getFriendlyAIError = (response, result = {}) => {
  * In development (localhost), always use Netlify dev server on port 8888
  * In production, use relative URLs
  */
-const getApiBaseUrl = () => {
-  // In development, always use Netlify dev server
-  if (window.location.hostname === 'localhost') {
-    return 'http://localhost:8888';
-  }
-  // In production, use relative URLs
-  return '';
-};
+const getApiBaseUrl = () => "";
 
 const getAuthenticatedHeaders = async () => {
   const user = auth.currentUser;
@@ -49,6 +42,7 @@ export const callOpenAI = async (messages, options = {}) => {
     model = "gemini-1.5-flash",
     temperature = 0.7,
     maxTokens = 1500,
+    task,
   } = options;
 
   try {
@@ -62,6 +56,7 @@ export const callOpenAI = async (messages, options = {}) => {
         model,
         temperature,
         maxTokens,
+        task,
       }),
     });
 
@@ -153,4 +148,9 @@ export const checkRateLimit = async () => {
   // Rate limiting is now handled internally by the OpenAI function
   // Return permissive default since Netlify functions handle this internally
   return { allowed: true, remaining: 50 };
+};
+
+export const runResumeTask = async (task, content) => {
+  const result = await callOpenAI([{ role: "user", content }], { task, temperature: 0.2, maxTokens: task === "import" ? 6000 : 1000 });
+  try { return JSON.parse(result); } catch { throw new Error("The writing assistant returned an incomplete result. Please try again with less text."); }
 };

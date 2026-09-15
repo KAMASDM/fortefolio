@@ -85,7 +85,8 @@ const authenticateRequest = async (event) => {
   }
 
   const app = getAdminApp();
-  return getAuth(app).verifyIdToken(token, true);
+  try { return await getAuth(app).verifyIdToken(token, true); }
+  catch { const error = new Error("Authentication required."); error.code = "AUTH_REQUIRED"; throw error; }
 };
 
 const enforceRateLimit = async ({

@@ -245,7 +245,7 @@ const IndiaTemplate = ({
               </Link>
             </Box>
           )}
-          {personalInfo.portfolio && (
+          {personalInfo.portfolio && personalInfo.portfolio !== personalInfo.website && (
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <PersonIcon fontSize="small" sx={{ mr: 1.5, color: colorScheme.primary, flexShrink: 0, ...pdfColorStyles }} />
               <Link
@@ -595,7 +595,7 @@ const IndiaTemplate = ({
     </Box>
   ),
 
-  isSectionEmpty("references") && (
+  !isSectionEmpty("references") && (
     <Box>
       <SectionTitle title="REFERENCES" />
       <Grid container spacing={3}>

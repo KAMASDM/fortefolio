@@ -43,6 +43,7 @@ describe("resume editor saving and navigation", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    window.sessionStorage.clear();
   });
 
   afterEach(() => {
@@ -57,7 +58,7 @@ describe("resume editor saving and navigation", () => {
         currentUser,
         resumeId: "resume-1",
         navigate,
-      })
+      }),
     );
     return { result, navigate };
   };
@@ -118,7 +119,7 @@ describe("resume editor saving and navigation", () => {
           template: "creative",
           fontSize: 12,
         }),
-      })
+      }),
     );
   });
 
@@ -128,7 +129,7 @@ describe("resume editor saving and navigation", () => {
       () =>
         new Promise((resolve) => {
           finishFirstSave = resolve;
-        })
+        }),
     );
     const { result } = setup();
 
@@ -136,8 +137,9 @@ describe("resume editor saving and navigation", () => {
       result.current.updateResumeData("personalInfo", { fullName: "Ada" });
     });
     let firstSave;
-    act(() => {
+    await act(async () => {
       firstSave = result.current.saveResumeData(false);
+      await Promise.resolve();
     });
     act(() => {
       result.current.updateResumeData("personalInfo", {
@@ -155,5 +157,66 @@ describe("resume editor saving and navigation", () => {
     });
     expect(serviceMocks.saveResume).toHaveBeenCalledTimes(2);
     expect(result.current.unsavedChanges).toBe(false);
+  });
+  it("saves the latest keystroke even when Save runs in the same event", async () => {
+    const { result } = setup();
+    await act(async () => {
+      result.current.updateResumeData("personalInfo", {
+        fullName: "Latest name",
+      });
+      await result.current.saveResumeData(false);
+    });
+    expect(serviceMocks.saveResume).toHaveBeenLastCalledWith(
+      "user-1",
+      "resume-1",
+      expect.objectContaining({
+        resumeData: expect.objectContaining({
+          personalInfo: { fullName: "Latest name" },
+        }),
+      }),
+    );
+  });
+
+  it("keeps a recovery draft after a save failure and allows retry", async () => {
+    serviceMocks.saveResume.mockImplementationOnce(() => {
+      throw new Error("sync validation failure");
+    });
+    const { result } = setup();
+    await act(async () => {
+      result.current.updateResumeData("personalInfo", {
+        fullName: "Recover me",
+      });
+      expect(await result.current.saveResumeData(false)).toBe(false);
+    });
+    expect(result.current.unsavedChanges).toBe(true);
+    expect(
+      window.sessionStorage.getItem("fortefolio:draft:user-1:resume-1"),
+    ).toContain("Recover me");
+    await act(async () => {
+      expect(await result.current.saveResumeData(false)).toBe(true);
+    });
+    expect(result.current.unsavedChanges).toBe(false);
+    expect(
+      window.sessionStorage.getItem("fortefolio:draft:user-1:resume-1"),
+    ).toBeNull();
+  });
+
+  it("undoes a replacement as one change and redoes it", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.replaceResume({
+        personalInfo: { fullName: "Imported" },
+        education: [],
+        experience: [],
+        skills: [],
+        projects: [],
+        references: [],
+      }),
+    );
+    expect(result.current.canUndo).toBe(true);
+    act(() => result.current.undo());
+    expect(result.current.resumeData.personalInfo.fullName).toBeUndefined();
+    act(() => result.current.redo());
+    expect(result.current.resumeData.personalInfo.fullName).toBe("Imported");
   });
 });

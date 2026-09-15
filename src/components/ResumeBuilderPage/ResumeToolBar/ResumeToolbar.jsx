@@ -5,26 +5,14 @@ import {
   Download,
   KeyboardArrowDown,
   AutoFixHigh as EnhanceIcon,
-  TextFormat,
 } from "@mui/icons-material";
+import { lavenderPalette } from "../lavenderPalette";
 
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
-};
 
 export const ResumeToolbar = ({
   onBack,
   isMobile,
   handleColorMenuOpen,
-  handleFontMenuOpen,
   handleExportMenuOpen,
   onEnhanceResume,
 }) => {
@@ -32,7 +20,7 @@ export const ResumeToolbar = ({
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: { xs: "column", sm: "row" },
         justifyContent: "space-between",
         alignItems: "center",
         p: { xs: 1.5, sm: 2 },
@@ -76,47 +64,27 @@ export const ResumeToolbar = ({
           display: "flex",
           gap: 1.5,
           alignItems: "center",
-          flexWrap: "nowrap",
+          flexWrap: "wrap",
+          justifyContent: { xs: "space-between", sm: "flex-end" },
         }}
       >
-        {!isMobile && (
-          <>
-            <Button
-              variant="outlined"
-              startIcon={<FormatColorFill />}
-              onClick={handleColorMenuOpen}
-              size="medium"
-              sx={{
-                color: lavenderPalette.text,
-                borderColor: lavenderPalette.soft,
-                "&:hover": {
-                  backgroundColor: lavenderPalette.light,
-                  borderColor: lavenderPalette.primary,
-                  color: lavenderPalette.deep,
-                },
-              }}
-            >
-              Color
-            </Button>
-            {/* <Button
-              variant="outlined"
-              startIcon={<TextFormat />}
-              onClick={handleFontMenuOpen}
-              size="medium"
-              sx={{
-                color: lavenderPalette.text,
-                borderColor: lavenderPalette.soft,
-                "&:hover": {
-                  backgroundColor: lavenderPalette.light,
-                  borderColor: lavenderPalette.primary,
-                  color: lavenderPalette.deep,
-                },
-              }}
-            >
-              Font
-            </Button> */}
-          </>
-        )}
+        <Button
+          variant="outlined"
+          startIcon={<FormatColorFill />}
+          onClick={handleColorMenuOpen}
+          size={isMobile ? "small" : "medium"}
+          sx={{
+            color: lavenderPalette.text,
+            borderColor: lavenderPalette.soft,
+            "&:hover": {
+              backgroundColor: lavenderPalette.light,
+              borderColor: lavenderPalette.primary,
+              color: lavenderPalette.deep,
+            },
+          }}
+        >
+          Color
+        </Button>
         <Tooltip title="Get AI suggestions to improve your resume">
           <Button
             variant="contained"

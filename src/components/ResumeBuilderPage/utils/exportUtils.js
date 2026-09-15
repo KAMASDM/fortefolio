@@ -1,142 +1,119 @@
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Tab, TabStopType, TabStopPosition } from "docx";
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  ExternalHyperlink,
+} from "docx";
 import { saveAs } from "file-saver";
+import {
+  documentData,
+  getDocumentSections,
+} from "../../../services/resumeDocument";
 
-// Helper function to format dates
-const formatDate = (dateString) => {
-    if (!dateString) return "Present";
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString;
-      return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    } catch (e) {
-      return dateString;
-    }
-};
-
-export const exportToDocx = async (resumeData, fileName = "resume.docx") => {
-  const { personalInfo, experience, education, skills, projects } = resumeData;
-
-  const doc = new Document({
-    sections: [{
-      properties: {},
-      children: [
-        // --- HEADER ---
-        new Paragraph({
-          children: [new TextRun({ text: personalInfo.fullName || "Your Name", bold: true, size: 48 })],
-          alignment: AlignmentType.CENTER,
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: personalInfo.jobTitle || "Professional Title", size: 28, color: "555555" })],
-          alignment: AlignmentType.CENTER,
-        }),
-        new Paragraph({
-          text: `${personalInfo.email || ''} | ${personalInfo.phone || ''} | ${personalInfo.location || ''}`,
-          alignment: AlignmentType.CENTER,
-          style: "WellSpaced",
-        }),
-        new Paragraph({ text: "", spacing: { after: 200 } }), // Spacer
-
-        // --- SUMMARY ---
-        new Paragraph({
-          children: [new TextRun({ text: "Professional Summary", bold: true, size: 24 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { after: 100 },
-          border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: personalInfo.summary || "", size: 20 })],
-        }),
-        new Paragraph({ text: "", spacing: { after: 300 } }),
-
-        // --- EXPERIENCE ---
-        new Paragraph({
-          children: [new TextRun({ text: "Work Experience", bold: true, size: 24 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { after: 100 },
-          border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
-        }),
-        ...experience.flatMap(exp => [
-          new Paragraph({
-            children: [
-              new TextRun({ text: exp.position || "Position", bold: true, size: 22 }),
-              new TextRun({ text: `\t${formatDate(exp.startDate)} - ${exp.current ? 'Present' : formatDate(exp.endDate)}`, size: 20 }),
-            ],
-            tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
+export const createDocxDocument = (resumeData, presentation = {}) => {
+  const info = documentData(resumeData, presentation).personalInfo;
+  const paragraph = (text) =>
+    new Paragraph({
+      children: [new TextRun(String(text || ""))],
+      spacing: { after: 100 },
+    });
+  const children = [
+    new Paragraph({
+      text: info.fullName || "Resume",
+      heading: HeadingLevel.TITLE,
+    }),
+  ];
+  if (info.jobTitle) children.push(paragraph(info.jobTitle));
+  children.push(
+    paragraph(
+      [info.email, info.phone, info.location].filter(Boolean).join(" · "),
+    ),
+  );
+  for (const url of [info.linkedin, info.github, info.website].filter(Boolean))
+    children.push(
+      new Paragraph({
+        children: [
+          new ExternalHyperlink({
+            link: url,
+            children: [new TextRun({ text: url, style: "Hyperlink" })],
           }),
-          new Paragraph({
-            children: [new TextRun({ text: `${exp.company || "Company"}, ${exp.location || "Location"}`, italics: true, size: 20 })],
-          }),
-          ...(exp.responsibilities || []).map(resp => new Paragraph({ text: resp, bullet: { level: 0 }, style: "WellSpaced" })),
-          new Paragraph({ text: "", spacing: { after: 200 } }),
-        ]),
-
-        // --- EDUCATION ---
+        ],
+      }),
+    );
+  if (info.summary)
+    children.push(
+      new Paragraph({ text: "Profile", heading: HeadingLevel.HEADING_1 }),
+      paragraph(info.summary),
+    );
+  for (const section of getDocumentSections(resumeData, presentation)) {
+    children.push(
+      new Paragraph({
+        text: section.title,
+        heading: HeadingLevel.HEADING_1,
+        keepNext: true,
+      }),
+    );
+    for (const item of section.items) {
+      children.push(
         new Paragraph({
-          children: [new TextRun({ text: "Education", bold: true, size: 24 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { after: 100 },
-          border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
-        }),
-        ...education.flatMap(edu => [
-          new Paragraph({
-            children: [
-              new TextRun({ text: `${edu.degree || "Degree"} in ${edu.field || "Field"}`, bold: true, size: 22 }),
-              new TextRun({ text: `\t${formatDate(edu.startDate)} - ${formatDate(edu.endDate)}`, size: 20 }),
-            ],
-            tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: `${edu.institution || "Institution"}, ${edu.location || "Location"}`, italics: true, size: 20 })],
-          }),
-          new Paragraph({ text: "", spacing: { after: 200 } }),
-        ]),
-
-        // --- SKILLS ---
-        new Paragraph({
-          children: [new TextRun({ text: "Skills", bold: true, size: 24 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { after: 100 },
-          border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
-        }),
-        ...skills.map(skillCategory => new Paragraph({
           children: [
-            new TextRun({ text: `${skillCategory.name}: `, bold: true, size: 20 }),
-            new TextRun({ text: (skillCategory.skills || []).join(', '), size: 20 }),
-          ]
-        })),
-         new Paragraph({ text: "", spacing: { after: 300 } }),
-        
-        // --- PROJECTS ---
-        new Paragraph({
-            children: [new TextRun({ text: "Projects", bold: true, size: 24 })],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 100 },
-            border: { bottom: { color: "auto", space: 1, value: "single", size: 6 } },
+            new TextRun({ text: item.title || "", bold: true }),
+            new TextRun({
+              text: item.meta ? `  |  ${item.meta}` : "",
+              color: "555555",
+            }),
+          ],
+          keepNext: true,
+        }),
+      );
+      if (item.subtitle) children.push(paragraph(item.subtitle));
+      for (const line of item.lines)
+        children.push(
+          section.key === "experience"
+            ? new Paragraph({
+                text: line,
+                bullet: { level: 0 },
+                spacing: { after: 80 },
+              })
+            : paragraph(line),
+        );
+      if (item.link)
+        children.push(
+          new Paragraph({
+            children: [
+              new ExternalHyperlink({
+                link: item.link,
+                children: [
+                  new TextRun({ text: item.link, style: "Hyperlink" }),
+                ],
+              }),
+            ],
           }),
-          ...projects.flatMap(proj => [
-            new Paragraph({
-              children: [
-                new TextRun({ text: proj.title || "Project Title", bold: true, size: 22 }),
-                new TextRun({ text: `\t${formatDate(proj.startDate)} - ${proj.current ? 'Present' : formatDate(proj.endDate)}`, size: 20 }),
-              ],
-              tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
-            }),
-            new Paragraph({
-              children: [new TextRun({ text: `Technologies: ${proj.technologies || ""}`, italics: true, size: 20 })],
-            }),
-            new Paragraph({ text: proj.description || "", style: "WellSpaced" }),
-            new Paragraph({ text: "", spacing: { after: 200 } }),
-          ]),
-      ],
-    }],
+        );
+    }
+  }
+  return new Document({
+    creator: "ForteFolio",
+    title: info.fullName || "Resume",
+    styles: { default: { document: { run: { font: "Calibri", size: 22 } } } },
+    sections: [{ children }],
   });
-
+};
+export const exportToDocx = async (
+  resumeData,
+  fileName = "resume.docx",
+  presentation = {},
+) => {
   try {
-    const buffer = await Packer.toBlob(doc);
-    saveAs(buffer, fileName);
+    saveAs(
+      await Packer.toBlob(createDocxDocument(resumeData, presentation)),
+      fileName,
+    );
     return true;
   } catch (error) {
-    console.error("Error creating DOCX:", error);
+    console.error("DOCX export failed", error);
     return false;
   }
 };

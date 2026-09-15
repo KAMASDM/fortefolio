@@ -3,41 +3,32 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      "/.netlify/functions": {
+        target: "http://localhost:8888",
+        changeOrigin: true,
+      },
+    },
+  },
   define: {
-    'global': 'globalThis',
-    '__BUILD_TIME__': JSON.stringify(new Date().toISOString()),
+    global: "globalThis",
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   build: {
-    target: 'es2020',
+    target: "es2020",
     chunkSizeWarningLimit: 2600,
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            // Large independent libraries
-            if (id.includes('framer-motion')) {
-              return 'animation-vendor';
-            }
-            if (id.includes('firebase')) {
-              return 'firebase-vendor';
-            }
-            if (id.includes('html2canvas') || id.includes('jspdf')) {
-              return 'pdf-vendor';
-            }
-            // Keep the remaining interdependent UI/runtime packages together
-            // to avoid circular vendor chunks in modern Rollup versions.
-            return 'vendor';
-          }
-        },
         // Force new hashes
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
+        entryFileNames: "assets/[name]-[hash].js",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash].[ext]",
       },
     },
   },
   optimizeDeps: {
-    include: ['html2canvas'],
+    include: ["html2canvas"],
   },
 });

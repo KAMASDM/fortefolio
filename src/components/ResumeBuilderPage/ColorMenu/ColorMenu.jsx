@@ -1,14 +1,5 @@
 import { Menu, MenuItem, ListItemIcon, ListItemText, Box } from "@mui/material";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 export const ColorMenu = ({
   colorMenu,

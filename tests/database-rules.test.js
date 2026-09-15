@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const rules = JSON.parse(
-  readFileSync(`${process.cwd()}/database.rules.json`, "utf8")
+  readFileSync(`${process.cwd()}/database.rules.json`, "utf8"),
 ).rules;
 
 describe("database rule contract", () => {

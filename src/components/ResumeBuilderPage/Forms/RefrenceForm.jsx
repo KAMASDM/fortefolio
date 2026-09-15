@@ -1,3 +1,4 @@
+import { useSectionForm } from "../../../hooks/useSectionForm";
 import { useState, useEffect } from "react";
 import {
   Typography,
@@ -26,16 +27,7 @@ import {
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const defaultReferenceEntry = {
   id: 1,
@@ -82,29 +74,8 @@ const SectionTitle = ({ icon, label }) => (
 );
 
 const ReferenceForm = ({ data, updateData, nextStep }) => {
-  const [references, setReferences] = useState([defaultReferenceEntry]);
-  const [lastSavedReferences, setLastSavedReferences] = useState(references);
+  const [references, setReferences] = useSectionForm(data, [defaultReferenceEntry], updateData);
   const [formComplete, setFormComplete] = useState(0);
-
-  useEffect(() => {
-    if (data && Array.isArray(data) && data.length > 0) {
-      setReferences(data);
-    } else {
-      setReferences([defaultReferenceEntry]);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanged =
-      JSON.stringify(references) !== JSON.stringify(lastSavedReferences);
-    if (hasChanged) {
-      const debounce = setTimeout(() => {
-        updateData(references);
-        setLastSavedReferences(references);
-      }, 1000);
-      return () => clearTimeout(debounce);
-    }
-  }, [references, lastSavedReferences, updateData]);
 
   useEffect(() => {
     const requiredFields = ["name"];
@@ -149,8 +120,7 @@ const ReferenceForm = ({ data, updateData, nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const dataToSave = references.filter((ref) => ref.name?.trim() !== "");
-    updateData(dataToSave);
+    updateData(references);
     nextStep();
   };
 

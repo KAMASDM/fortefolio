@@ -47,7 +47,7 @@ export const CreativeTemplate = ({
     references = [],
   } = resumeData;
 
-  console.log("resumeData:", references);
+
 
   const pdfColorStyles = {
     WebkitPrintColorAdjust: "exact",
@@ -201,7 +201,7 @@ export const CreativeTemplate = ({
               </IconButton>
             </Tooltip>
           )}
-          {personalInfo.portfolio && (
+          {personalInfo.portfolio && personalInfo.portfolio !== personalInfo.website && (
             <Tooltip title="Portfolio Website">
               <IconButton
                 component="a"

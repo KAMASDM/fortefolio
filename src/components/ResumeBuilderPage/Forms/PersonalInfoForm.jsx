@@ -29,18 +29,7 @@ import {
   Info as InfoIcon,
   Contacts as ContactIcon,
 } from "@mui/icons-material";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-  gradient: "linear-gradient(135deg, #B9A5E3 0%, #7F68C9 100%)",
-  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const titleSuggestions = [];
 const summaryExamples = [];
@@ -57,10 +46,22 @@ const defaultPersonalInfo = {
   summary: "",
 };
 
-const PersonalInfoForm = ({ data, updateData, nextStep }) => {
+export const validatePersonalInfo = (data) => {
+  const errors = {};
+  if (!data?.fullName?.trim()) {
+    errors.fullName = "Full name is required";
+  }
+  if (!data?.email?.trim()) {
+    errors.email = "Email is required";
+  } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+    errors.email = "Email is invalid";
+  }
+  return errors;
+};
+
+const PersonalInfoForm = ({ data, updateData, externalErrors }) => {
   const [formData, setFormData] = useState(defaultPersonalInfo);
 
-  const [errors, setErrors] = useState({});
   const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
   const [showSummaryExamples, setShowSummaryExamples] = useState(false);
   const [summaryWordCount, setSummaryWordCount] = useState(0);
@@ -125,6 +126,7 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
       ...prevFormData,
       jobTitle: title,
     }));
+    updateData({ ...formData, jobTitle: title });
     setShowTitleSuggestions(false);
   };
 
@@ -133,38 +135,11 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
       ...prevFormData,
       summary: summary,
     }));
+    updateData({ ...formData, summary });
     setShowSummaryExamples(false);
   };
 
-  const validateForm = () => {
-    let formErrors = {};
-    let isValid = true;
-
-    if (!formData.fullName?.trim()) {
-      formErrors.fullName = "Full name is required";
-      isValid = false;
-    }
-
-    if (!formData.email?.trim()) {
-      formErrors.email = "Email is required";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      formErrors.email = "Email is invalid";
-      isValid = false;
-    }
-
-    setErrors(formErrors);
-    return isValid;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (validateForm()) {
-      updateData(formData);
-      nextStep();
-    }
-  };
+  const fieldErrors = externalErrors || {};
 
   return (
     <Box>
@@ -212,7 +187,7 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
           Start by filling out your basic contact information.
         </Alert>
       )}
-      <form onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={(e) => e.preventDefault()}>
         <Paper elevation={2} sx={sectionStyle}>
           <SectionTitle icon={<PermIdentityIcon />} label="Basic Information" />
           <Grid container spacing={3}>
@@ -224,8 +199,8 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
                 label="Full Name"
                 value={formData.fullName}
                 onChange={handleChange}
-                error={!!errors.fullName}
-                helperText={errors.fullName}
+                error={!!fieldErrors.fullName}
+                helperText={fieldErrors.fullName}
                 placeholder="John Doe"
                 variant="outlined"
                 InputProps={{
@@ -298,8 +273,8 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                error={!!errors.email}
-                helperText={errors.email}
+                error={!!fieldErrors.email}
+                helperText={fieldErrors.email}
                 placeholder="john.doe@example.com"
                 variant="outlined"
                 InputProps={{
@@ -427,6 +402,7 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
           <TextField
             fullWidth
             name="summary"
+              inputProps={{ "aria-label": "Professional summary" }}
             value={formData.summary}
             onChange={handleChange}
             placeholder="Write a brief 2–4 sentence summary..."
@@ -438,7 +414,7 @@ const PersonalInfoForm = ({ data, updateData, nextStep }) => {
             Tip: Tailor this summary to the job you're applying for. (50–200 words)
           </Typography>
         </Paper>
-      </form>
+      </Box>
     </Box>
   );
 };

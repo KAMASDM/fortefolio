@@ -9,6 +9,7 @@ import {
   Star as StarIcon,
   StarBorder as StarBorderIcon,
 } from "@mui/icons-material";
+import EditableText from "../ResumePreview/EditableText";
 
 export const ModernTemplate = ({
   resumeData,
@@ -18,6 +19,9 @@ export const ModernTemplate = ({
   toggleStarSection,
   starredSections,
   fontFamily,
+  editMode = false,
+  onEditPersonalInfo = () => {},
+  onEditListItem = () => {},
 }) => {
   const {
     personalInfo = {},
@@ -81,10 +85,15 @@ export const ModernTemplate = ({
             ...pdfColorStyles,
           }}
         >
-          {personalInfo.fullName || "Your Name"}
+          <EditableText
+            editMode={editMode}
+            value={personalInfo.fullName}
+            placeholder="Your Name"
+            onCommit={(v) => onEditPersonalInfo("fullName", v)}
+          />
         </Typography>
 
-        {personalInfo.jobTitle && (
+        {(editMode || personalInfo.jobTitle) && (
           <Typography
             variant="h5"
             sx={{
@@ -96,7 +105,12 @@ export const ModernTemplate = ({
               ...pdfColorStyles,
             }}
           >
-            {personalInfo.jobTitle}
+            <EditableText
+              editMode={editMode}
+              value={personalInfo.jobTitle}
+              placeholder="Add a job title"
+              onCommit={(v) => onEditPersonalInfo("jobTitle", v)}
+            />
           </Typography>
         )}
         <Box
@@ -274,7 +288,7 @@ export const ModernTemplate = ({
       </Box>
       <Grid container spacing={4}>
         <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
-          {personalInfo.summary && (
+          {(editMode || personalInfo.summary) && (
             <Box
               sx={{
                 mb: 5,
@@ -337,7 +351,14 @@ export const ModernTemplate = ({
                   color: "rgba(0, 0, 0, 0.75)",
                 }}
               >
-                {personalInfo.summary}
+                <EditableText
+                  editMode={editMode}
+                  multiline
+                  component="div"
+                  value={personalInfo.summary}
+                  placeholder="Add a professional summary"
+                  onCommit={(v) => onEditPersonalInfo("summary", v)}
+                />
               </Typography>
             </Box>
           )}
@@ -424,7 +445,12 @@ export const ModernTemplate = ({
                           ...pdfColorStyles,
                         }}
                       >
-                        {exp.position || "Position Title"}
+                        <EditableText
+                          editMode={editMode}
+                          value={exp.position}
+                          placeholder="Position Title"
+                          onCommit={(v) => onEditListItem("experience", index, "position", v)}
+                        />
                       </Typography>
                       <Typography
                         variant="subtitle1"
@@ -434,7 +460,12 @@ export const ModernTemplate = ({
                           color: "rgba(0, 0, 0, 0.75)",
                         }}
                       >
-                        {exp.company || "Company Name"}
+                        <EditableText
+                          editMode={editMode}
+                          value={exp.company}
+                          placeholder="Company Name"
+                          onCommit={(v) => onEditListItem("experience", index, "company", v)}
+                        />
                       </Typography>
                     </Grid>
                     <Grid
@@ -487,7 +518,7 @@ export const ModernTemplate = ({
                       </Typography>
                     </Grid>
                   </Grid>
-                  {exp.description && (
+                  {(editMode || exp.description) && (
                     <Typography
                       variant="body2"
                       sx={{
@@ -497,7 +528,14 @@ export const ModernTemplate = ({
                         lineHeight: 1.6,
                       }}
                     >
-                      {exp.description}
+                      <EditableText
+                        editMode={editMode}
+                        multiline
+                        component="div"
+                        value={exp.description}
+                        placeholder="Add a description"
+                        onCommit={(v) => onEditListItem("experience", index, "description", v)}
+                      />
                     </Typography>
                   )}
                   {Array.isArray(exp.responsibilities) &&
@@ -636,7 +674,12 @@ export const ModernTemplate = ({
                         }}
                       >
                         <Box component="span" sx={{ pr: 1 }}>
-                          {project.title || "Project Title"}
+                          <EditableText
+                            editMode={editMode}
+                            value={project.title}
+                            placeholder="Project Title"
+                            onCommit={(v) => onEditListItem("projects", index, "title", v)}
+                          />
                         </Box>
                         {project.link && (
                           <Link
@@ -709,7 +752,7 @@ export const ModernTemplate = ({
                           ? "Present"
                           : formatDate(project.endDate) || "End Date"}
                       </Typography>
-                      {project.description && (
+                      {(editMode || project.description) && (
                         <Typography
                           variant="body2"
                           sx={{
@@ -719,7 +762,14 @@ export const ModernTemplate = ({
                             flexGrow: 1,
                           }}
                         >
-                          {project.description}
+                          <EditableText
+                            editMode={editMode}
+                            multiline
+                            component="div"
+                            value={project.description}
+                            placeholder="Add a description"
+                            onCommit={(v) => onEditListItem("projects", index, "description", v)}
+                          />
                         </Typography>
                       )}
                     </Box>
@@ -815,7 +865,13 @@ export const ModernTemplate = ({
                         ...pdfColorStyles,
                       }}
                     >
-                      {edu.degree || "Degree"} {edu.field && `in ${edu.field}`}
+                      <EditableText
+                        editMode={editMode}
+                        value={edu.degree}
+                        placeholder="Degree"
+                        onCommit={(v) => onEditListItem("education", index, "degree", v)}
+                      />{" "}
+                      {edu.field && `in ${edu.field}`}
                     </Typography>
                     <Typography
                       variant="subtitle2"
@@ -825,7 +881,12 @@ export const ModernTemplate = ({
                         mb: 0.5,
                       }}
                     >
-                      {edu.institution || "Institution Name"}
+                      <EditableText
+                        editMode={editMode}
+                        value={edu.institution}
+                        placeholder="Institution Name"
+                        onCommit={(v) => onEditListItem("education", index, "institution", v)}
+                      />
                     </Typography>
                     <Box
                       sx={{
@@ -871,7 +932,7 @@ export const ModernTemplate = ({
                         {formatDate(edu.endDate) || "End Date"}
                       </Typography>
                     </Box>
-                    {edu.description && (
+                    {(editMode || edu.description) && (
                       <Typography
                         variant="body2"
                         sx={{
@@ -881,7 +942,14 @@ export const ModernTemplate = ({
                           fontSize: "0.85rem",
                         }}
                       >
-                        {edu.description}
+                        <EditableText
+                          editMode={editMode}
+                          multiline
+                          component="div"
+                          value={edu.description}
+                          placeholder="Add a description"
+                          onCommit={(v) => onEditListItem("education", index, "description", v)}
+                        />
                       </Typography>
                     )}
                   </Box>
@@ -1060,9 +1128,14 @@ export const ModernTemplate = ({
                           ...pdfColorStyles,
                         }}
                       >
-                        {reference.name || "Reference Name"}
+                        <EditableText
+                          editMode={editMode}
+                          value={reference.name}
+                          placeholder="Reference Name"
+                          onCommit={(v) => onEditListItem("references", index, "name", v)}
+                        />
                       </Typography>
-                      {reference.position && (
+                      {(editMode || reference.position) && (
                         <Typography
                           variant="subtitle2"
                           sx={{
@@ -1071,10 +1144,15 @@ export const ModernTemplate = ({
                             mb: 0.5,
                           }}
                         >
-                          {reference.position}
+                          <EditableText
+                            editMode={editMode}
+                            value={reference.position}
+                            placeholder="Role"
+                            onCommit={(v) => onEditListItem("references", index, "position", v)}
+                          />
                         </Typography>
                       )}
-                      {reference.company && (
+                      {(editMode || reference.company) && (
                         <Typography
                           variant="body2"
                           sx={{
@@ -1084,7 +1162,12 @@ export const ModernTemplate = ({
                             fontSize: "0.8rem",
                           }}
                         >
-                          {reference.company}
+                          <EditableText
+                            editMode={editMode}
+                            value={reference.company}
+                            placeholder="Company"
+                            onCommit={(v) => onEditListItem("references", index, "company", v)}
+                          />
                         </Typography>
                       )}
                       {reference.email && (

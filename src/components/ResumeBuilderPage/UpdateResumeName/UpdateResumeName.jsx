@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { lavenderPalette } from "../lavenderPalette";
 
 const UpdateResumeName = ({
   open,
@@ -29,18 +30,6 @@ const UpdateResumeName = ({
   setShowLeaveConfirmation,
   handleConfirmedNavigation,
 }) => {
-  const lavenderPalette = {
-    light: "#EAE4F7",
-    soft: "#D8CCF0",
-    medium: "#B9A5E3",
-    primary: "#9D88D9",
-    deep: "#7F68C9",
-    text: "#4A3B77",
-    darkText: "#2E2152",
-    accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
-  };
-
-
   const theme = createTheme({
     palette: {
       primary: {

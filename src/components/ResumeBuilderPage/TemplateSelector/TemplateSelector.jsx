@@ -1,4 +1,5 @@
-import { Box, Paper, Stack, Typography, Chip } from "@mui/material";
+import { useState } from "react";
+import { Box, Paper, Stack, Typography, Chip, TextField } from "@mui/material";
 import {
   Description,
   Article,
@@ -9,18 +10,9 @@ import {
   Timeline,
   Palette as ElegantIcon,
 } from "@mui/icons-material";
+import { lavenderPalette } from "../lavenderPalette";
 
 // Define the color palette for consistency
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
-
 const templateOptions = [
   {
     label: "Modern",
@@ -208,7 +200,12 @@ const templateOptions = [
   },
 ];
 
-export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) => {
+export const TemplateSelector = ({
+  activeTab,
+  handleTemplateChange,
+  isMobile,
+}) => {
+  const [search, setSearch] = useState("");
   const currentTemplate = templateOptions[activeTab];
 
   return (
@@ -235,10 +232,24 @@ export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) 
         }}
       >
         <Box>
-          <Typography sx={{ fontSize: "0.82rem", fontWeight: 700, color: lavenderPalette.text, textTransform: "uppercase", letterSpacing: "0.12em" }}>
+          <Typography
+            sx={{
+              fontSize: "0.82rem",
+              fontWeight: 700,
+              color: lavenderPalette.text,
+              textTransform: "uppercase",
+              letterSpacing: "0.12em",
+            }}
+          >
             Template Gallery
           </Typography>
-          <Typography sx={{ fontSize: "0.92rem", color: lavenderPalette.text, opacity: 0.85 }}>
+          <Typography
+            sx={{
+              fontSize: "0.92rem",
+              color: lavenderPalette.text,
+              opacity: 0.85,
+            }}
+          >
             Choose a layout that matches your role and market.
           </Typography>
         </Box>
@@ -256,13 +267,21 @@ export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) 
         )}
       </Stack>
 
+      <TextField
+        size="small"
+        fullWidth
+        label="Find a template"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        sx={{ mt: 2 }}
+      />
       <Box
         sx={{
           mt: 1.5,
           display: "grid",
           gridTemplateColumns: isMobile
-            ? "repeat(2, minmax(150px, 1fr))"
-            : "repeat(auto-fill, minmax(180px, 1fr))",
+            ? "repeat(2, minmax(0, 1fr))"
+            : "repeat(auto-fill, minmax(140px, 1fr))",
           gap: 1.2,
           maxHeight: isMobile ? 310 : 360,
           overflowY: "auto",
@@ -277,12 +296,21 @@ export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) 
         }}
       >
         {templateOptions.map((option, index) => {
+          if (
+            search &&
+            !`${option.label} ${option.subtitle} ${option.category}`
+              .toLowerCase()
+              .includes(search.toLowerCase())
+          )
+            return null;
           const selected = activeTab === index;
           return (
             <Paper
               key={option.label}
               component="button"
               type="button"
+              aria-pressed={selected}
+              aria-label={`Use ${option.label} template`}
               onClick={(event) => handleTemplateChange(event, index)}
               sx={{
                 textAlign: "left",
@@ -290,7 +318,9 @@ export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) 
                 borderRadius: 1.8,
                 cursor: "pointer",
                 border: "1px solid",
-                borderColor: selected ? lavenderPalette.primary : lavenderPalette.light,
+                borderColor: selected
+                  ? lavenderPalette.primary
+                  : lavenderPalette.light,
                 bgcolor: selected ? lavenderPalette.light : "#fff",
                 boxShadow: selected
                   ? "0 8px 20px rgba(125, 104, 201, 0.24)"
@@ -303,8 +333,19 @@ export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) 
                 },
               }}
             >
-              <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-                <Box sx={{ color: selected ? lavenderPalette.deep : lavenderPalette.text }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                spacing={1}
+              >
+                <Box
+                  sx={{
+                    color: selected
+                      ? lavenderPalette.deep
+                      : lavenderPalette.text,
+                  }}
+                >
                   {option.icon}
                 </Box>
                 <Chip
@@ -319,10 +360,24 @@ export const TemplateSelector = ({ activeTab, handleTemplateChange, isMobile }) 
                   }}
                 />
               </Stack>
-              <Typography sx={{ mt: 1, fontWeight: 700, color: lavenderPalette.darkText, fontSize: "0.94rem" }}>
+              <Typography
+                sx={{
+                  mt: 1,
+                  fontWeight: 700,
+                  color: lavenderPalette.darkText,
+                  fontSize: "0.94rem",
+                }}
+              >
                 {option.label}
               </Typography>
-              <Typography sx={{ mt: 0.4, fontSize: "0.78rem", color: lavenderPalette.text, opacity: 0.9 }}>
+              <Typography
+                sx={{
+                  mt: 0.4,
+                  fontSize: "0.78rem",
+                  color: lavenderPalette.text,
+                  opacity: 0.9,
+                }}
+              >
                 {option.subtitle}
               </Typography>
             </Paper>

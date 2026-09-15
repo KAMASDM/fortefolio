@@ -552,7 +552,7 @@ const EuropeanUnionTemplate = ({
     ),
 
     // References
-    isSectionEmpty("references") && (
+    !isSectionEmpty("references") && (
       <Box>
         <SectionTitle title="References" />
         <Grid container spacing={3}>

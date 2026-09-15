@@ -1,5 +1,14 @@
+import ResumeNavigationGuard from "../components/ResumeBuilderPage/ResumeNavigationGuard";
+import ResumeWorkspaceTools from "../components/ResumeBuilderPage/ResumeWorkspaceTools";
+import LiveResumePreview from "../components/ResumeBuilderPage/LiveResumePreview";
+import { getResumeInsights } from "../services/resumeInsights";
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ThemeProvider } from "@mui/material/styles";
 import AnimatedBackground from "../components/DashboardPage/AnimatedBackground";
@@ -33,7 +42,8 @@ import {
   Badge,
   useMediaQuery,
   Snackbar,
-  Fab,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { styled, alpha } from "@mui/material/styles";
 import {
@@ -55,9 +65,12 @@ import {
   ArticleOutlined as ArticleIcon,
   GavelOutlined as GavelIcon,
   LightbulbOutlined as LightbulbIcon,
+  AutoFixHigh as AutoFixHighIcon,
 } from "@mui/icons-material";
 
-import PersonalInfoForm from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
+import PersonalInfoForm, {
+  validatePersonalInfo,
+} from "../components/ResumeBuilderPage/Forms/PersonalInfoForm";
 import EducationForm from "../components/ResumeBuilderPage/Forms/EducationForm";
 import ExperienceForm from "../components/ResumeBuilderPage/Forms/ExperienceForm";
 import SkillsForm from "../components/ResumeBuilderPage/Forms/SkillsForm";
@@ -72,8 +85,10 @@ import VisaInterviewFormDialog from "../components/ResumeBuilderPage/GenerateQue
 import FloatingElements from "../components/DashboardPage/FloatingElements";
 import { getCustomTheme } from "../theme/customTheme";
 import SOPFormDialog from "../components/ResumeBuilderPage/GenerateQuestionDialog/SOPFormDialog";
+import EnhanceResumeDialog from "../components/ResumeBuilderPage/EnhanceResume/EnhanceResumeDialog";
 import { callOpenAI } from "../utils/openai";
 import { useResumeEditor } from "../hooks/useResumeEditor";
+import { lavenderPalette } from "../components/ResumeBuilderPage/lavenderPalette";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -137,18 +152,6 @@ const sections = [
   },
 ];
 
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-  gradient: "linear-gradient(135deg, #B9A5E3 0%, #7F68C9 100%)",
-  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
-};
-
 const totalSteps = sections.length;
 const previewStepId = totalSteps + 1;
 
@@ -173,7 +176,7 @@ const isSectionComplete = (sectionKey, data) => {
             category.name &&
             category.skills &&
             category.skills.length > 0 &&
-            category.skills.some((s) => s.trim() !== "")
+            category.skills.some((s) => s.trim() !== ""),
         )
       );
     case "projects":
@@ -188,331 +191,12 @@ const isSectionComplete = (sectionKey, data) => {
   }
 };
 
-const getRandomSystemMessage = () => {
-  const systemMessages = [
-    "You are a real person writing about your own experiences. Write naturally, like you're talking to someone you trust.",
-    "Write as yourself - include your natural way of thinking, speaking, and explaining things. Don't try to sound perfect.",
-    "You're sharing your personal story. Use your own voice, with all its quirks and natural speech patterns.",
-    "Write like you normally do - with natural hesitations, corrections, and your genuine personality coming through.",
-    "Tell your story the way you'd explain it to a friend over coffee. Be genuine, natural, and authentically yourself.",
-  ];
-
-  return systemMessages[Math.floor(Math.random() * systemMessages.length)];
-};
-
-const generateHumanizedSOPPrompt = (resumeData, additionalData) => {
-  return `Write a personal Statement of Purpose for ${additionalData.universityName}, ${additionalData.courseName} program in ${additionalData.targetCountry}. Write naturally and authentically. Include: academic background, career goals, why this program, future plans. Target 800-900 words in 3-4 paragraphs.`;
-};
-
-const postProcessSOP = (sopContent) => {
-  let processedContent = sopContent;
-
-  const formalToNatural = {
-    "endeavor to": "plan to",
-    "in order to": "to",
-    "for the purpose of": "to",
-    facilitate: "help",
-    utilize: "use",
-    commence: "begin",
-    regarding: "about",
-    "in terms of": "for",
-    "with respect to": "about",
-    "prior to": "before",
-    subsequently: "then",
-    therefore: "so",
-    furthermore: "also",
-    moreover: "what's more",
-    nonetheless: "still",
-    consequently: "as a result",
-    however: "but",
-    nevertheless: "even so",
-    thus: "so",
-    hence: "that's why",
-    wherein: "where",
-    whereby: "how",
-    whilst: "while",
-    amongst: "among",
-    upon: "on",
-    shall: "will",
-    "ought to": "should",
-    "in addition": "also",
-    "in conclusion": "so",
-    "to summarize": "in short",
-    "it is evident that": "clearly",
-    "it can be seen that": "you can see",
-    "it should be noted": "worth noting",
-    "it is important to": "I need to",
-    "one can observe": "you can see",
-    "it becomes apparent": "it's clear",
-    "it is crucial": "it's really important",
-    significant: "big",
-    substantial: "major",
-    demonstrate: "show",
-    illustrate: "show",
-    exemplify: "show",
-    indicate: "show",
-    establish: "set up",
-    implement: "do",
-    execute: "carry out",
-    accomplish: "get done",
-    acquire: "get",
-    obtain: "get",
-    purchase: "buy",
-    receive: "get",
-    possess: "have",
-  };
-
-  Object.entries(formalToNatural).forEach(([formal, casual]) => {
-    const regex = new RegExp(`\\b${formal}\\b`, "gi");
-    processedContent = processedContent.replace(regex, casual);
-  });
-
-  processedContent = addHumanImperfections(processedContent);
-  processedContent = addNaturalVariations(processedContent);
-  processedContent = addConversationalElements(processedContent);
-
-  return processedContent;
-};
-
-const addHumanImperfections = (text) => {
-  let sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-
-  sentences = sentences.map((sentence, index) => {
-    const random = Math.random();
-
-    if (random < 0.2 && index > 0) {
-      const starters = [
-        "Actually, ",
-        "So, ",
-        "Well, ",
-        "I mean, ",
-        "You know, ",
-        "Honestly, ",
-        "To be fair, ",
-        "Looking back, ",
-      ];
-      const starter = starters[Math.floor(Math.random() * starters.length)];
-      sentence = starter + sentence.trim().toLowerCase();
-      sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-    }
-
-    if (random < 0.15) {
-      const qualifiers = [
-        " I think",
-        " I believe",
-        " I guess",
-        " I suppose",
-        " probably",
-        " maybe",
-        " sort of",
-        " kind of",
-      ];
-      const qualifier =
-        qualifiers[Math.floor(Math.random() * qualifiers.length)];
-      const words = sentence.split(" ");
-      if (words.length > 3) {
-        words.splice(2, 0, qualifier + ",");
-        sentence = words.join(" ");
-      }
-    }
-
-    sentence = sentence.replace(/\bI am\b/g, "I'm");
-    sentence = sentence.replace(/\bI have\b/g, "I've");
-    sentence = sentence.replace(/\bI will\b/g, "I'll");
-    sentence = sentence.replace(/\bI would\b/g, "I'd");
-    sentence = sentence.replace(/\bdo not\b/g, "don't");
-    sentence = sentence.replace(/\bcannot\b/g, "can't");
-    sentence = sentence.replace(/\bwill not\b/g, "won't");
-    sentence = sentence.replace(/\bthat is\b/g, "that's");
-    sentence = sentence.replace(/\bit is\b/g, "it's");
-    sentence = sentence.replace(/\bwe are\b/g, "we're");
-    sentence = sentence.replace(/\bthey are\b/g, "they're");
-
-    return sentence;
-  });
-
-  return sentences.join(" ");
-};
-
-const addFinalHumanTouches = (text) => {
-  let finalText = text;
-
-  finalText = finalText.replace(/^([A-Z])/gm, (match, firstChar, offset) => {
-    if (offset === 0) return match;
-
-    const naturalStarters = [
-      "So, " + firstChar.toLowerCase(),
-      "Well, " + firstChar.toLowerCase(),
-      "And " + firstChar.toLowerCase(),
-      "But " + firstChar.toLowerCase(),
-      "Actually, " + firstChar.toLowerCase(),
-      firstChar, // Keep original sometimes
-    ];
-
-    if (Math.random() < 0.3) {
-      return naturalStarters[
-        Math.floor(Math.random() * naturalStarters.length)
-      ];
-    }
-    return match;
-  });
-
-  const casualReplacements = {
-    " a lot of ": " lots of ",
-    " many ": " tons of ",
-    " very ": " really ",
-    " extremely ": " super ",
-    " particularly ": " especially ",
-    " specifically ": " especially ",
-    " approximately ": " around ",
-    " currently ": " right now ",
-    " recently ": " lately ",
-    " frequently ": " often ",
-    " occasionally ": " sometimes ",
-    " immediately ": " right away ",
-    " definitely ": " for sure ",
-    " certainly ": " definitely ",
-    " obviously ": " clearly ",
-    " undoubtedly ": " no doubt ",
-    " nevertheless ": " even so ",
-    " furthermore ": " plus ",
-    " additionally ": " also ",
-    " subsequently ": " after that ",
-    " consequently ": " so ",
-    " therefore ": " thats why ",
-    " however ": " but ",
-    " although ": " even though ",
-    " because ": " since ",
-    " in order to ": " to ",
-    " due to ": " because of ",
-    " as a result of ": " because of ",
-    " for the reason that ": " because ",
-    " in spite of ": " despite ",
-    " with regard to ": " about ",
-    " in relation to ": " about ",
-    " concerning ": " about ",
-    " regarding ": " about ",
-  };
-
-  Object.entries(casualReplacements).forEach(([formal, casual]) => {
-    const regex = new RegExp(formal, "gi");
-    if (Math.random() < 0.7) {
-      finalText = finalText.replace(regex, casual);
-    }
-  });
-  finalText = finalText.replace(
-    /\. (Which|That|Something that|This|It)/g,
-    (match, word) => {
-      if (Math.random() < 0.4) {
-        return `. ${word}`;
-      }
-      return match;
-    }
-  );
-
-  finalText = finalText.replace(
-    /\. (I think|I believe|I feel|I know)/g,
-    ". I mean, $1"
-  );
-
-  finalText = finalText.replace(
-    /(\w+) was (very|really|extremely) (\w+)/g,
-    (match, subject, intensity, adjective) => {
-      if (Math.random() < 0.3) {
-        return `${subject} was ${adjective}—${intensity} ${adjective}`;
-      }
-      return match;
-    }
-  );
-
-  return finalText;
-};
-
-const addConversationalElements = (text) => {
-  let processedText = text;
-
-  const asidesPattern = /\b(which was|this was|it was)\s+([^.!?]+)/g;
-  processedText = processedText.replace(
-    asidesPattern,
-    (match, start, content) => {
-      if (Math.random() < 0.3) {
-        return `(${content.trim()})`;
-      }
-      return match;
-    }
-  );
-
-  const corrections = [
-    {
-      find: /\bvery important\b/g,
-      replace: "really important—well, crucial actually",
-    },
-    { find: /\bI learned\b/g, replace: "I picked up" },
-    { find: /\bI discovered\b/g, replace: "I found out" },
-    { find: /\bI realized\b/g, replace: "it dawned on me" },
-  ];
-
-  corrections.forEach((correction) => {
-    if (Math.random() < 0.3) {
-      processedText = processedText.replace(
-        correction.find,
-        correction.replace
-      );
-    }
-  });
-
-  return processedText;
-};
-
-const addNaturalVariations = (text) => {
-  let sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-
-  sentences = sentences.map((sentence, index) => {
-    if (index > 0 && Math.random() < 0.25) {
-      const naturalConnectors = [
-        "Anyway, ",
-        "So yeah, ",
-        "Plus, ",
-        "And honestly, ",
-        "What's more, ",
-        "Also, ",
-        "Oh, and ",
-      ];
-      const connector =
-        naturalConnectors[Math.floor(Math.random() * naturalConnectors.length)];
-
-      if (
-        !sentence
-          .trim()
-          .match(
-            /^(Actually|So|Well|I mean|You know|Honestly|To be fair|Looking back|Anyway|Plus|Also)/
-          )
-      ) {
-        sentence = connector + sentence.trim().toLowerCase();
-        sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-      }
-    }
-
-    if (index > 0 && Math.random() < 0.15) {
-      if (!sentence.trim().match(/^(And|But|So|Well)/)) {
-        const starters = ["And ", "But "];
-        const starter = starters[Math.floor(Math.random() * starters.length)];
-        sentence = starter + sentence.trim().toLowerCase();
-        sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-      }
-    }
-
-    return sentence;
-  });
-
-  return sentences.join(" ");
-};
-
 function ResumeBuilderPage() {
   const { resumeId } = useParams();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   // const systemPrefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   // const [darkMode, setDarkMode] = useState(systemPrefersDarkMode);
   const [darkMode, setDarkMode] = useState(false);
@@ -524,19 +208,26 @@ function ResumeBuilderPage() {
   //   setDarkMode(systemPrefersDarkMode);
   // }, [systemPrefersDarkMode]);
 
-  useEffect(() => {
-    if (location?.state?.preview === true) {
-      setIsPreviewMode(true);
-    }
-  }, [location?.state?.preview]);
+  const isPreviewMode = searchParams.get("view") === "preview";
+  const currentStep = isPreviewMode
+    ? previewStepId
+    : sections.find((section) => section.key === searchParams.get("step"))
+        ?.id || 1;
+  const [showLivePreview, setShowLivePreview] = useState(true);
 
-  const [currentStep, setCurrentStep] = useState(sections[0].id);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showTitleDialog, setShowTitleDialog] = useState(false);
   const [currentTitle, setCurrentTitle] = useState("");
   const {
     resumeData,
+    replaceResume,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    isOnline,
+    shouldBlockNavigation,
+    discardDraft,
     resumeMetadata,
     setResumeMetadata,
     presentation,
@@ -571,7 +262,19 @@ function ResumeBuilderPage() {
   const [showVisaFormDialog, setShowVisaFormDialog] = useState(false);
   const [showResumeTips, setShowResumeTips] = useState(false);
   const [showSOPFormDialog, setShowSOPFormDialog] = useState(false);
+  const [showEnhanceDialog, setShowEnhanceDialog] = useState(false);
+  const [aiToolsMenuAnchor, setAiToolsMenuAnchor] = useState(null);
+  const [personalInfoErrors, setPersonalInfoErrors] = useState({});
   const sectionOrder = presentation.sectionOrder;
+
+  useEffect(() => {
+    if (Object.keys(personalInfoErrors).length === 0) return;
+    if (
+      Object.keys(validatePersonalInfo(resumeData.personalInfo)).length === 0
+    ) {
+      setPersonalInfoErrors({});
+    }
+  }, [resumeData.personalInfo, personalInfoErrors]);
 
   const completedSections = useMemo(() => {
     const completed = {};
@@ -581,23 +284,23 @@ function ResumeBuilderPage() {
     return completed;
   }, [resumeData]);
 
-  const completionProgress = useMemo(() => {
-    return (
-      (Object.values(completedSections).filter(Boolean).length / totalSteps) *
-      100
-    );
-  }, [completedSections]);
+  const completionProgress = useMemo(
+    () => getResumeInsights(resumeData).score,
+    [resumeData],
+  );
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   const handleNavItemClick = (stepId) => {
+    const next = new URLSearchParams(searchParams);
     if (stepId === previewStepId) {
-      setIsPreviewMode(true);
-      setCurrentStep(previewStepId);
-    } else if (stepId > 0 && stepId <= totalSteps) {
-      setIsPreviewMode(false);
-      setCurrentStep(stepId);
-    }
+      next.set("view", "preview");
+      next.delete("step");
+    } else if (sections.some((section) => section.id === stepId)) {
+      next.delete("view");
+      next.set("step", sections.find((section) => section.id === stepId).key);
+    } else return;
+    setSearchParams(next);
     setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -612,11 +315,16 @@ function ResumeBuilderPage() {
   };
 
   const nextStep = () => {
+    if (!isPreviewMode && currentStep === 1) {
+      const errors = validatePersonalInfo(resumeData.personalInfo);
+      setPersonalInfoErrors(errors);
+      if (Object.keys(errors).length > 0) return;
+    }
     const nextId = isPreviewMode
       ? previewStepId
       : currentStep < totalSteps
-      ? currentStep + 1
-      : previewStepId;
+        ? currentStep + 1
+        : previewStepId;
     handleNavItemClick(nextId);
   };
 
@@ -624,8 +332,8 @@ function ResumeBuilderPage() {
     const prevId = isPreviewMode
       ? totalSteps
       : currentStep > 1
-      ? currentStep - 1
-      : 1;
+        ? currentStep - 1
+        : 1;
     handleNavItemClick(prevId);
   };
 
@@ -666,7 +374,7 @@ function ResumeBuilderPage() {
     };
 
     if (type === "Statement of Purpose" && additionalData) {
-      fullPrompt = generateHumanizedSOPPrompt(resumeData, additionalData);
+      fullPrompt = `Write a clear, professional statement of purpose using only these supplied facts. Do not invent life stories, funding, academic achievements or goals. If details are missing, explain what the applicant should add. Aim for 600-800 words. Resume: ${JSON.stringify(resumeData)}. Application details: ${JSON.stringify(additionalData)}`;
 
       apiPayload = {
         model: "gemini-1.5-pro-latest",
@@ -679,41 +387,57 @@ function ResumeBuilderPage() {
     } else if (type === "Visa Interview Questions") {
       if (!additionalData) {
         setGenerateContentError(
-          "Required visa application details are missing."
+          "Required visa application details are missing.",
         );
         setIsGeneratingContent(false);
         setShowGeneratedContentDialog(false);
         return;
       }
-      fullPrompt = `Generate visa interview questions for student visa to ${additionalData.country}. University: ${additionalData.universityName}, Course: ${additionalData.courseName}. Include 10-12 realistic questions covering: purpose, finances, ties to home country, post-study plans. Format as numbered list with answers.`;
+      fullPrompt = `Generate visa interview questions for student visa to ${additionalData.country}. University: ${additionalData.universityName}, Course: ${additionalData.courseName}. Use the applicant details: ${JSON.stringify(additionalData)}. Resume: ${JSON.stringify(resumeData)}. Include 10-12 practice questions covering purpose, finances, home ties and plans. Suggest answer structures grounded in supplied facts; do not invent financial or personal details.`;
     } else {
       // Create a concise but informative summary of resume data
       const resumeSummary = `
-Name: ${resumeData.personalInfo?.fullName || 'N/A'}
-Contact: ${resumeData.personalInfo?.email || ''} ${resumeData.personalInfo?.phone || ''}
-Professional Summary: ${resumeData.personalInfo?.summary || 'N/A'}
+Name: ${resumeData.personalInfo?.fullName || "N/A"}
+Contact: ${resumeData.personalInfo?.email || ""} ${resumeData.personalInfo?.phone || ""}
+Professional Summary: ${resumeData.personalInfo?.summary || "N/A"}
 
 Skills:
-${resumeData.skills?.map(cat => `- ${cat.name}: ${Array.isArray(cat.skills) ? cat.skills.join(', ') : cat.skills}`).join('\n') || 'N/A'}
+${resumeData.skills?.map((cat) => `- ${cat.name}: ${Array.isArray(cat.skills) ? cat.skills.join(", ") : cat.skills}`).join("\n") || "N/A"}
 
 Experience:
-${resumeData.experience?.length ? resumeData.experience.map(exp => `
-Position: ${exp.position || exp.jobTitle || 'N/A'}
-Company: ${exp.company || 'N/A'}
-Duration: ${exp.startDate || ''} - ${exp.current ? 'Present' : exp.endDate || ''}
+${
+  resumeData.experience?.length
+    ? resumeData.experience
+        .map(
+          (exp) => `
+Position: ${exp.position || exp.jobTitle || "N/A"}
+Company: ${exp.company || "N/A"}
+Duration: ${exp.startDate || ""} - ${exp.current ? "Present" : exp.endDate || ""}
 Key Responsibilities:
-${Array.isArray(exp.responsibilities) ? exp.responsibilities.map(r => `- ${r}`).join('\n') : (exp.responsibilities || exp.description || 'N/A')}
-`).join('\n') : 'N/A'}
+${Array.isArray(exp.responsibilities) ? exp.responsibilities.map((r) => `- ${r}`).join("\n") : exp.responsibilities || exp.description || "N/A"}
+`,
+        )
+        .join("\n")
+    : "N/A"
+}
 
 Projects:
-${resumeData.projects?.length ? resumeData.projects.map(proj => `
-Title: ${proj.title || proj.name || 'N/A'}
-Description: ${proj.description || 'N/A'}
-Technologies: ${proj.technologies || 'N/A'}
-`).join('\n') : 'N/A'}
+${
+  resumeData.projects?.length
+    ? resumeData.projects
+        .map(
+          (proj) => `
+Title: ${proj.title || proj.name || "N/A"}
+Description: ${proj.description || "N/A"}
+Technologies: ${proj.technologies || "N/A"}
+`,
+        )
+        .join("\n")
+    : "N/A"
+}
 
 Education:
-${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} from ${edu.institution} (${edu.year || ''})`).join('\n') : 'N/A'}
+${resumeData.education?.length ? resumeData.education.map((edu) => `${edu.degree} from ${edu.institution} (${edu.year || ""})`).join("\n") : "N/A"}
 `.trim();
 
       let basePrompt = `Based on the following resume information, please generate a ${type}. `;
@@ -739,7 +463,7 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
           role: "system",
           content:
             type === "Statement of Purpose"
-              ? getRandomSystemMessage()
+              ? "Write in a professional, personal voice using only facts supplied by the applicant."
               : "You are a helpful assistant.",
         },
         {
@@ -760,15 +484,6 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
 
       if (message) {
         let processedMessage = message;
-
-        if (type === "Statement of Purpose") {
-          processedMessage = addFinalHumanTouches(processedMessage);
-        }
-
-        if (type === "Visa Interview Questions") {
-          const redFlagTips = `\n\n---\n\n RED FLAG INDICATORS I'M WATCHING FOR:\n\n🚩 Financial Red Flags:\n- The sponsor's income doesn't justify the expense\n- Recent large deposits in bank accounts\n- Inconsistent financial documentation\n- Vague explanations about funding sources\n\n🚩 Intent Red Flags:\n- Weak ties to the home country\n- Strong connections in the destination country\n- Evasive answers about return plans\n- Inconsistent story about the purpose of travel\n\n🚩 Credibility Red Flags:**\n- Contradictory statements\n- Nervous behavior beyond normal interview anxiety\n- Rehearsed or coached answers\n- Unable to provide specific details about plans`;
-          processedMessage += redFlagTips;
-        }
 
         setGeneratedContent(processedMessage.trim());
       } else {
@@ -906,6 +621,10 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
               data={resumeData[sectionKey]}
               updateData={(data) => updateResumeData(sectionKey, data)}
               isComplete={completedSections[sectionKey]}
+              nextStep={nextStep}
+              externalErrors={
+                sectionKey === "personalInfo" ? personalInfoErrors : undefined
+              }
             />
           </div>
         </Grow>
@@ -1158,79 +877,83 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
 
         <ListItem disablePadding>
           <ListItemButton
-            onClick={handleGenerateInterviewQuestions}
-            disabled={isGeneratingContent}
-            sx={{
-              "&:hover": { backgroundColor: "#f3f0fa" },
-              opacity: isGeneratingContent ? 0.5 : 1,
-            }}
+            onClick={(e) => setAiToolsMenuAnchor(e.currentTarget)}
+            sx={{ "&:hover": { backgroundColor: "#f3f0fa" } }}
           >
             <ListItemIcon sx={{ minWidth: 40 }}>
-              <QuestionAnswerIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
+              <AutoFixHighIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
             </ListItemIcon>
             <ListItemText
-              primary="Generate Interview Questions"
+              primary="AI Tools"
               primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
             />
           </ListItemButton>
         </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={handleGenerateCoverLetter}
-            disabled={isGeneratingContent}
-            sx={{
-              "&:hover": { backgroundColor: "#f3f0fa" },
-              opacity: isGeneratingContent ? 0.5 : 1,
+        <Menu
+          anchorEl={aiToolsMenuAnchor}
+          open={Boolean(aiToolsMenuAnchor)}
+          onClose={() => setAiToolsMenuAnchor(null)}
+        >
+          <MenuItem
+            onClick={() => {
+              setAiToolsMenuAnchor(null);
+              setShowEnhanceDialog(true);
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <ArticleIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
+            <ListItemIcon>
+              <AutoFixHighIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText
-              primary="Generate Cover Letter"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
-            />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => setShowSOPFormDialog(true)}
-            disabled={isGeneratingContent}
-            sx={{
-              "&:hover": { backgroundColor: "#f3f0fa" },
-              opacity: isGeneratingContent ? 0.5 : 1,
+            <ListItemText>Enhance Resume</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAiToolsMenuAnchor(null);
+              handleGenerateInterviewQuestions();
             }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <ArticleIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Generate Statement of Purpose"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
-            />
-          </ListItemButton>
-        </ListItem>
-
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => setShowVisaFormDialog(true)}
             disabled={isGeneratingContent}
-            sx={{
-              "&:hover": { backgroundColor: "#f3f0fa" },
-              opacity: isGeneratingContent ? 0.5 : 1,
-            }}
           >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <GavelIcon sx={{ color: "rgba(0, 0, 0, 0.6)" }} />
+            <ListItemIcon>
+              <QuestionAnswerIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText
-              primary="Generate Visa Interview Questions"
-              primaryTypographyProps={{ fontWeight: 500, variant: "body2" }}
-            />
-          </ListItemButton>
-        </ListItem>
+            <ListItemText>Interview Questions</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAiToolsMenuAnchor(null);
+              handleGenerateCoverLetter();
+            }}
+            disabled={isGeneratingContent}
+          >
+            <ListItemIcon>
+              <ArticleIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Cover Letter</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAiToolsMenuAnchor(null);
+              setShowSOPFormDialog(true);
+            }}
+            disabled={isGeneratingContent}
+          >
+            <ListItemIcon>
+              <ArticleIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Statement of Purpose</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAiToolsMenuAnchor(null);
+              setShowVisaFormDialog(true);
+            }}
+            disabled={isGeneratingContent}
+          >
+            <ListItemIcon>
+              <GavelIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Visa Interview Questions</ListItemText>
+          </MenuItem>
+        </Menu>
       </List>
 
       <Box
@@ -1258,8 +981,8 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
           {isSaving
             ? "Saving..."
             : unsavedChanges
-            ? "Save Changes"
-            : "Save All"}
+              ? "Save Changes"
+              : "Save All"}
         </Button>
         {saveError && (
           <Typography
@@ -1348,20 +1071,22 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
               style={{ position: "absolute", top: "-100px" }}
             ></span>
 
-            {/* <Navbar
-              darkMode={darkMode}
-              toggleDarkMode={toggleDarkMode}
-              unsavedChanges={unsavedChanges}
-              isSaving={isSaving}
-              completionProgress={completionProgress}
-              isPreviewMode={isPreviewMode}
-              currentStep={currentStep}
-              handleManualSave={handleManualSave}
-              handleNavItemClick={handleNavItemClick}
-              previewStepId={previewStepId}
-              handleDrawerToggle={handleDrawerToggle}
-              onOpenResumeTips={() => setShowResumeTips(true)}
-            /> */}
+            <Box sx={{ display: { xs: "block", md: "none" } }}>
+              <Navbar
+                darkMode={darkMode}
+                toggleDarkMode={toggleDarkMode}
+                unsavedChanges={unsavedChanges}
+                isSaving={isSaving}
+                completionProgress={completionProgress}
+                isPreviewMode={isPreviewMode}
+                currentStep={currentStep}
+                handleManualSave={handleManualSave}
+                handleNavItemClick={handleNavItemClick}
+                previewStepId={previewStepId}
+                handleDrawerToggle={handleDrawerToggle}
+                onOpenResumeTips={() => setShowResumeTips(true)}
+              />
+            </Box>
 
             <Container
               // maxWidth="lg"
@@ -1372,29 +1097,40 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
                 mb: { xs: 8, md: 3 },
               }}
             >
-              <Collapse in={unsavedChanges && !isSaving}>
-                <Alert
-                  severity="info"
-                  variant="standard"
-                  sx={{ mb: 2, display: { xs: "none", sm: "flex" } }}
-                  icon={<SaveIcon fontSize="inherit" />}
-                  action={
-                    <Button
-                      color="inherit"
-                      size="small"
-                      onClick={handleManualSave}
-                      disabled={isSaving}
-                    >
-                      Save Now
-                    </Button>
-                  }
+              <ResumeWorkspaceTools
+                resumeData={resumeData}
+                metadata={resumeMetadata}
+                presentation={presentation}
+                onImport={replaceResume}
+                onUpdate={updateResumeData}
+                onSection={(key) =>
+                  handleNavItemClick(
+                    sections.find((section) => section.key === key)?.id || 1,
+                  )
+                }
+                canUndo={canUndo}
+                canRedo={canRedo}
+                undo={undo}
+                redo={redo}
+                isOnline={isOnline}
+                isSaving={isSaving}
+                unsavedChanges={unsavedChanges}
+                saveError={saveError}
+              />
+              {!isPreviewMode && !isMobile && (
+                <Button
+                  size="small"
+                  sx={{ mb: 1 }}
+                  onClick={() => setShowLivePreview((value) => !value)}
                 >
-                  {" "}
-                  You have unsaved changes.{" "}
-                </Alert>
-              </Collapse>
+                  {showLivePreview ? "Hide live preview" : "Show live preview"}
+                </Button>
+              )}
 
-              {!isPreviewMode && !isSmall && (
+              {/* Only shown in the sm-md gap: below this, BottomNavigation covers section
+                  switching; at md+, the permanent sidebar drawer already shows the same
+                  section list, so rendering the Stepper too would just duplicate it. */}
+              {!isPreviewMode && isMobile && !isSmall && (
                 <Paper
                   elevation={0}
                   sx={{
@@ -1467,7 +1203,26 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
               )}
 
               {!isPreviewMode ? (
-                <AnimatedCard elevation={1}>{renderForm()}</AnimatedCard>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      !isMobile && showLivePreview
+                        ? "minmax(0, 1fr) minmax(280px, 0.75fr)"
+                        : "minmax(0, 1fr)",
+                    gap: 2,
+                  }}
+                >
+                  <AnimatedCard elevation={1} sx={{ minWidth: 0 }}>
+                    {renderForm()}
+                  </AnimatedCard>
+                  {!isMobile && showLivePreview && (
+                    <LiveResumePreview
+                      resumeData={resumeData}
+                      presentation={presentation}
+                    />
+                  )}
+                </Box>
               ) : (
                 <Box sx={{ mt: { xs: 0, sm: -2 } }}>
                   {" "}
@@ -1478,6 +1233,9 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
                     presentation={presentation}
                     onPresentationChange={updatePresentation}
                     onBeforePublish={() => saveResumeData(false)}
+                    onUpdateResumeData={updateResumeData}
+                    onEnhanceResume={() => setShowEnhanceDialog(true)}
+                    metadata={resumeMetadata}
                   />
                 </Box>
               )}
@@ -1497,6 +1255,14 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
               }}
             >
               <BottomNavigation
+                sx={{
+                  overflowX: "auto",
+                  justifyContent: "flex-start",
+                  "& .MuiBottomNavigationAction-root": {
+                    flexShrink: 0,
+                    minWidth: 62,
+                  },
+                }}
                 value={isPreviewMode ? previewStepId : currentStep}
                 onChange={handleBottomNavChange}
                 showLabels
@@ -1534,15 +1300,20 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
                     sx={{ minWidth: "auto", px: 1 }}
                   />
                 ))}
-                {/* <BottomNavigationAction
+                <BottomNavigationAction
                   label={isSmall ? "View" : "Preview"}
                   value={previewStepId}
                   icon={<VisibilityIcon />}
                   sx={{ minWidth: "auto", px: 1 }}
-                /> */}
+                />
               </BottomNavigation>
             </Paper>
           )}
+          <ResumeNavigationGuard
+            shouldBlock={shouldBlockNavigation}
+            onSave={() => saveResumeData(true)}
+            onDiscard={discardDraft}
+          />
           <UpdateResumeName
             open={showTitleDialog}
             onClose={handleCloseTitleDialog}
@@ -1585,6 +1356,11 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
             open={showResumeTips}
             onClose={() => setShowResumeTips(false)}
           />
+          <EnhanceResumeDialog
+            open={showEnhanceDialog}
+            onClose={() => setShowEnhanceDialog(false)}
+            resumeData={resumeData}
+          />
           <Snackbar
             open={notification.open}
             autoHideDuration={6000}
@@ -1599,33 +1375,6 @@ ${resumeData.education?.length ? resumeData.education.map(edu => `${edu.degree} 
               {notification.message}
             </Alert>
           </Snackbar>
-          <Collapse in={!isPreviewMode}>
-            <Tooltip title="Preview Resume" placement="left">
-              <Fab
-                variant="extended"
-                onClick={() => handleNavItemClick(previewStepId)}
-                sx={{
-                  position: "fixed",
-                  bottom: { xs: isMobile ? 80 : 32, md: 32 },
-                  right: 32,
-                  height: "50px",
-                  width: "50px",
-                  borderRadius: "50%",
-                  color: "white",
-                  backgroundImage: lavenderPalette.gradient,
-                  transition: "transform 0.2s ease-in-out, box-shadow 0.2s",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    boxShadow: theme.shadows[8],
-                  },
-                }}
-              >
-                <VisibilityIcon sx={{ mr: 0 }} />
-                {/* <VisibilityIcon sx={{ mr: 1 }} /> */}
-                {/* Preview */}
-              </Fab>
-            </Tooltip>
-          </Collapse>
         </Box>
       </ThemeProvider>
     </>

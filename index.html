@@ -9,6 +9,12 @@
 </head>
 
 <body>
+  <!-- Netlify discovers this static declaration during deployment. -->
+  <form name="contact" method="POST" data-netlify="true" hidden>
+    <input type="hidden" name="form-name" value="contact" />
+    <input name="name" /><input type="email" name="email" />
+    <input name="subject" /><textarea name="message"></textarea>
+  </form>
   <div id="root"></div>
   <script>
     // Dev-only cleanup: stale SW/cache can serve an old /@react-refresh module

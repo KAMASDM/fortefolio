@@ -8,16 +8,7 @@ import {
 } from "@mui/material";
 import { PictureAsPdf, Print, Article as DocxIcon } from "@mui/icons-material";
 import ShareIcon from "@mui/icons-material/Share";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 export const ExportMenu = ({
   exportMenu,
@@ -81,7 +72,7 @@ export const ExportMenu = ({
         </ListItemIcon>
         <ListItemText
           primary="Download Standard PDF"
-          secondary="Accessible single-column layout"
+          secondary="Selectable text, single-column layout"
         />
       </MenuItem>
       <MenuItem onClick={downloadDocx} disabled={loading}>
@@ -102,7 +93,10 @@ export const ExportMenu = ({
         <ListItemIcon>
           <ShareIcon />
         </ListItemIcon>
-        <ListItemText>Share Public Link</ListItemText>
+        <ListItemText
+          primary="Publish Public Link"
+          secondary="Saves your resume and opens a public, shareable page"
+        />
       </MenuItem>
     </Menu>
   );

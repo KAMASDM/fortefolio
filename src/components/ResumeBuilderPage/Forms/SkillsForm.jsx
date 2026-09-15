@@ -1,3 +1,4 @@
+import { useSectionForm } from "../../../hooks/useSectionForm";
 import { useState, useEffect } from "react";
 import {
   Typography,
@@ -22,16 +23,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Info as InfoIcon,
 } from "@mui/icons-material";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const defaultSkillCategories = [
   { id: 1, name: "Technical Skills", skills: [""] },
@@ -48,32 +40,8 @@ const sectionStyle = {
 };
 
 const SkillsForm = ({ data, updateData, nextStep }) => {
-  const [skillCategories, setSkillCategories] = useState(defaultSkillCategories);
-  const [lastSavedSkillCategories, setLastSavedSkillCategories] = useState(skillCategories);
+  const [skillCategories, setSkillCategories] = useSectionForm(data, defaultSkillCategories, updateData, (item) => ({ ...item, skills: Array.isArray(item.skills) ? item.skills : [item.skills || ""] }));
   const [formComplete, setFormComplete] = useState(0);
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const sanitizedData = data.map((cat) => ({
-        ...cat,
-        skills: Array.isArray(cat.skills) && cat.skills.length > 0 ? cat.skills : [""],
-      }));
-      setSkillCategories(sanitizedData);
-    } else {
-      setSkillCategories(defaultSkillCategories);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanged = JSON.stringify(skillCategories) !== JSON.stringify(lastSavedSkillCategories);
-    if (hasChanged) {
-      const debounce = setTimeout(() => {
-        updateData(skillCategories);
-        setLastSavedSkillCategories(skillCategories);
-      }, 1000);
-      return () => clearTimeout(debounce);
-    }
-  }, [skillCategories, lastSavedSkillCategories, updateData]);
 
   useEffect(() => {
     let completed = 0;
@@ -148,14 +116,7 @@ const SkillsForm = ({ data, updateData, nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const filteredData = skillCategories
-      .map((category) => ({
-        ...category,
-        name: category.name?.trim() || "",
-        skills: category.skills.map((s) => s.trim()).filter((s) => s !== ""),
-      }))
-      .filter((category) => category.name && category.skills.length > 0);
-    updateData(filteredData);
+    updateData(skillCategories);
     nextStep();
   };
 

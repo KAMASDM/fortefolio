@@ -1,3 +1,7 @@
+import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
+import ShareResumeDialog from "../ShareResumeDialog";
+import { documentData } from "../../../services/resumeDocument";
+import { SECTION_LABELS } from "../../../services/resumeInsights";
 import { useRef, useState } from "react";
 import {
   Box,
@@ -18,22 +22,23 @@ import {
   Slider,
   Tooltip,
   IconButton,
+  Checkbox,
+  FormControlLabel,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import { ResumeTemplateContent } from "../DisplayResume/ResumeTemplateContent";
 import { constants } from "./constants";
-import { exportToDocx } from "../utils/exportUtils";
+
 import { PDFGenerator } from "../utils/PDFGenerator";
 import { openTemplatePrintPreview } from "../utils/advancedPDFGenerator";
 import { ExportMenu } from "../ExportMenu/ExportMenu";
 import { ColorMenu } from "../ColorMenu/ColorMenu";
-import { FontMenu } from "../FontMenu/FontMenu";
 import { ResumeToolbar } from "../ResumeToolBar/ResumeToolbar";
 import { TemplateSelector } from "../TemplateSelector/TemplateSelector";
-import EnhanceResumeDialog from "../EnhanceResume/EnhanceResumeDialog";
 import PreviewWrapper from "../Templates/PreviewWrapper";
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { publishResume } from "../../../services/resumeService";
 
 const { TEMPLATES, FONTS, COLOR_SCHEMES } = constants;
 
@@ -44,32 +49,36 @@ const ResumePreview = ({
   presentation,
   onPresentationChange,
   onBeforePublish,
+  onUpdateResumeData,
+  onEnhanceResume,
+  metadata,
 }) => {
   const theme = useTheme();
-  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const resumeRef = useRef(null);
 
   const activeTemplate = presentation?.template || TEMPLATES.MODERN;
   const activeTab = Math.max(
     0,
-    Object.values(TEMPLATES).indexOf(activeTemplate)
+    Object.values(TEMPLATES).indexOf(activeTemplate),
   );
   const fontFamily = presentation?.fontFamily || FONTS.POPPINS;
   const colorSchemeKey = String(
-    presentation?.colorScheme || "blue"
+    presentation?.colorScheme || "blue",
   ).toUpperCase();
   const colorScheme = COLOR_SCHEMES[colorSchemeKey] || COLOR_SCHEMES.BLUE;
   const fontSize = presentation?.fontSize || 10;
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [shareOpen, setShareOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const [colorMenu, setColorMenu] = useState(null);
-  const [fontMenu, setFontMenu] = useState(null);
   const [exportMenu, setExportMenu] = useState(null);
   const starredSections = presentation?.starredSections || [];
   const [, setIsPrinting] = useState(false);
-  const [showEnhanceDialog, setShowEnhanceDialog] = useState(false);
 
   const { personalInfo = {} } = resumeData;
   const { currentUser } = useAuth();
@@ -79,14 +88,18 @@ const ResumePreview = ({
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
-      return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-    } catch (e) {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
       return dateString;
     }
   };
 
   const handleTabChange = (event, newValue) => {
-    const newTemplate = {
+    const newTemplate =
+      {
         0: TEMPLATES.MODERN,
         1: TEMPLATES.MODERN_NEO,
         2: TEMPLATES.MODERN_SLATE,
@@ -125,33 +138,17 @@ const ResumePreview = ({
 
   const handleColorMenuOpen = (event) => setColorMenu(event.currentTarget);
   const handleColorMenuClose = () => setColorMenu(null);
-  const handleFontMenuOpen = (event) => setFontMenu(event.currentTarget);
-  const handleFontMenuClose = () => setFontMenu(null);
   const handleExportMenuOpen = (event) => setExportMenu(event.currentTarget);
   const handleExportMenuClose = () => setExportMenu(null);
 
-  const handleDisplayresume = async () => {
+  const handleDisplayresume = () => {
     handleExportMenuClose();
-    try {
-      const saved = await onBeforePublish();
-      if (!saved) {
-        throw new Error("Save failed");
-      }
-      await publishResume(currentUser.uid, resumeData.id);
-      navigate(`/preview-only/${currentUser.uid}/${resumeData.id}`);
-    } catch (publishError) {
-      console.error("Failed to publish resume:", publishError);
-      setSnackbar({
-        open: true,
-        message: "The public copy could not be published. Please try again.",
-        severity: "error",
-      });
-    }
+    setShareOpen(true);
   };
 
   const changeColorScheme = (scheme) => {
     const entry = Object.entries(COLOR_SCHEMES).find(
-      ([, candidate]) => candidate === scheme
+      ([, candidate]) => candidate === scheme,
     );
     onPresentationChange({
       colorScheme: (entry?.[0] || "BLUE").toLowerCase(),
@@ -159,34 +156,52 @@ const ResumePreview = ({
     handleColorMenuClose();
   };
 
-  const changeFontFamily = (font) => {
-    onPresentationChange({ fontFamily: font });
-    handleFontMenuClose();
+  const onEditPersonalInfo = (field, value) => {
+    onUpdateResumeData?.("personalInfo", {
+      ...resumeData.personalInfo,
+      [field]: value,
+      ...(["website", "portfolio"].includes(field)
+        ? { website: value, portfolio: value }
+        : {}),
+    });
   };
 
-  const handleOpenEnhanceDialog = () => setShowEnhanceDialog(true);
+  const onEditListItem = (sectionKey, index, field, value) => {
+    const list = resumeData[sectionKey] || [];
+    const nextList = list.map((item, i) =>
+      i === index ? { ...item, [field]: value } : item,
+    );
+    onUpdateResumeData?.(sectionKey, nextList);
+  };
+
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   const isSectionEmpty = (section) => {
     const data = resumeData[section];
     if (!data) return true;
     if (Array.isArray(data)) return data.length === 0;
-    if (typeof data === 'object') return Object.keys(data).length === 0;
+    if (typeof data === "object") return Object.keys(data).length === 0;
     return false;
   };
-  
+
   const getInitials = (name) => {
     if (!name) return "?";
-    return name.split(" ").map((part) => part[0]).join("").toUpperCase().slice(0, 2);
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
-  
+
   const pdfGenerator = PDFGenerator({
     resumeRef,
     loading,
     setLoading,
     personalInfo,
-    resumeData,
+    resumeData: documentData(resumeData, presentation),
     colorScheme,
+    presentation,
     onSuccess: (message) => {
       setSnackbar({ open: true, message, severity: "success" });
       handleExportMenuClose();
@@ -196,11 +211,30 @@ const ResumePreview = ({
     },
   });
 
-   const downloadDocx = async () => {
-    // This is the only function that needs to be changed in this file
-    const success = await exportToDocx(resumeData, `${resumeData.personalInfo.fullName || 'Resume'}.docx`);
-    setSnackbar({ open: true, message: success ? "DOCX downloaded!" : "Failed to download DOCX.", severity: success ? "success" : "error" });
-    handleExportMenuClose();
+  const downloadDocx = async () => {
+    setLoading(true);
+    try {
+      const { exportToDocx } = await import("../utils/exportUtils");
+      const success = await exportToDocx(
+        resumeData,
+        `${resumeData.personalInfo.fullName || "Resume"}.docx`,
+        presentation,
+      );
+      if (!success)
+        throw new Error(
+          "Could not create your Word document. Please try again.",
+        );
+      setSnackbar({
+        open: true,
+        message: "DOCX downloaded",
+        severity: "success",
+      });
+      handleExportMenuClose();
+    } catch (error) {
+      setSnackbar({ open: true, message: error.message, severity: "error" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const printResume = async () => {
@@ -215,7 +249,10 @@ const ResumePreview = ({
 
     setIsPrinting(true);
     try {
-      const result = await openTemplatePrintPreview(resumeRef.current, personalInfo);
+      const result = await openTemplatePrintPreview(
+        resumeRef.current,
+        personalInfo,
+      );
 
       if (result.success) {
         setSnackbar({
@@ -247,118 +284,213 @@ const ResumePreview = ({
       toggleStarSection,
       starredSections,
       getInitials,
-      isMobile,
-      isSmallMobile,
+      isMobile: false,
+      isSmallMobile: false,
       sectionOrder,
-      fontSize
+      hiddenSections: presentation.hiddenSections,
+      fontSize,
+      editMode: true,
+      onEditPersonalInfo,
+      onEditListItem,
     };
-    
-    return <ResumeTemplateContent {...commonProps} activeTemplate={activeTemplate} />;
+
+    return (
+      <ResumeTemplateContent {...commonProps} activeTemplate={activeTemplate} />
+    );
   };
 
   return (
-    <Stack spacing={0} sx={{ width: "100%", height: "100%", overflow: "hidden" }}>
+    <Stack
+      spacing={0}
+      sx={{ width: "100%", height: "100%", overflow: "hidden" }}
+    >
       <ResumeToolbar
         onBack={onBack}
         isMobile={isMobile}
         handleColorMenuOpen={handleColorMenuOpen}
-        handleFontMenuOpen={handleFontMenuOpen}
         handleExportMenuOpen={handleExportMenuOpen}
-        onEnhanceResume={handleOpenEnhanceDialog}
+        onEnhanceResume={onEnhanceResume}
       />
-      <Container maxWidth="xl" sx={{ flexGrow: 1, display: 'flex' }}>
+      <Container maxWidth="lg" sx={{ flexGrow: 1, display: "flex" }}>
         <Grid container spacing={3}>
-            {!isMobile && (
-                <Grid item xs={12} md={3}>
-                    <Paper sx={{ p: 2, position: 'sticky', top: '20px' }}>
-                        <Typography variant="h6" gutterBottom>Customize</Typography>
-                        <Divider sx={{ my: 2 }}/>
-                        <Box sx={{ my: 2 }}>
-                            <Typography gutterBottom>Template</Typography>
-                            <TemplateSelector
-                              activeTab={activeTab}
-                              handleTemplateChange={handleTabChange}
-                              isMobile={false}
-                            />
-                        </Box>
-                        <Divider sx={{ my: 2 }}/>
-                        <Box sx={{ my: 2 }}>
-                            <Typography gutterBottom>Font Size ({fontSize}pt)</Typography>
-                            <Slider 
-                              value={fontSize} 
-                              onChange={(e, val) =>
-                                onPresentationChange({ fontSize: val })
-                              }
-                              min={8} 
-                              max={16} 
-                              step={1} 
-                              valueLabelDisplay="auto"
-                              marks={[
-                                { value: 8, label: '8' },
-                                { value: 10, label: '10' },
-                                { value: 12, label: '12' },
-                                { value: 14, label: '14' },
-                                { value: 16, label: '16' },
-                              ]}
-                            />
-                        </Box>
-                        <Divider sx={{ my: 2 }}/>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', mt: 2 }}>
-                          💡 Tip: Adjust font size to fit more content or improve readability
-                        </Typography>
-                    </Paper>
-                </Grid>
-            )}
-            <Grid item xs={12} md={isMobile ? 12 : 9}>
-              <Paper elevation={3} sx={{ overflow: "hidden", display: 'flex', flexDirection: 'column', height: '100%' }}>
-                {isMobile && (
-                  <TemplateSelector
-                    activeTab={activeTab}
-                    handleTemplateChange={handleTabChange}
-                    isMobile={true}
+          <Grid item xs={12} md={3}>
+            <Accordion
+              defaultExpanded={!isMobile}
+              elevation={0}
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
+              }}
+            >
+              <AccordionSummary>
+                <Typography fontWeight={600}>
+                  Customize your resume ▾
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <TemplateSelector
+                  activeTab={activeTab}
+                  handleTemplateChange={handleTabChange}
+                  isMobile={isMobile}
+                />
+                <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                  <InputLabel id="resume-font-label">Font</InputLabel>
+                  <Select
+                    labelId="resume-font-label"
+                    label="Font"
+                    value={fontFamily}
+                    onChange={(e) =>
+                      onPresentationChange({ fontFamily: e.target.value })
+                    }
+                  >
+                    {Object.entries(FONTS).map(([key, value]) => (
+                      <MenuItem key={key} value={value}>
+                        {key.replaceAll("_", " ")}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Typography sx={{ mt: 2 }}>
+                  Font size · {fontSize} pt
+                </Typography>
+                <Slider
+                  aria-label="Resume font size"
+                  value={fontSize}
+                  min={8}
+                  max={16}
+                  step={1}
+                  valueLabelDisplay="auto"
+                  onChange={(_, value) =>
+                    onPresentationChange({ fontSize: value })
+                  }
+                />
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="subtitle2">Visible sections</Typography>
+                {Object.entries(SECTION_LABELS).map(([key, label]) => (
+                  <FormControlLabel
+                    key={key}
+                    sx={{ display: "flex" }}
+                    label={label}
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={
+                          !(presentation.hiddenSections || []).includes(key)
+                        }
+                        onChange={(e) =>
+                          onPresentationChange({
+                            hiddenSections: e.target.checked
+                              ? (presentation.hiddenSections || []).filter(
+                                  (item) => item !== key,
+                                )
+                              : [...(presentation.hiddenSections || []), key],
+                          })
+                        }
+                      />
+                    }
                   />
-                )}
-                <Box sx={{ p: 2, bgcolor: "grey.200", overflow: "auto", flexGrow: 1 }}>
-                  <Box className="resume-preview-shell">
-                    <PreviewWrapper>
-                      <Box
-                        ref={resumeRef}
-                        id="print-resume-root"
-                        className="resume-container"
-                        sx={{
-                          width: "794px",
-                          minWidth: "794px",
-                          margin: "0 auto",
-                          backgroundColor: "#fff",
-                          '& p, & span, & div:not([class*="MuiBox"]):not([class*="MuiPaper"])': {
-                            fontSize: `${fontSize}pt`,
-                          },
-                          '& h1': {
-                            fontSize: `${fontSize * 2.5}pt`,
-                          },
-                          '& h2': {
-                            fontSize: `${fontSize * 2}pt`,
-                          },
-                          '& h3, & h4': {
-                            fontSize: `${fontSize * 1.5}pt`,
-                          },
-                          '& h5': {
-                            fontSize: `${fontSize * 1.3}pt`,
-                          },
-                          '& h6': {
-                            fontSize: `${fontSize * 1.1}pt`,
-                          },
+                ))}
+                <Typography variant="caption" color="text.secondary">
+                  Hidden sections stay saved. They are excluded from previews,
+                  exports and new public copies.
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle2">Section order</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Applies to Minimal, Standard PDF and DOCX. Other layouts keep
+                  their designed order.
+                </Typography>
+                {sectionOrder.map((key, index) => (
+                  <Stack key={key} direction="row" alignItems="center">
+                    <Typography variant="body2" sx={{ flex: 1 }}>
+                      {SECTION_LABELS[key]}
+                    </Typography>
+                    {[-1, 1].map((direction) => (
+                      <IconButton
+                        key={direction}
+                        size="small"
+                        aria-label={`Move ${SECTION_LABELS[key]} ${direction < 0 ? "up" : "down"}`}
+                        disabled={
+                          index + direction < 0 ||
+                          index + direction >= sectionOrder.length
+                        }
+                        onClick={() => {
+                          const order = [...sectionOrder];
+                          [order[index], order[index + direction]] = [
+                            order[index + direction],
+                            order[index],
+                          ];
+                          onPresentationChange({ sectionOrder: order });
                         }}
                       >
-                        {renderTemplate()}
-                      </Box>
-                    </PreviewWrapper>
-                  </Box>
+                        {direction < 0 ? (
+                          <ArrowUpward fontSize="small" />
+                        ) : (
+                          <ArrowDownward fontSize="small" />
+                        )}
+                      </IconButton>
+                    ))}
+                  </Stack>
+                ))}
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
+          <Grid item xs={12} md={9}>
+            <Paper
+              elevation={3}
+              sx={{
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+              }}
+            >
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "grey.200",
+                  overflow: "auto",
+                  flexGrow: 1,
+                }}
+              >
+                <Box
+                  className="resume-preview-shell"
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <PreviewWrapper>
+                    <Box
+                      ref={resumeRef}
+                      id="print-resume-root"
+                      className="resume-container"
+                      sx={{
+                        width: "794px",
+                        minWidth: "794px",
+                        margin: "0 auto",
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      {renderTemplate()}
+                    </Box>
+                  </PreviewWrapper>
                 </Box>
-              </Paper>
-            </Grid>
+              </Box>
+            </Paper>
+          </Grid>
         </Grid>
       </Container>
+      <ShareResumeDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        userId={currentUser?.uid}
+        resumeId={resumeData.id}
+        metadata={metadata}
+        onSave={onBeforePublish}
+      />
       <ExportMenu
         exportMenu={exportMenu}
         handleExportMenuClose={handleExportMenuClose}
@@ -374,16 +506,16 @@ const ResumePreview = ({
         changeColorScheme={changeColorScheme}
         COLOR_SCHEMES={COLOR_SCHEMES}
       />
-      <FontMenu
-        fontMenu={fontMenu}
-        handleFontMenuClose={handleFontMenuClose}
-        changeFontFamily={changeFontFamily}
-        FONTS={FONTS}
-        fontFamily={fontFamily}
-      />
-      <EnhanceResumeDialog open={showEnhanceDialog} onClose={() => setShowEnhanceDialog(false)} resumeData={resumeData} />
-      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

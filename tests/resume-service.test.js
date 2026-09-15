@@ -43,7 +43,7 @@ describe("resume persistence and sharing service", () => {
           template: "classic",
           colorScheme: "blue",
         },
-      })
+      }),
     );
   });
 
@@ -58,20 +58,26 @@ describe("resume persistence and sharing service", () => {
 
     await publishResume("user-1", "resume-1");
 
-    expect(databaseMocks.set).toHaveBeenCalledWith(
-      { path: "publicResumes/user-1/resume-1" },
-      expect.objectContaining({ title: "Engineer" })
-    );
+    expect(databaseMocks.update).toHaveBeenCalledTimes(1);
     expect(databaseMocks.update).toHaveBeenCalledWith(
-      { path: "users/user-1/resumes/resume-1" },
-      expect.objectContaining({ "metadata/shared": true })
+      { path: undefined },
+      expect.objectContaining({
+        "publicResumes/user-1/resume-1": expect.objectContaining({
+          title: "Engineer",
+        }),
+        "users/user-1/resumes/resume-1/metadata/shared": true,
+      }),
     );
   });
 
   it("removes the public copy when unpublishing", async () => {
     await unpublishResume("user-1", "resume-1");
-    expect(databaseMocks.remove).toHaveBeenCalledWith({
-      path: "publicResumes/user-1/resume-1",
-    });
+    expect(databaseMocks.update).toHaveBeenCalledWith(
+      { path: undefined },
+      expect.objectContaining({
+        "publicResumes/user-1/resume-1": null,
+        "users/user-1/resumes/resume-1/metadata/shared": false,
+      }),
+    );
   });
 });

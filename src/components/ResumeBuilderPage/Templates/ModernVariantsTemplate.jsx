@@ -136,18 +136,29 @@ const contactEntries = (personalInfo) => [
 ].filter((item) => item.value);
 
 const SectionTitle = ({ title, colorScheme, styleSet }) => (
-  <Typography
-    sx={{
-      fontSize: "0.82rem",
-      fontWeight: 800,
-      textTransform: styleSet.titleCase,
-      letterSpacing: styleSet.titleSpacing,
-      color: colorScheme.primary,
-      mb: 1.2,
-    }}
-  >
-    {title}
-  </Typography>
+  <Box sx={{ mb: 1.8 }}>
+    <Typography
+      sx={{
+        fontSize: "0.82rem",
+        fontWeight: 800,
+        textTransform: styleSet.titleCase,
+        letterSpacing: styleSet.titleSpacing,
+        color: colorScheme.primary,
+      }}
+    >
+      {title}
+    </Typography>
+    <Box
+      sx={{
+        mt: 0.6,
+        width: "2.25rem",
+        height: "3px",
+        borderRadius: "2px",
+        bgcolor: colorScheme.primary,
+        opacity: 0.55,
+      }}
+    />
+  </Box>
 );
 
 const ModernVariantTemplate = ({
@@ -208,20 +219,20 @@ const ModernVariantTemplate = ({
         </Stack>
       </Box>
 
-      <Box sx={{ p: { xs: 3, md: 4 }, bgcolor: styleSet.card }}>
+      <Box sx={{ p: { xs: 3, md: 4.5 }, bgcolor: styleSet.card }}>
         {personalInfo.summary && (
-          <Box sx={{ mb: 3.2 }}>
+          <Box sx={{ mb: 4 }}>
             <SectionTitle title="Profile" colorScheme={colorScheme} styleSet={styleSet} />
             <Typography sx={{ color: "#334155", lineHeight: 1.75 }}>{personalInfo.summary}</Typography>
           </Box>
         )}
 
-        <Grid container spacing={3.5}>
+        <Grid container spacing={4.5}>
           <Grid item xs={12} md={8}>
             {!isSectionEmpty("experience") && (
-              <Box sx={{ mb: 3.2 }}>
+              <Box sx={{ mb: 4 }}>
                 <SectionTitle title="Experience" colorScheme={colorScheme} styleSet={styleSet} />
-                <Stack spacing={2.2}>
+                <Stack spacing={2.8}>
                   {experience.map((exp, index) => (
                     <Box key={exp.id || index}>
                       <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
@@ -239,20 +250,20 @@ const ModernVariantTemplate = ({
                         </Typography>
                       </Box>
                       {exp.description && (
-                        <Typography sx={{ mt: 0.9, color: "#334155", lineHeight: 1.72 }}>{exp.description}</Typography>
+                        <Typography sx={{ mt: 1.1, color: "#334155", lineHeight: 1.72 }}>{exp.description}</Typography>
                       )}
                       {typeof exp.responsibilities === "string" && exp.responsibilities.trim() && (
-                        <Box component="ul" sx={{ pl: 2.2, mt: 0.9, mb: 0 }}>
+                        <Box component="ul" sx={{ pl: 2.2, mt: 1.1, mb: 0 }}>
                           {exp.responsibilities.split("\n").map((line, lineIndex) =>
                             line.trim() ? (
-                              <Typography component="li" key={lineIndex} sx={{ mb: 0.5, color: "#334155", lineHeight: 1.65 }}>
+                              <Typography component="li" key={lineIndex} sx={{ mb: 0.6, color: "#334155", lineHeight: 1.65 }}>
                                 {line}
                               </Typography>
                             ) : null
                           )}
                         </Box>
                       )}
-                      {index < experience.length - 1 && <Divider sx={{ mt: 1.7 }} />}
+                      {index < experience.length - 1 && <Divider sx={{ mt: 2.2 }} />}
                     </Box>
                   ))}
                 </Stack>
@@ -262,15 +273,15 @@ const ModernVariantTemplate = ({
             {!isSectionEmpty("projects") && (
               <Box>
                 <SectionTitle title="Projects" colorScheme={colorScheme} styleSet={styleSet} />
-                <Stack spacing={1.8}>
+                <Stack spacing={2.2}>
                   {projects.map((project, index) => (
                     <Box key={project.id || index}>
                       <Typography sx={{ fontWeight: 800, fontSize: "1rem" }}>{project.title || "Project Title"}</Typography>
                       {project.description && (
-                        <Typography sx={{ mt: 0.7, color: "#334155", lineHeight: 1.7 }}>{project.description}</Typography>
+                        <Typography sx={{ mt: 0.8, color: "#334155", lineHeight: 1.7 }}>{project.description}</Typography>
                       )}
                       {project.technologies && (
-                        <Stack direction="row" spacing={0.9} useFlexGap flexWrap="wrap" sx={{ mt: 0.9 }}>
+                        <Stack direction="row" spacing={0.9} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
                           {project.technologies.split(",").map((tech) =>
                             tech.trim() ? (
                               <Chip
@@ -296,13 +307,13 @@ const ModernVariantTemplate = ({
 
           <Grid item xs={12} md={4}>
             {!isSectionEmpty("skills") && (
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 4 }}>
                 <SectionTitle title="Skills" colorScheme={colorScheme} styleSet={styleSet} />
-                <Stack spacing={1.2}>
+                <Stack spacing={1.6}>
                   {skills.map((group, index) => (
                     <Box key={group.id || index}>
                       <Typography sx={{ fontWeight: 800, color: "#0f172a" }}>{group.name || "Category"}</Typography>
-                      <Typography sx={{ mt: 0.3, color: "#475569", lineHeight: 1.65 }}>
+                      <Typography sx={{ mt: 0.4, color: "#475569", lineHeight: 1.65 }}>
                         {Array.isArray(group.skills) ? group.skills.filter(Boolean).join(" • ") : group.skills || "Add skills"}
                       </Typography>
                     </Box>
@@ -312,16 +323,16 @@ const ModernVariantTemplate = ({
             )}
 
             {!isSectionEmpty("education") && (
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 4 }}>
                 <SectionTitle title="Education" colorScheme={colorScheme} styleSet={styleSet} />
-                <Stack spacing={1.4}>
+                <Stack spacing={1.8}>
                   {education.map((edu, index) => (
                     <Box key={edu.id || index}>
                       <Typography sx={{ fontWeight: 800 }}>{edu.degree || "Degree"}</Typography>
-                      <Typography sx={{ mt: 0.2, color: colorScheme.primary, fontWeight: 700 }}>
+                      <Typography sx={{ mt: 0.25, color: colorScheme.primary, fontWeight: 700 }}>
                         {edu.institution || "Institution"}
                       </Typography>
-                      <Typography sx={{ mt: 0.2, color: "#64748b" }}>
+                      <Typography sx={{ mt: 0.25, color: "#64748b" }}>
                         {formatDate(edu.startDate) || "Start Date"} - {edu.current ? "Present" : formatDate(edu.endDate) || "End Date"}
                       </Typography>
                     </Box>
@@ -333,7 +344,7 @@ const ModernVariantTemplate = ({
             {!isSectionEmpty("references") && (
               <Box>
                 <SectionTitle title="References" colorScheme={colorScheme} styleSet={styleSet} />
-                <Stack spacing={1.2}>
+                <Stack spacing={1.6}>
                   {references.map((reference, index) => (
                     <Box key={reference.id || index}>
                       <Typography sx={{ fontWeight: 800 }}>{reference.name || "Reference Name"}</Typography>

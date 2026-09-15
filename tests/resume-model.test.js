@@ -11,7 +11,7 @@ describe("resume model compatibility", () => {
       normalizePresentation({
         template: "creative",
         colorScheme: "purple",
-      })
+      }),
     ).toMatchObject({
       template: "creative",
       colorScheme: "lavender",
@@ -25,7 +25,7 @@ describe("resume model compatibility", () => {
         resumeData: { personalInfo: { fullName: "Ada Lovelace" } },
         metadata: { title: "Engineering" },
       },
-      "resume-1"
+      "resume-1",
     );
 
     expect(normalized.id).toBe("resume-1");
@@ -47,7 +47,7 @@ describe("resume model compatibility", () => {
           presentation: { template: "classic", colorScheme: "blue" },
         },
       },
-      "resume-1"
+      "resume-1",
     );
 
     expect(snapshot.title).toBe("Public Resume");

@@ -1,3 +1,4 @@
+import { useSectionForm } from "../../../hooks/useSectionForm";
 import { useState, useEffect } from "react";
 import {
   Typography,
@@ -27,18 +28,9 @@ import {
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
+import { lavenderPalette } from "../lavenderPalette";
 
 // Shared color palette for consistency
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
-
 const defaultProjectEntry = {
   id: 1,
   title: "",
@@ -85,29 +77,8 @@ const SectionTitle = ({ icon, label }) => (
 );
 
 const ProjectsForm = ({ data, updateData, nextStep }) => {
-  const [projects, setProjects] = useState([defaultProjectEntry]);
-  const [lastSavedProjects, setLastSavedProjects] = useState(projects);
+  const [projects, setProjects] = useSectionForm(data, [defaultProjectEntry], updateData);
   const [formComplete, setFormComplete] = useState(0);
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setProjects(data);
-    } else {
-      setProjects([defaultProjectEntry]);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanged =
-      JSON.stringify(projects) !== JSON.stringify(lastSavedProjects);
-    if (hasChanged) {
-      const debounce = setTimeout(() => {
-        updateData(projects);
-        setLastSavedProjects(projects);
-      }, 1000);
-      return () => clearTimeout(debounce);
-    }
-  }, [projects, lastSavedProjects, updateData]);
 
   useEffect(() => {
     const requiredFields = ["title"];
@@ -157,8 +128,7 @@ const ProjectsForm = ({ data, updateData, nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const dataToSave = projects.filter((proj) => proj.title?.trim() !== "");
-    updateData(dataToSave);
+    updateData(projects);
     nextStep();
   };
 

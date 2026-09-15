@@ -1,34 +1,51 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
-const A4_WIDTH = 794;
-const A4_HEIGHT = 1123;
-
+// One scaling system shared by the editor, live preview and public page.
 export default function PreviewWrapper({ children }) {
-  const wrapperRef = useRef(null);
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (wrapperRef.current) {
-        const containerWidth = wrapperRef.current.offsetWidth;
-        const newScale = Math.min(containerWidth / A4_WIDTH, 1);
-        setScale(newScale);
-      }
+  const outer = useRef(null);
+  const inner = useRef(null);
+  const [size, setSize] = useState({ scale: 1, height: 1123 });
+  useLayoutEffect(() => {
+    const measure = () => {
+      const scale = Math.min((outer.current?.clientWidth || 794) / 794, 1);
+      const height = inner.current?.scrollHeight || 1123;
+      setSize((previous) =>
+        previous.scale === scale && previous.height === height
+          ? previous
+          : { scale, height },
+      );
     };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(outer.current);
+    observer.observe(inner.current);
+    return () => observer.disconnect();
   }, []);
-
   return (
-      <div className="page-wrapper" ref={wrapperRef}>
-        <div
-          className="page-container"
-          style={{ transform: `scale(${scale})`, transformOrigin: "top left" }}
-        >
-          {children}
-        </div>
+    <div
+      ref={outer}
+      className="page-wrapper"
+      style={{
+        display: "block",
+        width: "100%",
+        height: size.height * size.scale,
+        position: "relative",
+      }}
+    >
+      <div
+        ref={inner}
+        className="scaled-resume"
+        style={{
+          width: 794,
+          position: "absolute",
+          left: "50%",
+          marginLeft: -397,
+          transform: `scale(${size.scale})`,
+          transformOrigin: "top center",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

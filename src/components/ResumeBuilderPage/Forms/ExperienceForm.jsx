@@ -1,3 +1,4 @@
+import { useSectionForm } from "../../../hooks/useSectionForm";
 import { useState, useEffect } from "react";
 import {
   Typography,
@@ -15,6 +16,7 @@ import {
   Chip,
   Alert,
   Zoom,
+  Dialog, DialogTitle, DialogContent, DialogActions,
   CircularProgress
 } from "@mui/material";
 import {
@@ -31,16 +33,7 @@ import {
   AutoAwesome as AiIcon
 } from "@mui/icons-material";
 import { getAISuggestion } from "../../../utils/openai";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const defaultExperienceEntry = {
   id: 1,
@@ -88,38 +81,11 @@ const SectionTitle = ({ icon, label }) => (
 );
 
 const ExperienceForm = ({ data, updateData, nextStep }) => {
-  const [experiences, setExperiences] = useState([defaultExperienceEntry]);
-  const [lastSavedExperiences, setLastSavedExperiences] = useState(experiences);
+  const [experiences, setExperiences] = useSectionForm(data, [defaultExperienceEntry], updateData, (item) => ({ ...defaultExperienceEntry, ...item, responsibilities: Array.isArray(item.responsibilities) ? item.responsibilities : [item.description || ""] }));
   const [formComplete, setFormComplete] = useState(0);
   const [aiLoading, setAiLoading] = useState({});
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const sanitizedData = data.map((exp) => ({
-        ...defaultExperienceEntry,
-        ...exp,
-        responsibilities:
-          Array.isArray(exp.responsibilities) && exp.responsibilities.length > 0
-            ? exp.responsibilities
-            : [""],
-      }));
-      setExperiences(sanitizedData);
-    } else {
-      setExperiences([defaultExperienceEntry]);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanged =
-      JSON.stringify(experiences) !== JSON.stringify(lastSavedExperiences);
-    if (hasChanged) {
-      const debounce = setTimeout(() => {
-        updateData(experiences);
-        setLastSavedExperiences(experiences);
-      }, 1000);
-      return () => clearTimeout(debounce);
-    }
-  }, [experiences, lastSavedExperiences, updateData]);
+  const [suggestion, setSuggestion] = useState(null);
+  const [aiError, setAiError] = useState("");
 
   useEffect(() => {
     const requiredFields = ["company", "position", "startDate"];
@@ -208,17 +174,18 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
     const responsibilityText = experiences.find(exp => exp.id === expId).responsibilities[respIndex];
     if (!responsibilityText) return;
 
+    setAiError("");
     setAiLoading(prev => ({ ...prev, [`${expId}-${respIndex}`]: true }));
 
-    const prompt = `Rewrite the following resume bullet point to be more impactful and achievement-oriented. Focus on using strong action verbs and quantifying results where possible. Original bullet point: "${responsibilityText}"`;
+    const prompt = `Rewrite the following resume bullet point to be more impactful and achievement-oriented. Use strong action verbs. Preserve the original facts and language; never invent numbers, results or skills. Original bullet point: "${responsibilityText}"`;
 
     try {
         // Use secure Firebase Function instead of direct API call
         const suggestion = await getAISuggestion(prompt, 60);
-        handleResponsibilityChange(expId, respIndex, suggestion);
+        setSuggestion({ expId, respIndex, original: responsibilityText, text: suggestion });
     } catch (error) {
         console.error("Error getting AI suggestion:", error);
-        alert(error.message);
+        setAiError(error.message);
     } finally {
         setAiLoading(prev => ({ ...prev, [`${expId}-${respIndex}`]: false }));
     }
@@ -226,16 +193,21 @@ const ExperienceForm = ({ data, updateData, nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const dataToSave = experiences.filter(
-      (exp) =>
-        exp.company && exp.position && exp.startDate
-    );
-    updateData(dataToSave);
+    updateData(experiences);
     nextStep();
   };
 
   return (
     <Box>
+      {aiError && <Alert severity="error" onClose={() => setAiError("")} sx={{ mb: 2 }}>{aiError}</Alert>}
+      <Dialog open={Boolean(suggestion)} onClose={() => setSuggestion(null)} fullWidth maxWidth="sm">
+        <DialogTitle>Review your improved bullet</DialogTitle>
+        <DialogContent><Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{suggestion?.original}</Typography><TextField label="Suggested wording" fullWidth multiline minRows={3} value={suggestion?.text || ""} onChange={e => setSuggestion(value => ({ ...value, text: e.target.value }))} /><Typography variant="caption">Check the facts before applying. You can undo this change.</Typography></DialogContent>
+        <DialogActions><Button onClick={() => setSuggestion(null)}>Discard</Button><Button disabled={!suggestion?.text.trim()} onClick={() => {
+          if (experiences.find(item => item.id === suggestion.expId)?.responsibilities[suggestion.respIndex] !== suggestion.original) { setAiError("This bullet changed while the suggestion was being prepared. Generate a new suggestion to keep your edits."); setSuggestion(null); return; }
+          handleResponsibilityChange(suggestion.expId, suggestion.respIndex, suggestion.text); setSuggestion(null);
+        }}>Apply suggestion</Button></DialogActions>
+      </Dialog>
       <Box
         sx={{
           mb: 4,

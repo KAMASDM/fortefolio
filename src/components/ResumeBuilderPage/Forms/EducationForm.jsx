@@ -1,3 +1,4 @@
+import { useSectionForm } from "../../../hooks/useSectionForm";
 import { useState, useEffect } from "react";
 import {
   Typography,
@@ -26,18 +27,7 @@ import {
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-  gradient: "linear-gradient(135deg, #B9A5E3 0%, #7F68C9 100%)",
-  accentGradient: "linear-gradient(45deg, #A190DD 30%, #7F68C9 90%)",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const defaultEducationEntry = {
   id: 1,
@@ -85,31 +75,8 @@ const SectionTitle = ({ icon, label }) => (
 );
 
 const EducationForm = ({ data, updateData, nextStep }) => {
-  const [educations, setEducations] = useState([defaultEducationEntry]);
-  const [lastSavedEducations, setLastSavedEducations] = useState(educations);
+  const [educations, setEducations] = useSectionForm(data, [defaultEducationEntry], updateData);
   const [formComplete, setFormComplete] = useState(0);
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setEducations(data);
-    } else if (data && data.length === 0) {
-      setEducations([defaultEducationEntry]);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    const hasChanged =
-      JSON.stringify(educations) !== JSON.stringify(lastSavedEducations);
-
-    if (hasChanged) {
-      const debounce = setTimeout(() => {
-        updateData(educations);
-        setLastSavedEducations(educations);
-      }, 1000);
-
-      return () => clearTimeout(debounce);
-    }
-  }, [educations, lastSavedEducations, updateData]);
 
   useEffect(() => {
     const requiredFields = ["institution", "degree", "startDate"];
@@ -159,21 +126,7 @@ const EducationForm = ({ data, updateData, nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const dataToSave = educations.filter(
-      (edu) =>
-        !(
-          edu.id === 1 &&
-          !edu.institution &&
-          !edu.degree &&
-          !edu.field &&
-          !edu.startDate &&
-          !edu.endDate &&
-          !edu.location &&
-          !edu.description
-        )
-    );
-    updateData(dataToSave);
+    updateData(educations);
     nextStep();
   };
 

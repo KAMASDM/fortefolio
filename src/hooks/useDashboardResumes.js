@@ -1,22 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { subscribeToResumes } from "../services/resumeService";
 
-const hasContent = (value) =>
-  Array.isArray(value)
-    ? value.length > 0
-    : value &&
-      typeof value === "object" &&
-      Object.values(value).some(
-        (item) => item != null && String(item).trim() !== ""
-      );
+import {
+  hasSectionContent as hasContent,
+  getResumeInsights,
+} from "../services/resumeInsights";
 
 export const useDashboardResumes = (
   currentUser,
-  { searchTerm, sortBy, sortDirection }
+  { searchTerm, sortBy, sortDirection },
 ) => {
   const [resumes, setResumes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
     if (!currentUser) {
@@ -40,7 +37,6 @@ export const useDashboardResumes = (
               hasProjects: hasContent(resumeData.projects),
               hasReferences: hasContent(resumeData.references),
             };
-            const completed = Object.values(sections).filter(Boolean).length;
 
             return {
               id,
@@ -50,12 +46,10 @@ export const useDashboardResumes = (
               template: metadata.presentation.template,
               colorScheme: metadata.presentation.colorScheme,
               shared: metadata.shared || false,
-              completionPercentage: Math.round(
-                (completed / Object.keys(sections).length) * 100
-              ),
+              completionPercentage: getResumeInsights(resumeData).score,
               sections,
             };
-          })
+          }),
         );
         setIsLoading(false);
       },
@@ -63,14 +57,14 @@ export const useDashboardResumes = (
         console.error("Error fetching resumes:", subscriptionError);
         setError("Could not load your resumes. Please try again later.");
         setIsLoading(false);
-      }
+      },
     );
-  }, [currentUser]);
+  }, [currentUser, revision]);
 
   const filteredResumes = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     const results = resumes.filter(
-      (resume) => !search || resume.title.toLowerCase().includes(search)
+      (resume) => !search || resume.title.toLowerCase().includes(search),
     );
 
     return results.sort((left, right) => {
@@ -79,9 +73,7 @@ export const useDashboardResumes = (
         return sortDirection === "asc" ? comparison : -comparison;
       }
       const leftValue =
-        sortBy === "completion"
-          ? left.completionPercentage
-          : left[sortBy] || 0;
+        sortBy === "completion" ? left.completionPercentage : left[sortBy] || 0;
       const rightValue =
         sortBy === "completion"
           ? right.completionPercentage
@@ -97,18 +89,17 @@ export const useDashboardResumes = (
     return {
       total: resumes.length,
       recent: resumes.filter(
-        (resume) => resume.lastModified && resume.lastModified > oneWeekAgo
+        (resume) => resume.lastModified && resume.lastModified > oneWeekAgo,
       ).length,
-      completed: resumes.filter(
-        (resume) => resume.completionPercentage === 100
-      ).length,
+      completed: resumes.filter((resume) => resume.completionPercentage === 100)
+        .length,
     };
   }, [resumes]);
 
   const refresh = () => {
     setError("");
     setIsLoading(true);
-    window.setTimeout(() => setIsLoading(false), 500);
+    setRevision((value) => value + 1);
   };
 
   return {

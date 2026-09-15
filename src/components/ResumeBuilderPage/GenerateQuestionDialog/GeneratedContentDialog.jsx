@@ -1,3 +1,4 @@
+import { printText } from "../utils/printText";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -18,16 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
-
-const lavenderPalette = {
-  light: "#EAE4F7",
-  soft: "#D8CCF0",
-  medium: "#B9A5E3",
-  primary: "#9D88D9",
-  deep: "#7F68C9",
-  text: "#4A3B77",
-  darkText: "#2E2152",
-};
+import { lavenderPalette } from "../lavenderPalette";
 
 const resumeLoadingTips = [
   {
@@ -101,6 +93,7 @@ const GeneratedContentDialog = ({
   error,
 }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [actionError, setActionError] = useState("");
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [showTip, setShowTip] = useState(true);
 
@@ -123,35 +116,13 @@ const GeneratedContentDialog = ({
   }, [loading, open]);
 
   const handleDownloadPDF = () => {
-    // Create a simple print dialog for PDF generation
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${title}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-            @media print { body { margin: 20px; } }
-          </style>
-        </head>
-        <body>
-          <h1>${title}</h1>
-          <pre style="white-space: pre-wrap; font-family: inherit;">${content}</pre>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+    try { printText(title, content); }
+    catch (error) { setActionError(error.message); }
   };
 
-  const handleCopyContent = () => {
-    navigator.clipboard.writeText(content || "");
-    setSnackbarOpen(true);
+  const handleCopyContent = async () => {
+    try { await navigator.clipboard.writeText(content || ""); setSnackbarOpen(true); }
+    catch { setActionError("Copy is unavailable. Select the text and copy it manually."); }
   };
 
   const handleCloseSnackbar = (event, reason) => {
@@ -204,6 +175,7 @@ const GeneratedContentDialog = ({
         dividers
         sx={{ p: 3, borderColor: lavenderPalette.soft, overflowY: "auto" }}
       >
+        {actionError && <Alert severity="error" onClose={() => setActionError("")}>{actionError}</Alert>}
         {loading && (
           <Box
             sx={{

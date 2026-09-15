@@ -1,3 +1,4 @@
+import { escapeHtml } from "./printText";
 const RENDER_WIDTH_PX = 794;
 
 const PRINT_HIDE_SELECTORS = [
@@ -15,11 +16,32 @@ export const openTemplatePrintPreview = async (element, personalInfo) => {
   }
 
   const filename = `${personalInfo?.fullName || "Resume"}`;
-  const styles = Array.from(document.querySelectorAll("style, link[rel='stylesheet']"))
-    .map((node) => node.outerHTML)
+  const styles = Array.from(
+    document.querySelectorAll("style, link[rel='stylesheet']"),
+  )
+    .map((node) => {
+      // Emotion inserts rules through CSSOM; style.outerHTML can be empty.
+      if (node.tagName === "STYLE") {
+        try {
+          return `<style>${Array.from(node.sheet?.cssRules || [])
+            .map((rule) => rule.cssText)
+            .join("\n")}</style>`;
+        } catch {
+          return node.outerHTML;
+        }
+      }
+      return node.outerHTML;
+    })
     .join("\n");
 
   const clone = element.cloneNode(true);
+  const sourceNodes = Array.from(element.querySelectorAll("*"));
+  const clonedNodes = Array.from(clone.querySelectorAll("*"));
+  sourceNodes.forEach((node, index) => {
+    const style = window.getComputedStyle(node);
+    if (style.visibility === "hidden" || style.display === "none")
+      clonedNodes[index]?.remove();
+  });
   clone.querySelectorAll(PRINT_HIDE_SELECTORS).forEach((node) => node.remove());
   clone.style.display = "block";
   clone.style.visibility = "visible";
@@ -28,6 +50,10 @@ export const openTemplatePrintPreview = async (element, personalInfo) => {
   clone.style.maxWidth = `${RENDER_WIDTH_PX}px`;
   clone.style.margin = "0 auto";
   clone.style.transform = "none";
+  clone.style.zoom = "1";
+  clone
+    .querySelectorAll("[contenteditable]")
+    .forEach((node) => node.removeAttribute("contenteditable"));
 
   const printWindow = window.open("", "_blank", "width=1200,height=800");
   if (!printWindow) {
@@ -38,7 +64,7 @@ export const openTemplatePrintPreview = async (element, personalInfo) => {
     <!DOCTYPE html>
     <html>
       <head>
-        <title>${filename}</title>
+        <title>${escapeHtml(filename)}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -58,11 +84,11 @@ export const openTemplatePrintPreview = async (element, personalInfo) => {
 
           @page {
             size: A4;
-            margin: 10mm;
+            margin: 0;
           }
 
           #print-root {
-            width: 190mm;
+            width: 210mm;
             margin: 0 auto;
           }
 

@@ -232,7 +232,7 @@ export const SidebarTemplate = ({
                     </Link>
                   </Box>
                 )}
-                {personalInfo.portfolio && (
+                {personalInfo.portfolio && personalInfo.portfolio !== personalInfo.website && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <LanguageIcon
                       fontSize="small"

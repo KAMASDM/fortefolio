@@ -144,7 +144,7 @@ export const CanadaTemplate = ({
               </Link>
             </Box>
           )}
-          {personalInfo.portfolio && (
+          {personalInfo.portfolio && personalInfo.portfolio !== personalInfo.website && (
             <Box component="span">
               <Link href={personalInfo.portfolio} target="_blank">
                 Portfolio

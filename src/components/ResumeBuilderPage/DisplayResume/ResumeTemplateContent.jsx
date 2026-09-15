@@ -1,3 +1,6 @@
+import { documentData } from "../../../services/resumeDocument";
+import { hasSectionContent } from "../../../services/resumeInsights";
+import { Box } from "@mui/material";
 import { ModernTemplate } from "../Templates/ModernTemplate";
 import {
   ModernNeoTemplate,
@@ -33,15 +36,24 @@ export const ResumeTemplateContent = ({
   activeTemplate,
   fontFamily,
   colorScheme,
-  isSectionEmpty,
   getInitials,
   formatDate,
   isMobile,
   isSmallMobile,
   starredSections = [],
   toggleStarSection = () => {},
-  sectionOrder = ['experience', 'education', 'projects', 'skills', 'references'], // Default order
+  sectionOrder = [
+    "experience",
+    "education",
+    "projects",
+    "skills",
+    "references",
+  ], // Default order
   fontSize = 10,
+  hiddenSections = [],
+  editMode = false,
+  onEditPersonalInfo,
+  onEditListItem,
 }) => {
   const TemplateComponent =
     {
@@ -71,12 +83,13 @@ export const ResumeTemplateContent = ({
       [TEMPLATES.INDIA]: IndiaTemplate,
     }[activeTemplate] || ModernTemplate;
 
+  const visibleData = documentData(resumeData, { hiddenSections });
   const commonProps = {
-    resumeData,
+    resumeData: visibleData,
     formatDate,
     colorScheme,
     fontFamily,
-    isSectionEmpty,
+    isSectionEmpty: (section) => !hasSectionContent(visibleData[section]),
     toggleStarSection,
     starredSections,
     getInitials,
@@ -84,7 +97,39 @@ export const ResumeTemplateContent = ({
     isSmallMobile,
     sectionOrder, // Pass the order to the template
     fontSize, // Pass font size to the template
+    editMode,
+    onEditPersonalInfo,
+    onEditListItem: onEditListItem
+      ? (section, index, field, value) => {
+          const originalIndex = (resumeData[section] || []).findIndex(
+            (item) => item.id === visibleData[section][index].id,
+          );
+          onEditListItem(
+            section,
+            originalIndex >= 0 ? originalIndex : index,
+            field,
+            value,
+          );
+        }
+      : undefined,
   };
 
-  return <TemplateComponent {...commonProps} />;
+  return (
+    <Box
+      sx={{
+        fontFamily,
+        fontSize: `${fontSize}pt`,
+        bgcolor: "white",
+        color: "#1f2937",
+        "& .MuiTypography-body1, & .MuiTypography-body2": {
+          fontSize: "inherit",
+          fontFamily: "inherit",
+        },
+        "& a": { overflowWrap: "anywhere" },
+        ...(!editMode ? { "& button": { display: "none" } } : {}),
+      }}
+    >
+      <TemplateComponent {...commonProps} />
+    </Box>
+  );
 };

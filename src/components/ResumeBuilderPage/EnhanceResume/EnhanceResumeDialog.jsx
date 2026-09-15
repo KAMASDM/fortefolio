@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+import { printText } from "../utils/printText";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -118,10 +118,11 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
   }, [isEnhancing, open]);
 
   useEffect(() => {
-    if (open && resumeData && Object.keys(resumeData).length > 0) {
-      handleEnhanceResume();
+    if (!open) {
+      setEnhancedContent("");
+      setEnhanceError("");
     }
-  }, [open, resumeData]);
+  }, [open]);
 
   const handleEnhanceResume = async () => {
     if (!resumeData) {
@@ -208,48 +209,8 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
   };
 
   const handleExportPdf = () => {
-    if (!enhancedContent) {
-      alert("No content to export!");
-      return;
-    }
-
-    // Create a simple print dialog for PDF generation
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Resume Enhancement Suggestions</title>
-          <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 40px; 
-              line-height: 1.6; 
-              color: #333;
-            }
-            h1 {
-              color: #2c3e50;
-              border-bottom: 2px solid #3498db;
-              padding-bottom: 10px;
-            }
-            @media print { 
-              body { margin: 20px; }
-              h1 { color: #000; border-bottom: 1px solid #000; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Resume Enhancement Suggestions</h1>
-          <pre style="white-space: pre-wrap; font-family: inherit;">${enhancedContent}</pre>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+    try { printText("Resume Enhancement Suggestions", enhancedContent); }
+    catch (error) { setEnhanceError(error.message); }
   };
 
   const handleCopyContent = () => {
@@ -399,13 +360,19 @@ const EnhanceResumeDialog = ({ open, onClose, resumeData }) => {
           </Typography>
         )}
         {!enhancedContent && !isEnhancing && !enhanceError && (
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ textAlign: "center", py: 4 }}
-          >
-            Click "Enhance Resume" to get AI-powered suggestions.
-          </Typography>
+          <Box sx={{ textAlign: "center", py: 4 }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              Get AI-powered suggestions to strengthen your summary,
+              experience, and skills sections.
+            </Typography>
+            <Button
+              onClick={handleEnhanceResume}
+              variant="contained"
+              startIcon={<AutoFixHighIcon />}
+            >
+              Enhance Resume
+            </Button>
+          </Box>
         )}
       </DialogContent>
       <DialogActions

@@ -148,6 +148,7 @@ function DashboardPage() {
         title: newResumeName.trim(),
         template: selectedTemplate,
         colorScheme: selectedColorScheme,
+        resumeData: { personalInfo: { fullName: currentUser.displayName || "", email: currentUser.email || "" }, education: [], experience: [], skills: [], projects: [], references: [] },
       });
       setNotification({
         open: true,
@@ -170,7 +171,7 @@ function DashboardPage() {
 
   const handleEdit = (resumeId) => navigate(`/resume/${resumeId}`);
   const handlePreview = (resumeId) =>
-    navigate(`/resume/${resumeId}`, { state: { preview: true } });
+    navigate(`/resume/${resumeId}?view=preview`);
 
   const handleDelete = async (resumeId) => {
     if (!currentUser || !resumeId) return;

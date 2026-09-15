@@ -35,9 +35,12 @@ exports.handler = async (event, _context) => {
   }
 
   let rateLimit = null;
+  let timeoutId;
+  const controller = new AbortController();
   try {
     const user = await authenticateRequest(event);
-    const { prompt, maxTokens = 60 } = JSON.parse(event.body);
+    if (!event.body || event.body.length > 15000) return respond(createErrorResponse(400, "Please use a shorter prompt.", "INVALID_REQUEST"));
+    const { prompt, maxTokens = 120 } = JSON.parse(event.body);
 
     if (!prompt) {
       return respond({
@@ -64,26 +67,22 @@ exports.handler = async (event, _context) => {
     // Initialize Gemini client
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-    // Create a timeout promise
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), 15000);
-    });
+    timeoutId = setTimeout(() => controller.abort(), 15000);
 
     // Configure generation for quick, focused suggestions using utility
-    const generationConfig = getGenerationConfig('quick', maxTokens);
+    const generationConfig = getGenerationConfig('quick', Math.max(60, Math.min(Number(maxTokens) || 120, 1000)));
 
-    const result = await Promise.race([
-      ai.models.generateContent({
+    const result = await ai.models.generateContent({
         model: mapModelName("gemini-1.5-flash"),
         contents: sanitizeInput(prompt, 10000),
         config: {
           ...generationConfig,
+          abortSignal: controller.signal,
+          systemInstruction: "Improve wording without inventing facts, skills or metrics. Keep the original language and return only the rewritten text.",
           safetySettings: ENTERPRISE_SAFETY_SETTINGS,
           responseMimeType: "text/plain",
         },
-      }),
-      timeoutPromise
-    ]);
+      });
 
     const text = result.text;
 
@@ -132,5 +131,7 @@ exports.handler = async (event, _context) => {
           : {}),
       }
     );
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
